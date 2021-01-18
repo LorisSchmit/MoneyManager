@@ -1,6 +1,8 @@
 from Transaction import Transaction
 from Account import *
 from datetime import datetime
+import csv
+
 
 def CSV2Object(file,account):
     start_found = False
@@ -18,12 +20,12 @@ def CSV2Object(file,account):
                         comma_pos = row[2].rfind(",")
                         recipient = row[2][:comma_pos].replace(",", "")
                         reference = row[2][comma_pos + 2:].replace(",", "")
-                        transacts.append(Transaction(datetime.strptime(row[0],"%d/%m/%Y"),row[1],recipient,reference,row[3],row[4],account))
+                        transacts.append(Transaction(datetime.strptime(row[0],"%d/%m/%Y"),row[1],recipient,reference,row[3],row[4],'',account))
                     elif account == GK_DE:
                         amount_str = ('-') * (row[12] == 'S') + row[11].replace(',', '.')
                         amount = float(amount_str)
                         transacts.append(Transaction(datetime.strptime(row[0], '%d.%m.%Y'), row[2], row[3],
-                                               row[8].replace("\n", " "), amount, row[10], account))
+                                               row[8].replace("\n", " "), amount, row[10], '',account))
                     elif account == PP:
                         if row[3] != "Bank Deposit to PP Account":
                             if row[9] != "":
@@ -31,13 +33,13 @@ def CSV2Object(file,account):
                             else:
                                 amount = float(row[5])
                             date = datetime.strptime(row[0], "%m/%d/%Y")
-                            transacts.append(Transaction(date, row[3], row[11], '', amount, row[4], account))
+                            transacts.append(Transaction(date, row[3], row[11], '', amount, row[4], '', account))
                     elif account == VISA:
                         recipient = row[1].replace(",", "")
                         reference = ''
                         amount = float(row[3].replace(",", "."))
                         date = datetime.strptime(row[0], "%d/%m/%Y")
-                        transacts.append(Transaction(date, 'Credit Card Transaction', recipient, reference, amount, row[4], account))
+                        transacts.append(Transaction(date, 'Credit Card Transaction', recipient, reference, amount, row[4], '', account))
 
     transacts.reverse()
     return transacts

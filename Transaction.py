@@ -8,4 +8,3 @@ class Transaction:
         self.currency = currency
         self.tag = tag
         self.account = account
-        self.expense = 
