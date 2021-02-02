@@ -39,3 +39,12 @@ def main():
         row = ('1/2/2020','test_type','test_recipient','test_reference',40.2,'EUR','test_tag','Girokonto')
         write(conn,row)
         select(conn)
+
+
+def deleteAll(conn):
+    sql = "delete from transacts"
+    cur = conn.cursor()
+    cur.execute(sql)
+    sql = "delete from sqlite_sequence where name='transacts'"
+    cur.execute(sql)
+    return 0
