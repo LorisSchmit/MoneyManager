@@ -41,7 +41,7 @@ def createGraph(data,month,year,tot,max,font_size):
     if rot_fact<0:
         rot_fact = 0
     if rot_fact > 360:
-        rot_fact-360
+        rot_fact=-360
     layout = dict(showlegend=False,font=dict(size=font_size),margin=dict(l=0, r=0, t=0, b=0))
     fig = go.Figure(data=[go.Pie(labels=labels, values=values)],layout=layout)
     fig.update_traces(textinfo='label',hoverinfo='percent+value',rotation=rot_fact,)

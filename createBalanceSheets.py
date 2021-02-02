@@ -15,18 +15,16 @@ from reportlab.platypus import Table, TableStyle
 #from budget import getBudgetPerMonth,getBudget
 
 
-def drawPDF(file,month,year,start_year):
-    years = str(start_year)[2:]+"_"+str(start_year+1)[2:]
+def drawPDF(month_obj):
+    years = str(month_obj.start_year)[2:]+"_"+str(month_obj.start_year+1)[2:]
 
-    file_name = "Balance Sheets"+years+"/"+str(year)+"-"+str(month)+".pdf"
+    file_name = "Balance Sheets"+years+"/"+str(month_obj.year)+"-"+str(month_obj.month)+".pdf"
     #file_name = "Balance Sheets/" + str(year) + "-" + str(month) + ".pdf"
 
-    image_path = "Graphs/"+str(year)+" - "+str(month)+".svg"
-    document_title = str(month)+" "+str(year)
-    title = monthNumberToMonthName(int(month)-1)+" "+str(year)
-    all_transacts = getAllTransacts()
-    transacts = getMonthlyTransacts(all_transacts,month,year)
-    total_spent = total(transacts)
+    image_path = "Graphs/"+str(month_obj.year)+" - "+str(month_obj.month)+".svg"
+    document_title = str(month_obj.month)+" "+str(month_obj.year)
+    title = month_obj.month_name + " " + str(month_obj.year)
+    total_spent = month_obj.total
 
     pdf = canvas.Canvas(file_name)
 
@@ -34,23 +32,20 @@ def drawPDF(file,month,year,start_year):
 
     drawImage(image_path,pdf,-40, 390,0.7)
 
-    tags = perTag(transacts)
-    drawCategoryTable(pdf,tags)
+    drawCategoryTable(pdf,month_obj.tags)
 
     pdf.setFont("Helvetica-Bold", 30)
     pdf.drawCentredString(300, 780, title)
 
-    weeks = perWeek(transacts)
-    drawWeeksTable(pdf,weeks,int(month),int(year))
+    drawWeeksTable(pdf,month_obj.weeks,int(month_obj.month),int(month_obj.year))
 
     pdf.line(50, 220, 540, 220)
 
     try:
-        payback = -tags['Rückzahlung']
+        payback = -month_obj.tags['Rückzahlung']
     except KeyError:
         payback = 0
-    budget = 1000#getBudgetPerMonth(getBudget(int(start_year)))
-    drawBalanceTable(pdf,budget,-total_spent,payback,50,75)
+    drawBalanceTable(pdf,month_obj.budget,-total_spent,payback,50,75)
 
     pdf.setFont("Helvetica-Bold", 22)
     pdf.drawString(50,35,"Gesamtausgaben: "+str(-total_spent)+" €")
@@ -146,13 +141,6 @@ def drawBalanceTable(pdf,budget,spent,payback,x,y):
     t.wrapOn(pdf, 500, 300)
     t.drawOn(pdf, x, y)
     return t
-
-def drawPDFCollection(start_year):
-    files = defineFiles(start_year,"")
-    for file in files:
-        month = int(file[5:])
-        year = int(file[:4])
-        drawPDF(file,month,year,start_year)
 
 def main():
     drawPDFCollection(2018)
