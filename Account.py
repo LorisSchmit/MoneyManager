@@ -21,8 +21,17 @@ class Account:
     def getDate(self):
         return self.date
 
+
 CC_LUX = Account('Compte courant')
 GK_DE = Account('Girokonto')
 PP = Account('PayPal')
 GB = Account('Geldbeutel')
 VISA = Account('Visa')
+
+def accountsLookup(account_name):
+    accounts_lookup = {'Compte courant': CC_LUX, 'Girokonto': GK_DE, 'PayPal': PP, 'Geldbeutel': GB, 'Visa': VISA}
+    try:
+        account = accounts_lookup[account_name]
+    except KeyError:
+        account = None
+    return account
