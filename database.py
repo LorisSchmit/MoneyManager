@@ -16,6 +16,13 @@ def fetchAllTransacts(conn):
     rows = cur.fetchall()
     return rows
 
+def read(conn, table):
+    sql = 'SELECT * FROM '+table
+    cur = conn.cursor()
+    cur.execute(sql)
+    data = cur.fetchall()
+    return data
+
 def write(conn, row):
     sql = ''' INSERT INTO transacts(date,type,recipient,reference,amount,currency,tag,account)
               VALUES(?,?,?,?,?,?,?,?) '''
@@ -31,6 +38,11 @@ def writeMany(conn, data):
     cur.executemany(sql, data)
     return cur.lastrowid
 
+def writeManyTags(conn, data):
+    sql = ' INSERT INTO tags(ref,cat) VALUES(?,?) '
+    cur = conn.cursor()
+    cur.executemany(sql, data)
+    return cur.lastrowid
 
 def main():
     db_file = "/Users/lorisschmit1/PycharmProjects/BudgetManager/Expenses.db"
@@ -41,10 +53,10 @@ def main():
         select(conn)
 
 
-def deleteAll(conn):
-    sql = "delete from transacts"
+def deleteAll(conn,table):
+    sql = "delete from "+table
     cur = conn.cursor()
     cur.execute(sql)
-    sql = "delete from sqlite_sequence where name='transacts'"
+    sql = "delete from sqlite_sequence where name='"+table+"'"
     cur.execute(sql)
     return 0
