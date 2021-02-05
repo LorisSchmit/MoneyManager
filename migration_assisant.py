@@ -1,7 +1,8 @@
 import csv
 import os
 import datetime
-from database import *
+from database_api import *
+from Account import CC_LUX
 
 
 def migrate(year):
@@ -27,11 +28,23 @@ def write2db(transacts):
         writeMany(conn, transacts)
 
 
+def fixer():
+    transacts = getAllTransacts()
+    for action in transacts:
+        if action.tag.find("Elektro") != -1:
+            action.tag = "Hardware"
+    deleteAllFromTable("transacts")
+    writeTransacts2DB(transacts)
+
+def cleaner():
+    transacts = getAllTransacts()
+    transacts.sort(key=lambda x: x.date)
+    deleteAllFromTable("transacts")
+    writeTransacts2DB(transacts)
+
+
 def main():
-    transacts = migrate(2020)
-    write2db(transacts)
-
-
+    cleaner()
 
 if __name__ == '__main__':
     main()

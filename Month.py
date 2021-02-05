@@ -14,8 +14,10 @@ class Month:
             self.start_year -= 1
         all_transacts = getAllTransacts()
         self.transacts = self.getMonthlyTransacts(all_transacts)
+        self.lean_transacts = self.getLeanTransacts()
         if len(self.transacts)>0:
             self.tags = self.perTag()
+            print(self.tags)
             self.total = self.total()
             self.budget = 1000
             self.max = self.biggestTag()[1]
@@ -51,9 +53,16 @@ class Month:
     def total(self):
         tot = 0
         for action in self.transacts:
-            if action.tag != "Einkommen" and action.amount < 0:
+            if action.tag != "Einkommen" and action.amount < 0 and action.tag != "Kapitaltransfer":
                 tot += action.amount
         return round(tot, 2)
+
+    def getLeanTransacts(self):
+        lean_transacts = []
+        for action in self.transacts:
+            if action.tag != "Einkommen" and action.tag != "Kapitaltransfer":
+                lean_transacts.append(action)
+        return lean_transacts
 
     def monthNumberToMonthName(self):
         months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober',
@@ -64,15 +73,15 @@ class Month:
         tags_temp = {}
         tags = {}
         truth_table = []
-        for el in self.transacts:
+        for el in self.lean_transacts:
             truth_table.append(True)
-        for i in range(0, len(self.transacts)):
+        for i in range(0, len(self.lean_transacts)):
             if truth_table[i]:
-                tot = self.transacts[i].amount
-                tag = self.transacts[i].tag
-                for j in range(i + 1, len(self.transacts)):
-                    if self.transacts[i].tag == self.transacts[j].tag and truth_table[j]:
-                        tot += self.transacts[j].amount
+                tot = self.lean_transacts[i].amount
+                tag = self.lean_transacts[i].tag
+                for j in range(i + 1, len(self.lean_transacts)):
+                    if self.lean_transacts[i].tag == self.lean_transacts[j].tag and truth_table[j]:
+                        tot += self.lean_transacts[j].amount
                         truth_table[j] = False
                 tot = -round(tot, 2)
                 tags_temp[tag] = tot
@@ -99,10 +108,10 @@ class Month:
 
     def perWeek(self):
         weeks = {}
-        date = self.transacts[0].date
+        date = self.lean_transacts[0].date
         week_number0 = date.isocalendar()[1]
         tot = 0
-        for action in self.transacts:
+        for action in self.lean_transacts:
             date = action.date
             week_number = date.isocalendar()[1]
             if week_number == week_number0:
@@ -136,10 +145,12 @@ class Month:
         if len(self.transacts) > 0:
             drawPDF(self)
 
+def monthsPerYear(year):
+    for i in range(1, 13):
+        month = Month(i, year)
+        month.createGraph()
+        month.createBalanceSheet()
 
 
 if __name__ == '__main__':
-    for i in range(1,13):
-        month = Month(i,2020)
-        month.createGraph()
-        month.createBalanceSheet()
+    monthsPerYear(2020)
