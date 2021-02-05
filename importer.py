@@ -4,6 +4,7 @@ from datetime import datetime
 import csv
 from pathlib import Path
 from database_api import *
+from tagger import tag
 
 class Importer:
     def __init__(self,file):
@@ -13,7 +14,10 @@ class Importer:
         start_found = False
         transacts = []
         with open(file,mode="r",encoding="latin-1") as csv_file:
-            csv_reader=csv.reader(csv_file,delimiter=";")
+            if account == PP:
+                csv_reader=csv.reader(csv_file,delimiter=",")
+            else:
+                csv_reader = csv.reader(csv_file, delimiter=";")
             transacts = []
             for index,row in enumerate(csv_reader):
                 if len(row)>0:
@@ -26,13 +30,13 @@ class Importer:
                             recipient = row[4][:comma_pos].replace(",", "")
                             reference = row[4][comma_pos + 2:].replace(",", "")
                             transacts.append(Transaction(datetime.strptime(row[0],"%d/%m/%Y"),row[1],recipient,reference,float(row[2].replace(',', '.')),row[3],'',account))
-                        elif account == GK_DE:
+                        elif account == GK_DE and not (row[3] == "" and row[8] == ""):
                             amount_str = ('-') * (row[12] == 'S') + row[11].replace(',', '.')
                             amount = float(amount_str)
                             transacts.append(Transaction(datetime.strptime(row[0], '%d.%m.%Y'), row[2], row[3],
                                                    row[8].replace("\n", " "), amount, row[10], '',account))
                         elif account == PP:
-                            if row[3] != "Bank Deposit to PP Account":
+                            if row[3] != "Bank Deposit to PP Account" and row[3] != "Reversal of General Account Hold" and row[3] != "Account Hold for Open Authorization":
                                 if row[9] != "":
                                     amount = float(row[7])
                                 else:
@@ -45,8 +49,8 @@ class Importer:
                             amount = float(row[3].replace(",", "."))
                             date = datetime.strptime(row[0], "%d/%m/%Y")
                             transacts.append(Transaction(date, 'Credit Card Transaction', recipient, reference, amount, row[4], '', account))
-
-        transacts.reverse()
+        if account != PP:
+            transacts.reverse()
         return transacts
 
     def import_transactions(self,file):
@@ -75,7 +79,6 @@ class Importer:
                 last_element = action
                 last_index = i
                 break
-
         return last_element, last_index
 
 
@@ -93,18 +96,14 @@ class Importer:
                     first_new_index = index + 1
                     break
             new_transacts = list(self.new_transacts[first_new_index:])
+        new_transacts = tag(new_transacts)
         joined_transacts = old_transacts
         for action in new_transacts:
             joined_transacts.append(action)
-        #joined_transacts = list(old_transacts.extend(new_transacts))
-
         joined_transacts.sort(key=lambda x: x.date)
-
         self.updated_transacts = joined_transacts
-
-        deleteAllFromTable()
-
-        write2DB(joined_transacts)
+        deleteAllFromTable("transacts")
+        writeTransacts2DB(joined_transacts)
 
 
 def __eq__(this,other, *attributes):
@@ -115,11 +114,16 @@ def __eq__(this,other, *attributes):
 
     return this.__dict__ == other.__dict__
 
+def displayTransacts(transacts):
+    for action in transacts:
+        print(action.__dict__)
+
 def main():
     home = str(Path.home())
-    file = home+"/Movements/Umsaetze_DE22660908000007898649_2020.10.21.csv"
+    file = home+"/Movements/Umsaetze_DE22660908000007898649_2021.01.26.csv"
     file2 = home+"/Movements/Export_Mouvements_Current acc. Green Code 18-30 Study copy.csv"
-    importer = Importer(file2)
+    file3 = home+"/Movements/MSR-202012.CSV"
+    importer = Importer(file)
     importer.joiner()
 
 if __name__ == '__main__':
