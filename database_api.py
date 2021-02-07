@@ -30,9 +30,9 @@ def deleteAllFromTable(table):
     with conn:
         deleteAll(conn,table)
 
-def importKnownTags():
+def importKnownTags(table):
     with conn:
-        raw_data = read(conn, "tags")
+        raw_data = read(conn, table)
     known_tags = {}
     for el in raw_data:
         known_tags[el[1]] = el[2]

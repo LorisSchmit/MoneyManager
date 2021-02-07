@@ -1,7 +1,7 @@
-from database_api import importKnownTags,writeTags
+from database_api import *
 import readline
 
-known_tags = importKnownTags()
+known_tags = importKnownTags("tags")
 
 
 def rlinput(prompt, prefill):
@@ -38,13 +38,3 @@ def tag(transacts):
             transacts.remove(action)
 
     return transacts
-
-def addTags():
-    tags = [["SCHECK-IN CENTER KARLSRUHE","Essen"],
-            ["nahkauf Ute Petriccione","Essen"]]
-
-    writeTags(tags)
-
-
-if __name__ == '__main__':
-   addTags()

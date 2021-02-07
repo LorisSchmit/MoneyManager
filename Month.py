@@ -17,8 +17,7 @@ class Month:
         self.lean_transacts = self.getLeanTransacts()
         if len(self.transacts)>0:
             self.tags = self.perTag()
-            print(self.tags)
-            self.total = self.total()
+            self.total = self.getTotalSpent()
             self.budget = 1000
             self.max = self.biggestTag()[1]
             self.weeks = self.perWeek()
@@ -35,22 +34,14 @@ class Month:
                 monthly_transacts.append(action)
         return monthly_transacts
 
-
-    def calculateExpenses(self):
+    def getIncome(self):
         total = 0
         for action in self.transacts:
-            if action.amount > 0:
+            if action.amount > 0 and action.tag != "Kapitaltransfer":
                 total += action.amount
         return total
 
-    def calculateIncome(self):
-        total = 0
-        for action in self.transacts:
-            if action.amount < 0:
-                total += action.amount
-        return total
-
-    def total(self):
+    def getTotalSpent(self):
         tot = 0
         for action in self.transacts:
             if action.tag != "Einkommen" and action.amount < 0 and action.tag != "Kapitaltransfer":
