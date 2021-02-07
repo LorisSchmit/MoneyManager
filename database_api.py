@@ -3,8 +3,6 @@ from Transaction import Transaction
 from datetime import datetime
 from Account import accountsLookup
 
-db_file = "db.db"
-conn = create_connection(db_file)
 
 def object2list(action):
     l = [int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name]
@@ -12,6 +10,8 @@ def object2list(action):
 
 
 def getAllTransacts():
+    db_file = "db.db"
+    conn = create_connection(db_file)
     with conn:
         transacts_temp = fetchAllTransacts(conn)
     transacts = []
@@ -20,6 +20,8 @@ def getAllTransacts():
     return transacts
 
 def writeTransacts2DB(transacts):
+    db_file = "db.db"
+    conn = create_connection(db_file)
     data = []
     for action in transacts:
         data.append(object2list(action))
@@ -27,10 +29,14 @@ def writeTransacts2DB(transacts):
         writeMany(conn,data)
 
 def deleteAllFromTable(table):
+    db_file = "db.db"
+    conn = create_connection(db_file)
     with conn:
         deleteAll(conn,table)
 
 def importKnownTags(table):
+    db_file = "db.db"
+    conn = create_connection(db_file)
     with conn:
         raw_data = read(conn, table)
     known_tags = {}
@@ -39,6 +45,8 @@ def importKnownTags(table):
     return known_tags
 
 def writeTags(tags):
+    db_file = "db.db"
+    conn = create_connection(db_file)
     deleteAllFromTable("tags")
     data = []
     for key in tags:
