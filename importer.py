@@ -1,6 +1,6 @@
 from Transaction import Transaction
 from Account import *
-from datetime import datetime
+import datetime as dt
 import csv
 from pathlib import Path
 from database_api import *
@@ -100,10 +100,18 @@ class Importer:
         joined_transacts = old_transacts
         for action in new_transacts:
             joined_transacts.append(action)
-        joined_transacts.sort(key=lambda x: x.date)
-        self.updated_transacts = joined_transacts
+        final_transacts = []
+        if self.account == PP:
+            for action in joined_transacts:
+                if not (action.tag == "PayPal" and action.date <= self.new_transacts[-1].date + dt.timedelta(days=1)):
+                    final_transacts.append(action)
+        else:
+            final_transacts = joined_transacts
+
+        final_transacts.sort(key=lambda x: x.date)
+        self.updated_transacts = final_transacts
         deleteAllFromTable("transacts")
-        writeTransacts2DB(joined_transacts)
+        writeTransacts2DB(final_transacts)
 
 
 def __eq__(this,other, *attributes):
@@ -118,11 +126,7 @@ def displayTransacts(transacts):
     for action in transacts:
         print(action.__dict__)
 
-def main():
-    home = str(Path.home())
-    file = home+"/Movements/Umsaetze_DE22660908000007898649_2021.01.26.csv"
-    file2 = home+"/Movements/Export_Mouvements_Current acc. Green Code 18-30 Study copy.csv"
-    file3 = home+"/Movements/MSR-202012.CSV"
+def importNewFile(file):
     importer = Importer(file)
     importer.joiner()
 
