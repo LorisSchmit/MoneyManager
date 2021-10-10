@@ -38,11 +38,11 @@ def displayTransacts(transacts):
         print(object2list(action))
 
 def object2list(action):
-    l = [action.date.strftime("%d/%m/%Y"), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name]
+    l = [action.id,action.date.strftime("%d/%m/%Y"), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name,action.pb_assign]
     return l
 
 def list2object(row):
-    o = Transaction(datetime.datetime.strptime(row[0],"%d/%m/%Y"),row[1],row[2],row[3],float(row[4]),row[5],row[6],accountName2account(row[7]))
+    o = Transaction(datetime.datetime.strptime(row[0],"%d/%m/%Y"),row[1],row[2],row[3],float(row[4]),row[5],row[6],accountName2account(row[7]),row[8])
     return o
 
 def accountName2account(name):

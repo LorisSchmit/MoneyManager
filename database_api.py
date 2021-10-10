@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 def object2list(action):
-    l = [int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name]
+    l = [int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name,action.pb_assign]
     return l
 
 
@@ -18,7 +18,7 @@ def getAllTransacts():
         transacts_temp = fetchAllTransacts(conn)
     transacts = []
     for action in transacts_temp:
-        transacts.append(Transaction(datetime.fromtimestamp(action[1]),action[2],action[3],action[4],action[5],action[6],action[7],accountsLookup(action[8])))
+        transacts.append(Transaction(action[0],datetime.fromtimestamp(action[1]),action[2],action[3],action[4],action[5],action[6],action[7],accountsLookup(action[8]),action[9]))
     return transacts
 
 def writeTransacts2DB(transacts):
@@ -60,6 +60,15 @@ def writeTags(tags):
         data.append(temp)
     with conn:
         writeManyTags(conn,data)
+
+
+def updateMany(transacts):
+    home = str(Path.home())
+    db_file = home + "/Documents/db.db"
+    conn = create_connection(db_file)
+    with conn:
+        for action in transacts:
+            updatePBAssign(conn,action.id, action.pb_assign)
 
 
 if __name__ == '__main__':

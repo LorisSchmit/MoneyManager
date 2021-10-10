@@ -24,16 +24,16 @@ def read(conn, table):
     return data
 
 def write(conn, row):
-    sql = ''' INSERT INTO transacts(date,type,recipient,reference,amount,currency,tag,account)
-              VALUES(?,?,?,?,?,?,?,?) '''
+    sql = ''' INSERT INTO transacts(date,type,recipient,reference,amount,currency,tag,account,pb_assign)
+              VALUES(?,?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, row)
     return cur.lastrowid
 
 
 def writeMany(conn, data):
-    sql = ''' INSERT INTO transacts(date,type,recipient,reference,amount,currency,tag,account)
-              VALUES(?,?,?,?,?,?,?,?) '''
+    sql = ''' INSERT INTO transacts(date,type,recipient,reference,amount,currency,tag,account,pb_assign)
+              VALUES(?,?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.executemany(sql, data)
     return cur.lastrowid
@@ -44,13 +44,18 @@ def writeManyTags(conn, data):
     cur.executemany(sql, data)
     return cur.lastrowid
 
+def updatePBAssign(conn,id,pb_assign):
+    sql = 'UPDATE transacts SET pb_assign = ? WHERE ID = ?'
+    cur = conn.cursor()
+    cur.execute(sql,(pb_assign,id))
+    return cur.lastrowid
+
 def main():
-    db_file = "/Users/lorisschmit1/PycharmProjects/BudgetManager/Expenses.db"
+    home = "/Users/lorisschmit1"
+    db_file = home + "/Documents/db.db"
     conn = create_connection(db_file)
     with conn:
-        row = ('1/2/2020','test_type','test_recipient','test_reference',40.2,'EUR','test_tag','Girokonto')
-        write(conn,row)
-        select(conn)
+        updatePBAssign(conn, 1522, 1517)
 
 
 def deleteAll(conn,table):
@@ -60,3 +65,6 @@ def deleteAll(conn,table):
     sql = "delete from sqlite_sequence where name='"+table+"'"
     cur.execute(sql)
     return 0
+
+if __name__ == '__main__':
+    main()

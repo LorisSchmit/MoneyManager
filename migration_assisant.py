@@ -75,6 +75,18 @@ def extractText():
             print(action)
 
 
+def assignPayback(month,year):
+    month = Month(month, year)
+    assigns = []
+    for action in month.transacts:
+        if action.tag == "Rückzahlung":
+            print(object2list(action))
+            pb = input("of which action?")
+            action.pb_assign = pb
+            assigns.append(action)
+    updateMany(assigns)
+
+
 def removeNewLine():
     all_transacts = getAllTransacts()
     for action in all_transacts:
@@ -84,7 +96,7 @@ def removeNewLine():
 
 
 def main():
-    assignPayback(8,2021)
+    assignPayback(1,2021)
 
 if __name__ == '__main__':
     main()
