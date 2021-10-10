@@ -1,5 +1,6 @@
 from database_api import *
 import readline
+import sys
 
 known_tags = importKnownTags("tags")
 
@@ -25,10 +26,12 @@ def tag(transacts):
                 break
         if not tag_found:
             printAction(action)
-            tag = input("Tag: ")
+            print("Tag: ")
+            tag = sys.stdin.readline()
             default = action.recipient
             print("Default reference is: ", default)
-            ref = str(input("Save as: ") or default)
+            print("Save as: ")
+            ref = str(sys.stdin.readline() or default)
             if ref != "none":
                 known_tags[ref] = tag
         if tag != "none":

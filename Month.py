@@ -3,6 +3,7 @@ from database_api import *
 import plotly.graph_objects as go
 from commonFunctions import weekNumberToDates
 from createBalanceSheets import drawPDF
+import threading
 
 class Month:
     def __init__(self,month,year):
@@ -64,6 +65,8 @@ class Month:
         tags_temp = {}
         tags = {}
         truth_table = []
+        #for act in self.transacts:
+           # print(act.tag)
         for el in self.lean_transacts:
             truth_table.append(True)
         for i in range(0, len(self.lean_transacts)):
@@ -75,15 +78,15 @@ class Month:
                         tot += self.lean_transacts[j].amount
                         truth_table[j] = False
                 tot = -round(tot, 2)
-                tags_temp[tag] = tot
+                tags_temp[tag.rstrip()] = tot
         rest = 0
         for tag in tags_temp:
             if tags_temp[tag] >= 20:
-                tags[tag] = tags_temp[tag]
-            elif tag == "Rückzahlung":
-                tags[tag] = tags_temp[tag]
+                tags[tag.rstrip()] = tags_temp[tag]
+            elif tag.find("Rückzahlung") != -1:
+                tags[tag.rstrip()] = tags_temp[tag]
             elif tags_temp[tag] > 0:
-                rest += float(tags_temp[tag])
+                rest += float(tags_temp[tag.rstrip()])
         rest = round(rest, 2)
         tags['Rest'] = rest
         return tags
@@ -139,9 +142,21 @@ class Month:
 def monthsPerYear(year):
     for i in range(1, 13):
         month = Month(i, year)
-        month.createGraph()
+        #month.createGraph()
         month.createBalanceSheet()
+    return "All Balances for "+str(year)+" created"
+
+def createSingleMonth(month,year):
+    month = Month(month, year)
+    month.createGraph()
+    month.createBalanceSheet()
+
+def executeCreateSingleMonth(month,year):
+    print("Balance Sheet Creation started")
+    main_thread = threading.Thread(target=createSingleMonth,args=(month,year,))
+    main_thread.start()
 
 
 if __name__ == '__main__':
-    monthsPerYear(2020)
+    #monthsPerYear(2020)
+    createSingleMonth(9, 2021)

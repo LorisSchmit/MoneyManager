@@ -15,7 +15,9 @@ class Year:
         self.lean_transacts = self.getLeanTransacts()
         self.total_spent = self.getTotalSpent()
         self.total_budget = self.getBudget()
-        self.tags = self.perTag()
+        tags = self.perTag()
+        self.tags = tags[0]
+        self.tags_shortened = tags[1]
         self.max = self.biggestTag(self.tags)[1]
         self.budget_tagged = self.analyzeBudget()
         self.payback = self.getPayback()
@@ -74,6 +76,7 @@ class Year:
     def perTag(self):
         tags_temp = {}
         tags = {}
+        tags_shortened = {}
         truth_table = []
         for el in self.lean_transacts:
             truth_table.append(True)
@@ -88,6 +91,7 @@ class Year:
                 tot = -round(tot, 2)
                 tags_temp[tag] = tot
         rest = 0
+        rest_shortened = 0
         for tag in tags_temp:
             if tags_temp[tag] >= 20:
                 tags[tag] = tags_temp[tag]
@@ -95,9 +99,17 @@ class Year:
                 tags[tag] = tags_temp[tag]
             elif tags_temp[tag] > 0:
                 rest += float(tags_temp[tag])
+
+            if tags_temp[tag] >= 200:
+                tags_shortened[tag] = tags_temp[tag]
+            elif tag == "Rückzahlung":
+                tags_shortened[tag] = tags_temp[tag]
+            elif tags_temp[tag] > 0:
+                rest_shortened += float(tags_temp[tag])
         rest = round(rest, 2)
         tags['Rest'] = rest
-        return tags
+        tags_shortened['Rest'] = rest_shortened
+        return tags,tags_shortened
 
     def biggestTag(self,tags):
         max_key = next(iter(tags))
@@ -145,24 +157,24 @@ class Year:
         fig.write_image("Graphs/Budget" + str(self.year_no) + ".svg")
 
     def createExpensesGraph(self):
-        labels = list(self.tags.keys())
-        values = list(self.tags.values())
-        rot_fact = (3 / 8 - self.max/self.total_spent) * 8 * 55
-        if rot_fact < 0:
-            rot_fact = 0
-        if rot_fact > 360:
-            rot_fact = -360
-        layout = dict(showlegend=False, font=dict(size=19), margin=dict(l=0, r=0, t=0, b=0))
+        labels = list(self.tags_shortened.keys())
+        values = list(self.tags_shortened.values())
+        rot_fact = -30#(3 / 8 - self.max/self.total_spent) * 8 * 55
+        #if rot_fact < 0:
+        #    rot_fact = 0
+        #if rot_fact > 360:
+        #    rot_fact = -360
+        layout = dict(showlegend=False, font=dict(size=19), margin=dict(l=0, r=0, t=0, b=0,pad=0))
         fig = go.Figure(data=[go.Pie(labels=labels, values=values)], layout=layout)
         fig.update_traces(textinfo='label', hoverinfo='percent+value', rotation=rot_fact, )
-        # fig.show()
+        #fig.show()
         fig.write_image("Graphs/Expenses" + str(self.year_no) + ".svg")
 
 def createYearlySheet(year):
-    year.createBudgetGraph()
+    #year.createBudgetGraph()
     year.createExpensesGraph()
     createPDF(year)
 
 if __name__ == '__main__':
     year = Year(2020)
-    drawBigCategoryTable(year.tags)
+    createYearlySheet(year)

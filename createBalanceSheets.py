@@ -1,6 +1,8 @@
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from operator import itemgetter
+from pathlib import Path
+
 
 import os
 
@@ -14,12 +16,12 @@ from reportlab.platypus import Table, TableStyle
 
 #from budget import getBudgetPerMonth,getBudget
 
+home = str(Path.home())
 
 def drawPDF(month_obj):
     years = str(month_obj.start_year)[2:]+"_"+str(month_obj.start_year+1)[2:]
 
-    file_name = "Balance Sheets"+years+"/"+str(month_obj.year)+"-"+str(month_obj.month)+".pdf"
-    #file_name = "Balance Sheets/" + str(year) + "-" + str(month) + ".pdf"
+    file_name = home + "/Balance Sheets/"+str(month_obj.year)+"/"+str(month_obj.year)+"-"+str(month_obj.month)+".pdf"
 
     image_path = "Graphs/"+str(month_obj.year)+" - "+str(month_obj.month)+".svg"
     document_title = str(month_obj.month)+" "+str(month_obj.year)
@@ -42,16 +44,17 @@ def drawPDF(month_obj):
     pdf.line(50, 220, 540, 220)
 
     try:
-        payback = -month_obj.tags['Rückzahlung']
+        payback = -month_obj.tags["Rückzahlung"]
     except KeyError:
         payback = 0
+        print(month_obj.tags)
     drawBalanceTable(pdf,month_obj.budget,-total_spent,payback,50,75)
 
     pdf.setFont("Helvetica-Bold", 22)
     pdf.drawString(50,35,"Gesamtausgaben: "+str(-total_spent)+" €")
 
-    if not ("Balance Sheets"+years in os.listdir()):
-        os.mkdir("Balance Sheets"+years)
+    if not (str(month_obj.year) in os.listdir(home+"/Balance Sheets")):
+        os.mkdir(home+"/Balance Sheets/"+str(month_obj.year))
     pdf.save()
 
 def drawImage(image_path,pdf,x,y,scale):
@@ -94,7 +97,7 @@ def drawWeeksTable(pdf,weeks,month,year):
 def drawCategoryTable(pdf,tags):
     data = []
     for key in tags.keys():
-        if key != "Rückzahlung":
+        if key.find("Rückzahlung") == -1:
             data.append([key,tags[key]])
     rowHeights = len(data) * [25]
     data = list(reversed(sorted(data, key=itemgetter(1))))

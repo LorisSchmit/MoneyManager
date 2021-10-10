@@ -4,9 +4,11 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from operator import itemgetter
+from pathlib import Path
 
 def createPDF(year):
-    file_name = "Yearly Sheet"+str(year.year_no)+".pdf"
+    home = str(Path.home())
+    file_name = home+"/Balance Sheets/Yearly Sheet"+str(year.year_no)+".pdf"
 
     graph_path_budget = "Graphs/Budget"+str(year.year_no)+".svg"
     graph_path_expenses = "Graphs/Expenses"+str(year.year_no)+".svg"
@@ -20,21 +22,31 @@ def createPDF(year):
     pdf = canvas.Canvas(file_name)
     pdf.setTitle(document_title)
 
+
+    # Page 1
+
+    drawImage(graph_path_expenses, pdf, 0, 450, 0.7 )
+
     pdf.setFont("Helvetica-Bold", 30)
     pdf.drawCentredString(300, 790, title)
 
-    drawImage(graph_path_budget, pdf, -25, 510, 0.45)
-    drawImage(graph_path_expenses, pdf, 245, 560, 0.45)
-
     pdf.setFont("Helvetica-Bold", 18)
 
-    pdf.drawString(80, 430, "Budget: " + str(budget) + " €")
     pdf.drawString(320, 430, "Gesamtausgaben: " + str(total_spent) + " €")
 
     drawCategoryTable(pdf, year.tags)
 
-    pdf.line(50,165,530,165)
+    pdf.showPage()
+
+    #Page 2
+
+    drawImage(graph_path_budget, pdf, -25, 510, 0.45)
+    pdf.drawString(80, 430, "Budget: " + str(budget) + " €")
+
+
+    pdf.line(50, 165, 530, 165)
     drawBalanceTable(pdf, budget, total_spent, year.payback, 50, 50)
+
 
     pdf.save()
 
@@ -74,13 +86,17 @@ def drawCategoryTable(pdf,tags):
     subdata = []
     mod0 = 0
     for index,element in enumerate(tag_list):
-        mod = index//7
+        mod = index//12
         if mod != mod0:
             data.append(subdata)
             subdata = []
         mod0 = mod
         subdata.append([element[0],element[1]])
     data.append(subdata)
+
+    pdf.setFont("Helvetica", 18)
+    pdf.drawString(50, 380, 'Ausgaben pro Kategorie')
+    pdf.line(50, 378, 245, 378)
 
     for index0,ar in enumerate(data):
         rowHeights = len(ar) * [25]
@@ -93,8 +109,6 @@ def drawCategoryTable(pdf,tags):
                                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                                ('FONTSIZE', (0, 0), (-1, -1), 15),
                                ]))
-        pdf.setFont("Helvetica", 18)
-        pdf.drawString(50, 380, 'Ausgaben pro Kategorie')
-        pdf.line(50, 378, 245, 378)
+
         t.wrapOn(pdf, 500, 300)
-        t.drawOn(pdf, 50+170*index0, 180)
+        t.drawOn(pdf, 50+170*index0, 50)

@@ -1,6 +1,9 @@
 import csv
 import os
 import datetime
+from PyPDF2 import PdfFileReader
+
+
 from database_api import *
 from Account import CC_LUX
 
@@ -42,9 +45,36 @@ def cleaner():
     deleteAllFromTable("transacts")
     writeTransacts2DB(transacts)
 
+def extractText():
+    pdf_document = "/Users/lorisschmit1/Desktop/7898649_2020_Nr.006_Kontoauszug_vom_30.06.2020_20210211092749.pdf"
+    with open(pdf_document, "rb") as filehandle:
+        pdf = PdfFileReader(filehandle)
+        info = pdf.getDocumentInfo()
+        pages = pdf.getNumPages()
+
+        #print(info)
+        #print("number of pages: %i" % pages)
+
+        page1 = pdf.getPage(0)
+        #print(page1)
+        text_extract = page1.extractText()
+        lines = text_extract.split('                                        ')
+
+        lines = lines[1:]
+        transacts = []
+        for line in lines:
+            line = line.split('             ')
+            temp = []
+            for el in line:
+                if el != '':
+                    temp.append(el[1:])
+            transacts.append(temp)
+        for action in transacts:
+            print(action)
+
 
 def main():
-    cleaner()
+    extractText()
 
 if __name__ == '__main__':
     main()
