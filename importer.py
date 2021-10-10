@@ -26,17 +26,18 @@ class Importer:
                         start_found = True
                     if start_found:
                         if account == CC_LUX:
-                            comma_pos = row[4].rfind(",")
-                            recipient = row[4][:comma_pos].replace(",", "")
-                            reference = row[4][comma_pos + 2:].replace(",", "")
-                            transacts.append(Transaction(datetime.strptime(row[0],"%d/%m/%Y"),row[1],recipient,reference,float(row[2].replace(',', '.')),row[3],'',account))
+                            if row[1] != "DECOMPTE VISA":
+                                comma_pos = row[4].rfind(",")
+                                recipient = row[4][:comma_pos].replace(",", "")
+                                reference = row[4][comma_pos + 2:].replace(",", "")
+                                transacts.append(Transaction(datetime.strptime(row[0],"%d/%m/%Y"),row[1],recipient,reference,float(row[2].replace(',', '.')),row[3],'',account))
                         elif account == GK_DE and not (row[3] == "" and row[8] == ""):
                             amount_str = ('-') * (row[12] == 'S') + row[11].replace(',', '.')
                             amount = float(amount_str)
                             transacts.append(Transaction(datetime.strptime(row[0], '%d.%m.%Y'), row[2], row[3],
                                                    row[8].replace("\n", " "), amount, row[10], '',account))
                         elif account == PP:
-                            if row[3] != "Bank Deposit to PP Account" and row[3] != "Reversal of General Account Hold" and row[3] != "Account Hold for Open Authorization":
+                            if row[3] != "Bank Deposit to PP Account" and row[3] != "Reversal of General Account Hold" and row[3] != "Account Hold for Open Authorization" and row[4] == "EUR":
                                 if row[9] != "":
                                     amount = float(row[7])
                                 else:
@@ -44,10 +45,11 @@ class Importer:
                                 date = datetime.strptime(row[0], "%m/%d/%Y")
                                 transacts.append(Transaction(date, row[3], row[11], '', amount, row[4], '', account))
                         elif account == VISA:
-                            recipient = row[1].replace(",", "")
+                            recipient = row[6].replace(",", "")
                             reference = ''
-                            amount = float(row[3].replace(",", "."))
-                            date = datetime.strptime(row[0], "%d/%m/%Y")
+                            amount = float(row[8].replace(",", "."))
+                            date = datetime.strptime(row[5], "%d/%m/%Y")
+                            self.settlement_date = datetime.strptime(row[2], "%d/%m/%Y")
                             transacts.append(Transaction(date, 'Credit Card Transaction', recipient, reference, amount, row[4], '', account))
         if account != PP:
             transacts.reverse()
@@ -104,6 +106,10 @@ class Importer:
         if self.account == PP:
             for action in joined_transacts:
                 if not (action.tag == "PayPal" and action.date <= self.new_transacts[-1].date + dt.timedelta(days=1)):
+                    final_transacts.append(action)
+        elif self.account == VISA:
+            for action in joined_transacts:
+                if not (action.tag == "Visa" and action.date <= self.settlement_date):
                     final_transacts.append(action)
         else:
             final_transacts = joined_transacts
