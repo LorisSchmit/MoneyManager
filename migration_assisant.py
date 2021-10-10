@@ -6,6 +6,8 @@ from PyPDF2 import PdfFileReader
 
 from database_api import *
 from Account import CC_LUX
+from Month import Month
+from commonFunctions import object2list
 
 
 def migrate(year):
@@ -73,8 +75,18 @@ def extractText():
             print(action)
 
 
+def removeNewLine():
+    all_transacts = getAllTransacts()
+    for action in all_transacts:
+        action.tag = action.tag.rstrip()
+    deleteAllFromTable("transacts")
+    writeTransacts2DB(all_transacts)
+
+
 def main():
-    extractText()
+    assignPayback(8,2021)
 
 if __name__ == '__main__':
     main()
+
+

@@ -28,14 +28,15 @@ def tag(transacts):
             printAction(action)
             print("Tag: ")
             tag = sys.stdin.readline()
+            tag = tag.rstrip()
             default = action.recipient
             print("Default reference is: ", default)
             print("Save as: ")
             ref = str(sys.stdin.readline() or default)
             if ref != "none":
-                known_tags[ref] = tag
+                known_tags[ref] = tag.rstrip()
         if tag != "none":
-            action.tag = tag
+            action.tag = tag.rstrip()
             writeTags(known_tags)
         else:
             transacts.remove(action)
