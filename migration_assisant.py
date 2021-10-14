@@ -83,22 +83,19 @@ def assignPayback(month,year):
     for action in month.transacts:
         if action.tag == "Rückzahlung":
             print(object2list(action))
-            #pb = int(input("of which action?"))
-            if len(action.pb_assign) > 0:
-                pb = int(action.pb_assign)
-                in_advance_action = all_transacts[pb-1]
-                if in_advance_action.pb_assign is None:
+            pb = int(input("of which action?"))
+            in_advance_action = all_transacts[pb-1]
+            if in_advance_action.pb_assign is None:
+                in_advance_action.pb_assign = []
+            elif type(in_advance_action.pb_assign) is str:
+                if len(in_advance_action.pb_assign) == 0:
                     in_advance_action.pb_assign = []
-                elif type(in_advance_action.pb_assign) is str:
-                    if len(in_advance_action.pb_assign) == 0:
-                        in_advance_action.pb_assign = []
-                    else:
-                        in_advance_action.pb_assign = ast.literal_eval(in_advance_action.pb_assign)
-                        #in_advance_action.pb_assign = [n.strip() for n in in_advance_action.pb_assign]
+                else:
+                    in_advance_action.pb_assign = ast.literal_eval(in_advance_action.pb_assign)
 
-                if not (action.id in in_advance_action.pb_assign):
-                    in_advance_action.pb_assign.append(action.id)
-                    assigns.append(in_advance_action)
+            if not (action.id in in_advance_action.pb_assign):
+                in_advance_action.pb_assign.append(action.id)
+                assigns.append(in_advance_action)
 
     for in_advance_action in assigns:
         in_advance_action.pb_assign = str(in_advance_action.pb_assign)
@@ -116,8 +113,8 @@ def removeNewLine():
 
 
 def main():
-    for i in range(1,8):
-        assignPayback(i,2021)
+    #for i in range(1,8):
+    assignPayback(1,2020)
 
 if __name__ == '__main__':
     main()

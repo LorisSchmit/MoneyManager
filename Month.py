@@ -7,8 +7,10 @@ import threading
 import matplotlib.pyplot as plt
 import collections
 import numpy as np
-from matplotlib import cm
+from matplotlib.colors import LinearSegmentedColormap
 from test_pdf import PdfImage
+import matplotlib.colors as mcolors
+
 
 
 
@@ -139,13 +141,14 @@ class Month:
         in_advances = collections.OrderedDict(sorted(in_advances.items(), key=lambda x: x[1]))
         pbs_pie_dict = collections.OrderedDict()
         tags = self.tags.copy()
-        tags.pop("Rückzahlung")
-        for key,value in tags.items():
-            if key in in_advances:
-                pbs_pie_dict[key] = in_advances[key]
-                pbs_pie_dict[key+" fillup"] = round(value - in_advances[key],2)
-            else:
-                pbs_pie_dict[key+" fillup"] = value
+        if "Rückzahlung" in tags:
+            tags.pop("Rückzahlung")
+            for key,value in tags.items():
+                if key in in_advances:
+                    pbs_pie_dict[key] = in_advances[key]
+                    pbs_pie_dict[key+" fillup"] = round(value - in_advances[key],2)
+                else:
+                    pbs_pie_dict[key+" fillup"] = value
         return pbs_pie_dict
 
     def perWeek(self):
@@ -172,19 +175,15 @@ class Month:
             font_size = 12
             labels = list(self.tags.keys())
             values = list(self.tags.values())
-            pb_ind = labels.index("Rückzahlung")
-            #values[pb_ind] = -values[pb_ind]
-            labels.pop(pb_ind)
-            values.pop(pb_ind)
-            pbs_pie_dict = self.paybackPerTag()
-
-            pbs_values = list(pbs_pie_dict.values())
-            pbs_labels = list(pbs_pie_dict.keys())
-            #for label in list(pbs_pie_dict.keys()):
-             #   if label.find("fillup") == -1:
-              #      pbs_labels.append(label)
-              #  else:
-               #      pbs_labels.append(" ")
+            pb_exist = False
+            if "Rückzahlung" in labels:
+                pb_exist = True
+                pb_ind = labels.index("Rückzahlung")
+                labels.pop(pb_ind)
+                values.pop(pb_ind)
+                pbs_pie_dict = self.paybackPerTag()
+                pbs_values = list(pbs_pie_dict.values())
+                pbs_labels = list(pbs_pie_dict.keys())
 
             rot_fact = (3 / 8 - self.max / self.total) * 8 * 55
             if rot_fact < 0:
@@ -193,29 +192,39 @@ class Month:
                 rot_fact -= 360
             rot_fact = 0
 
-            cs = plt.get_cmap('jet',len(values))(range(len(values)))
-            #cs = cm.Set1(np.arange(len(values)) / float(len(values)))
-            cs_pb = []
-            i = 0
-            for key,value in pbs_pie_dict.items():
-                if key.find("fillup") == -1:
-                    cs_pb.append("#FFFFFF80")
-                else:
-                    cs_pb.append("#FFFFFF00")
-                i+=1
-            cs_pb = np.array(cs_pb)
-            fig, ax = plt.subplots()
-            pie = ax.pie(values, labels=labels, startangle=rot_fact, labeldistance=0.35, textprops={"color":"white", "fontsize":font_size}, rotatelabels=True, colors=cs)
-            pbs_pie = ax.pie(pbs_values, radius=1,startangle=rot_fact,textprops={"color":"white", "fontsize":font_size,"rotation_mode":'anchor', "va":'center', "ha":'left'},labeldistance=0.6,  colors=cs_pb)
-            legend_labels = []
-            legend_patches = []
-            for i in range(len(pbs_pie[0])):
-                if int(cs_pb[i][1:],16) > 0xFFFFFF00:
-                    pbs_pie[0][i].set(hatch="///",edgecolor=cs[i])
-                    legend_patches.append(pbs_pie[0][i])
-                    legend_labels.append(pbs_labels[i]+" rückbezahlt")
-            ax.legend(legend_patches,legend_labels,loc="lower left")
+            #cs = plt.get_cmap('rainbow',len(values))(range(len(values)))
+            interval = np.hstack([np.linspace(0, 0.6), np.linspace(0.7, 1)])
+            colors = plt.cm.jet(interval)
+            cs = LinearSegmentedColormap.from_list('name', colors,N=len(values))
+            cs = [mcolors.rgb2hex(cs(i)) for i in range(cs.N)]
 
+            if pb_exist:
+                cs_pb = []
+                i = 0
+                for key,value in pbs_pie_dict.items():
+                    if key.find("fillup") == -1:
+                        cs_pb.append("#FFFFFF80")
+                    else:
+                        cs_pb.append("#FFFFFF00")
+                    i+=1
+                cs_pb = np.array(cs_pb)
+            fig, ax = plt.subplots()
+            pie = ax.pie(values, labels=labels, startangle=rot_fact, labeldistance=0.35, textprops={"color":"white", "fontsize":font_size, "rotation_mode":'anchor', "va":'center', "ha":'right'}, rotatelabels=True, colors=cs)
+            for t in pie[1]:
+                if t.get_position()[0] > 0:
+                    t.set_ha("left")
+            if pb_exist:
+                pbs_pie = ax.pie(pbs_values, radius=1,startangle=rot_fact,textprops={"color":"white", "fontsize":font_size, "rotation_mode":'anchor', "va":'center', "ha":'left'},labeldistance=0.6,  colors=cs_pb,wedgeprops={"lw":0})
+                legend_labels = []
+                legend_patches = []
+                for i in range(len(pbs_pie[0])):
+                    if int(cs_pb[i][1:],16) > 0xFFFFFF00:
+                        ind = labels.index(list(pbs_pie_dict.items())[i][0].replace(" fillup",""))
+                        pbs_pie[0][i].set(hatch="///",edgecolor=cs[ind])
+                        if len(legend_patches) == 0:
+                            legend_patches.append(pbs_pie[0][i])
+                            legend_labels.append("Rückzahlung")
+                ax.legend(legend_patches,legend_labels,loc="lower left",framealpha=0)
 
             fig.savefig("Graphs/" + str(self.year) + " - " + str(self.month) + ".png",bbox_inches="tight",dpi=1000)
 
@@ -227,7 +236,7 @@ class Month:
 def monthsPerYear(year):
     for i in range(1, 13):
         month = Month(i, year)
-        #month.createGraph()
+        month.createGraph()
         month.createBalanceSheet()
     return "All Balances for "+str(year)+" created"
 
@@ -244,6 +253,6 @@ def executeCreateSingleMonth(month,year):
 
 
 if __name__ == '__main__':
-    #monthsPerYear(2020)
-    createSingleMonth(9, 2020)
+    monthsPerYear(2021)
+    #createSingleMonth(2, 2020)
 
