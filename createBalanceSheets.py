@@ -2,6 +2,12 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from operator import itemgetter
 from pathlib import Path
+from PIL import Image,EpsImagePlugin
+from pdfrw.buildxobj import pagexobj
+from pdfrw.toreportlab import makerl
+from pdfrw import PdfReader, PdfDict
+
+
 
 
 import os
@@ -23,16 +29,28 @@ def drawPDF(month_obj):
 
     file_name = home + "/Balance Sheets/"+str(month_obj.year)+"/"+str(month_obj.year)+"-"+str(month_obj.month)+".pdf"
 
-    image_path = "Graphs/"+str(month_obj.year)+" - "+str(month_obj.month)+".svg"
+    image_path = "Graphs/"+str(month_obj.year)+" - "+str(month_obj.month)+".png"
     document_title = str(month_obj.month)+" "+str(month_obj.year)
     title = month_obj.month_name + " " + str(month_obj.year)
     total_spent = month_obj.total
 
     pdf = canvas.Canvas(file_name)
 
+    myImage = Image.open(image_path)
+
+    pdf.setPageCompression(0)
+    pdf.drawInlineImage(myImage, 0, 400, width=400,height=400)
+
+
     pdf.setTitle(document_title)
 
-    drawImage(image_path,pdf,-40, 390,0.7)
+    # drawImage(image_path,pdf,-10, 390,1)
+    #page = PdfReader(image_path, decompress=False).pages[0]
+    #xobj = pagexobj(page)
+    #xobj_name = makerl(pdf, xobj)
+    #pdf.translate(0, 150)
+    #pdf.scale(1, 1)
+    #pdf.doForm(xobj_name)
 
     drawCategoryTable(pdf,month_obj.tags)
 
@@ -60,6 +78,8 @@ def drawPDF(month_obj):
 def drawImage(image_path,pdf,x,y,scale):
     drawing = svg2rlg(image_path)
     drawing.scale(scale,scale)
+    print("post-render")
+
     renderPDF.draw(drawing, pdf, x,y)
 
 def drawWeeksTable(pdf,weeks,month,year):

@@ -4,6 +4,14 @@ import plotly.graph_objects as go
 from commonFunctions import weekNumberToDates
 from createBalanceSheets import drawPDF
 import threading
+import matplotlib.pyplot as plt
+import collections
+import numpy as np
+from matplotlib import cm
+from test_pdf import PdfImage
+
+
+
 
 class Month:
     def __init__(self,month,year):
@@ -13,8 +21,8 @@ class Month:
         self.start_year = year
         if month<=9:
             self.start_year -= 1
-        all_transacts = getAllTransacts()
-        self.transacts = self.getMonthlyTransacts(all_transacts)
+        self.all_transacts = getAllTransacts()
+        self.transacts = self.getMonthlyTransacts(self.all_transacts)
         self.lean_transacts = self.getLeanTransacts()
         if len(self.transacts)>0:
             self.tags = self.perTag()
@@ -22,6 +30,8 @@ class Month:
             self.budget = 1000
             self.max = self.biggestTag()[1]
             self.weeks = self.perWeek()
+            self.pbs = self.getPayBacks()
+            self.pbs_tags = self.paybackPerTag()
 
     def getMonthlyTransacts(self,transacts):
         start = datetime(self.year, self.month, 1)
@@ -56,6 +66,13 @@ class Month:
                 lean_transacts.append(action)
         return lean_transacts
 
+    def getPayBacks(self):
+        pbs = []
+        for action in self.transacts:
+            if action.tag == "Rückzahlung":
+                pbs.append(action)
+        return pbs
+
     def monthNumberToMonthName(self):
         months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober',
                   'November', 'Dezember']
@@ -89,6 +106,7 @@ class Month:
                 rest += float(tags_temp[tag.rstrip()])
         rest = round(rest, 2)
         tags['Rest'] = rest
+        tags = collections.OrderedDict(sorted(tags.items(), key=lambda x: x[1]))
         return tags
 
     def biggestTag(self):
@@ -99,6 +117,36 @@ class Month:
                 max_key = tag
                 max = self.tags[tag]
         return (max_key, max)
+
+    def paybackPerTag(self):
+        in_advances = {}
+        for action in self.transacts:
+            if type(action.pb_assign) is list:
+                if len(action.pb_assign) > 0:
+                    tag = action.tag
+                    if not (tag in in_advances):
+                        in_advances[tag] = 0
+                    for pb_assign in action.pb_assign:
+                        in_advances[tag] += self.all_transacts[pb_assign-1].amount
+
+                    in_advances[tag] = round(in_advances[tag], 2)
+        pbs_labels = []
+        pbs_labels.extend(in_advances.keys())
+        pbs_labels.append("  ")
+        pbs_values = []
+        pbs_values.extend(in_advances.values())
+        #pbs_values.append(-self.total - in_advances["Ausflug"])
+        in_advances = collections.OrderedDict(sorted(in_advances.items(), key=lambda x: x[1]))
+        pbs_pie_dict = collections.OrderedDict()
+        tags = self.tags.copy()
+        tags.pop("Rückzahlung")
+        for key,value in tags.items():
+            if key in in_advances:
+                pbs_pie_dict[key] = in_advances[key]
+                pbs_pie_dict[key+" fillup"] = round(value - in_advances[key],2)
+            else:
+                pbs_pie_dict[key+" fillup"] = value
+        return pbs_pie_dict
 
     def perWeek(self):
         weeks = {}
@@ -121,19 +169,56 @@ class Month:
 
     def createGraph(self):
         if len(self.transacts) > 0:
-            font_size = 19
+            font_size = 12
             labels = list(self.tags.keys())
             values = list(self.tags.values())
+            pb_ind = labels.index("Rückzahlung")
+            #values[pb_ind] = -values[pb_ind]
+            labels.pop(pb_ind)
+            values.pop(pb_ind)
+            pbs_pie_dict = self.paybackPerTag()
+
+            pbs_values = list(pbs_pie_dict.values())
+            pbs_labels = list(pbs_pie_dict.keys())
+            #for label in list(pbs_pie_dict.keys()):
+             #   if label.find("fillup") == -1:
+              #      pbs_labels.append(label)
+              #  else:
+               #      pbs_labels.append(" ")
+
             rot_fact = (3 / 8 - self.max / self.total) * 8 * 55
             if rot_fact < 0:
                 rot_fact = 0
             if rot_fact > 360:
                 rot_fact -= 360
-            layout = dict(showlegend=False, font=dict(size=font_size), margin=dict(l=0, r=0, t=0, b=0))
-            fig = go.Figure(data=[go.Pie(labels=labels, values=values)], layout=layout)
-            fig.update_traces(textinfo='label', hoverinfo='percent+value', rotation=rot_fact, )
-            # fig.show()
-            fig.write_image("Graphs/" + str(self.year) + " - " + str(self.month) + ".svg")
+            rot_fact = 0
+
+            cs = plt.get_cmap('jet',len(values))(range(len(values)))
+            #cs = cm.Set1(np.arange(len(values)) / float(len(values)))
+            cs_pb = []
+            i = 0
+            for key,value in pbs_pie_dict.items():
+                if key.find("fillup") == -1:
+                    cs_pb.append("#FFFFFF80")
+                else:
+                    cs_pb.append("#FFFFFF00")
+                i+=1
+            cs_pb = np.array(cs_pb)
+            fig, ax = plt.subplots()
+            pie = ax.pie(values, labels=labels, startangle=rot_fact, labeldistance=0.35, textprops={"color":"white", "fontsize":font_size}, rotatelabels=True, colors=cs)
+            pbs_pie = ax.pie(pbs_values, radius=1,startangle=rot_fact,textprops={"color":"white", "fontsize":font_size,"rotation_mode":'anchor', "va":'center', "ha":'left'},labeldistance=0.6,  colors=cs_pb)
+            legend_labels = []
+            legend_patches = []
+            for i in range(len(pbs_pie[0])):
+                if int(cs_pb[i][1:],16) > 0xFFFFFF00:
+                    pbs_pie[0][i].set(hatch="///",edgecolor=cs[i])
+                    legend_patches.append(pbs_pie[0][i])
+                    legend_labels.append(pbs_labels[i]+" rückbezahlt")
+            ax.legend(legend_patches,legend_labels,loc="lower left")
+
+
+            fig.savefig("Graphs/" + str(self.year) + " - " + str(self.month) + ".png",bbox_inches="tight",dpi=1000)
+
 
     def createBalanceSheet(self):
         if len(self.transacts) > 0:
@@ -157,6 +242,8 @@ def executeCreateSingleMonth(month,year):
     main_thread.start()
 
 
+
 if __name__ == '__main__':
     #monthsPerYear(2020)
-    createSingleMonth(9, 2021)
+    createSingleMonth(9, 2020)
+

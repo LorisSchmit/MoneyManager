@@ -3,6 +3,7 @@ from Transaction import Transaction
 from datetime import datetime
 from Account import accountsLookup
 from pathlib import Path
+import ast
 
 
 def object2list(action):
@@ -18,7 +19,14 @@ def getAllTransacts():
         transacts_temp = fetchAllTransacts(conn)
     transacts = []
     for action in transacts_temp:
-        transacts.append(Transaction(action[0],datetime.fromtimestamp(action[1]),action[2],action[3],action[4],action[5],action[6],action[7],accountsLookup(action[8]),action[9]))
+        if action[9] is None:
+            pb_assign = []
+        elif type(action[9]) is str:
+            if len(action[9]) == 0:
+                pb_assign = []
+            else:
+                pb_assign = ast.literal_eval(action[9])
+        transacts.append(Transaction(action[0],datetime.fromtimestamp(action[1]),action[2],action[3],action[4],action[5],action[6],action[7],accountsLookup(action[8]),pb_assign))
     return transacts
 
 def writeTransacts2DB(transacts):
