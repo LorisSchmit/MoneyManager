@@ -46,16 +46,35 @@ def deleteAllFromTable(table):
     with conn:
         deleteAll(conn,table)
 
-def importKnownTags(table):
+def importTable(table,tags=False):
     home = str(Path.home())
     db_file = home + "/Documents/db.db"
     conn = create_connection(db_file)
     with conn:
-        raw_data = read(conn, table)
-    known_tags = {}
-    for el in raw_data:
-        known_tags[el[1]] = el[2]
-    return known_tags
+        raw_data,cnames = read(conn, table)
+    if tags:
+        data = {}
+        for el in raw_data:
+            data[el[1]] = el[2]
+    else:
+        data = []
+        for row in raw_data:
+            row_dict = {}
+            for i,el in enumerate(row):
+                if i > 0:
+                    row_dict[cnames[i]] = el
+            data.append(row_dict)
+    return data
+
+def writeTable(table,data):
+    deleteAllFromTable(table)
+    home = str(Path.home())
+    db_file = home + "/Documents/db.db"
+    conn = create_connection(db_file)
+    with conn:
+        writeManyTable(conn, table, data)
+
+
 
 def writeTags(tags):
     home = str(Path.home())

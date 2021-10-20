@@ -3,10 +3,10 @@ from database_api import *
 import plotly.graph_objects as go
 from createYearlySheet import *
 
-income_tags = importKnownTags("income_tags")
+income_tags = importTable("income_tags",tags=True)
 
 class Year:
-    def __init__(self,year_no):
+    def __init__(self,year_no,projection=True):
         self.year_no = year_no
         self.months = self.getMonths()
         all_transacts = getAllTransacts()
@@ -14,13 +14,16 @@ class Year:
         self.income_transacts = self.getIncomeTransacts()
         self.lean_transacts = self.getLeanTransacts()
         self.total_spent = self.getTotalSpent()
-        self.total_budget = self.getBudget()
+        if projection and self.year_no >= datetime.now().year:
+            self.projections = importTable("budget_projection")
+        self.budget = self.getBudget(projection=projection)
+        self.budget_tagged = self.analyzeBudget(projection=projection)
         tags = self.perTag()
         self.tags = tags[0]
         self.tags_shortened = tags[1]
         self.max = self.biggestTag(self.tags)[1]
-        self.budget_tagged = self.analyzeBudget()
         self.payback = self.getPayback()
+
 
     def getMonths(self):
         months = []
@@ -35,12 +38,17 @@ class Year:
             total += month.getTotalSpent()
         return -round(total,2)
 
-    def getBudget(self):
+    def getBudget(self,projection=True):
         total = 0
-        for month in self.months:
-            total += month.getIncome()
-        additional_income = 0
-        total += additional_income
+        if projection and self.year_no >= datetime.now().year:
+            for proj in self.projections:
+                total += proj["amount"]
+        else:
+            total = 0
+            for action in self.transacts:
+                if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
+                    print(object2list(action))
+                    total += action.amount
         return round(total,2)
 
     def getPayback(self):
@@ -69,7 +77,7 @@ class Year:
     def getIncomeTransacts(self):
         income_transacts = []
         for action in self.transacts:
-            if action.tag == "Einkommen":
+            if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
                 income_transacts.append(action)
         return income_transacts
 
@@ -121,31 +129,62 @@ class Year:
         return (max_key, max)
 
 
-    def analyzeBudget(self):
-        data = {}
-        for cat in income_tags.values():
-            data[cat] = 0
-        data["Rest"] = 0
-        for action in self.income_transacts:
-            for ref in income_tags:
-                tag_found = False
-                if action.recipient.lower().find(ref.lower()) != -1:
-                    tag = income_tags[ref]
-                    tag_found = True
-                    break
-            if not tag_found:
-                tag = "Rest"
-            data[tag] += action.amount
-        data_copy = {}
-        for key in data.keys():
-            if data[key] != 0:
-                data_copy[key] = data[key]
-        return data_copy
+    def analyzeBudget(self,projection=True):
+        if projection and self.year_no >= datetime.now().year:
+            data = {}
+            for proj in self.projections:
+                data[proj["tag"]] = 0
+            for proj in self.projections:
+                data[proj["tag"]] += proj["amount"]
+            #data_copy = {}
+            #for key in data.keys():
+                #if data[key] != 0:
+                   # data_copy[key] = data[key]
+        else:
+            data_temp = {}
+            for cat in income_tags.values():
+                data_temp[cat] = 0
+            data_temp["Rest"] = 0
+            for action in self.income_transacts:
+                for ref in income_tags:
+                    tag_found = False
+                    if action.recipient.lower().find(ref.lower()) != -1:
+                        tag = income_tags[ref]
+                        tag_found = True
+                        break
+                if not tag_found:
+                    tag = "Rest"
+                data_temp[tag] += action.amount
+            data = {}
+            for key in data_temp.keys():
+                if data_temp[key] != 0:
+                    data[key] = data_temp[key]
+        return data
+
+
+
+    def setProjections(self):
+        projections = importTable("budget_projection")
+        print(projections)
+        exited = False
+        print("Startup of budget projection...")
+        while not exited:
+            name = input("Income name?")
+            if name == "none":
+                exited = True
+            else:
+                amount = float(input("Amount?"))
+                tag = input("Tag?")
+                projections.append({"name":name,"amount":amount, "tag":tag})
+        print(projections)
+        writeTable("budget_projection", projections)
+
+        return 0
 
     def createBudgetGraph(self):
         labels = list(self.budget_tagged.keys())
         values = list(self.budget_tagged.values())
-        rot_fact = (3 / 8 - self.biggestTag(self.budget_tagged)[1]/self.total_budget) * 8 * 55
+        rot_fact = (3 / 8 - self.biggestTag(self.budget_tagged)[1]/self.budget) * 8 * 55
         if rot_fact < 0:
             rot_fact = 0
         if rot_fact > 360:
@@ -171,10 +210,16 @@ class Year:
         fig.write_image("Graphs/Expenses" + str(self.year_no) + ".svg")
 
 def createYearlySheet(year):
-    #year.createBudgetGraph()
+    year.createBudgetGraph()
     year.createExpensesGraph()
     createPDF(year)
 
 if __name__ == '__main__':
-    year = Year(2020)
+    year0 = Year(2020)
+    print(year0.budget)
+    print(year0.analyzeBudget())
+    year = Year(2021)
+    print(year.budget)
+    print(year.analyzeBudget())
     createYearlySheet(year)
+    #year.setProjections()

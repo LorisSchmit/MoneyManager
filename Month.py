@@ -12,35 +12,33 @@ from test_pdf import PdfImage
 import matplotlib.colors as mcolors
 
 
-
-
-
 class Month:
-    def __init__(self,month,year):
+    def __init__(self,month,year,projection=True):
         self.month = month
         self.month_name = self.monthNumberToMonthName()
-        self.year = year
-        self.start_year = year
-        if month<=9:
-            self.start_year -= 1
+        self.year_no = year
+        #self.year = Year.Year(self.year_no)
         self.all_transacts = getAllTransacts()
         self.transacts = self.getMonthlyTransacts(self.all_transacts)
         self.lean_transacts = self.getLeanTransacts()
+        self.yearly_transacts = self.getYearlyTransacts()
         if len(self.transacts)>0:
             self.tags = self.perTag()
             self.total = self.getTotalSpent()
-            self.budget = 1000
+            if projection and self.year_no >= datetime.now().year:
+                self.projections = importTable("budget_projection")
+            self.budget = self.getBudget(projection=projection)
             self.max = self.biggestTag()[1]
             self.weeks = self.perWeek()
             self.pbs = self.getPayBacks()
             self.pbs_tags = self.paybackPerTag()
 
     def getMonthlyTransacts(self,transacts):
-        start = datetime(self.year, self.month, 1)
+        start = datetime(self.year_no, self.month, 1)
         if self.month < 12:
-            end = datetime(self.year, self.month + 1, 1)
+            end = datetime(self.year_no, self.month + 1, 1)
         else:
-            end = datetime(self.year + 1, 1, 1)
+            end = datetime(self.year_no + 1, 1, 1)
         monthly_transacts = []
         for action in transacts:
             if action.date >= start and action.date < end:
@@ -50,7 +48,7 @@ class Month:
     def getIncome(self):
         total = 0
         for action in self.transacts:
-            if action.amount > 0 and action.tag != "Kapitaltransfer":
+            if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Einkommen":
                 total += action.amount
         return total
 
@@ -67,6 +65,29 @@ class Month:
             if action.tag != "Einkommen" and action.tag != "Kapitaltransfer":
                 lean_transacts.append(action)
         return lean_transacts
+
+    def getYearlyTransacts(self):
+        start = datetime(self.year_no, 1, 1)
+        end = datetime(self.year_no+1, 1, 1)
+        yearly_transacts = []
+        for action in self.all_transacts:
+            if action.date >= start and action.date < end:
+                yearly_transacts.append(action)
+        return yearly_transacts
+
+    def getBudget(self,projection=True):
+        yearly_budget = 0
+        if projection and self.year_no >= datetime.now().year:
+            for proj in self.projections:
+                yearly_budget += proj["amount"]
+        else:
+            yearly_budget = 0
+            for action in self.yearly_transacts:
+                if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
+                    yearly_budget += action.amount
+
+        budget = round(yearly_budget/12.0,2)
+        return budget
 
     def getPayBacks(self):
         pbs = []
@@ -226,7 +247,7 @@ class Month:
                             legend_labels.append("Rückzahlung")
                 ax.legend(legend_patches,legend_labels,loc="lower left",framealpha=0)
 
-            fig.savefig("Graphs/" + str(self.year) + " - " + str(self.month) + ".png",bbox_inches="tight",dpi=1000)
+            fig.savefig("Graphs/" + str(self.year_no) + " - " + str(self.month) + ".png",bbox_inches="tight",dpi=1000)
 
 
     def createBalanceSheet(self):
@@ -253,6 +274,10 @@ def executeCreateSingleMonth(month,year):
 
 
 if __name__ == '__main__':
-    monthsPerYear(2021)
-    #createSingleMonth(2, 2020)
+    monthsPerYear(2020)
+    #month = Month(2, 2020)
+    #month.createGraph()
+    #month.createBalanceSheet()
+    #print(month.budget)
+
 

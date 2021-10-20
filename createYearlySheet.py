@@ -17,7 +17,7 @@ def createPDF(year):
     title = "Balance Sheet "+str(year.year_no)
 
     total_spent = year.total_spent
-    budget = year.total_budget
+    budget = year.budget
 
     pdf = canvas.Canvas(file_name)
     pdf.setTitle(document_title)

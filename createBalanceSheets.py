@@ -25,13 +25,11 @@ from reportlab.platypus import Table, TableStyle
 home = str(Path.home())
 
 def drawPDF(month_obj):
-    years = str(month_obj.start_year)[2:]+"_"+str(month_obj.start_year+1)[2:]
+    file_name = home + "/Balance Sheets/"+str(month_obj.year_no)+"/"+str(month_obj.year_no)+"-"+str(month_obj.month)+".pdf"
 
-    file_name = home + "/Balance Sheets/"+str(month_obj.year)+"/"+str(month_obj.year)+"-"+str(month_obj.month)+".pdf"
-
-    image_path = "Graphs/"+str(month_obj.year)+" - "+str(month_obj.month)+".png"
-    document_title = str(month_obj.month)+" "+str(month_obj.year)
-    title = month_obj.month_name + " " + str(month_obj.year)
+    image_path = "Graphs/"+str(month_obj.year_no)+" - "+str(month_obj.month)+".png"
+    document_title = str(month_obj.month)+" "+str(month_obj.year_no)
+    title = month_obj.month_name + " " + str(month_obj.year_no)
     total_spent = month_obj.total
 
     pdf = canvas.Canvas(file_name)
@@ -57,7 +55,7 @@ def drawPDF(month_obj):
     pdf.setFont("Helvetica-Bold", 30)
     pdf.drawCentredString(300, 780, title)
 
-    drawWeeksTable(pdf,month_obj.weeks,int(month_obj.month),int(month_obj.year))
+    drawWeeksTable(pdf,month_obj.weeks,int(month_obj.month),int(month_obj.year_no))
 
     pdf.line(50, 220, 540, 220)
 
@@ -71,8 +69,8 @@ def drawPDF(month_obj):
     pdf.setFont("Helvetica-Bold", 22)
     pdf.drawString(50,35,"Gesamtausgaben: "+str(-total_spent)+" €")
 
-    if not (str(month_obj.year) in os.listdir(home+"/Balance Sheets")):
-        os.mkdir(home+"/Balance Sheets/"+str(month_obj.year))
+    if not (str(month_obj.year_no) in os.listdir(home+"/Balance Sheets")):
+        os.mkdir(home+"/Balance Sheets/"+str(month_obj.year_no))
     pdf.save()
 
 def drawImage(image_path,pdf,x,y,scale):

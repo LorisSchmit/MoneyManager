@@ -21,7 +21,8 @@ def read(conn, table):
     cur = conn.cursor()
     cur.execute(sql)
     data = cur.fetchall()
-    return data
+    names = list(map(lambda x: x[0], cur.description))
+    return data,names
 
 def write(conn, row):
     sql = ''' INSERT INTO transacts(date,type,recipient,reference,amount,currency,tag,account,pb_assign)
@@ -37,6 +38,14 @@ def writeMany(conn, data):
     cur = conn.cursor()
     cur.executemany(sql, data)
     return cur.lastrowid
+
+def writeManyTable(conn, table, data):
+    cols = ', '.join('"{}"'.format(col) for col in data[0].keys())
+    vals = ', '.join(':{}'.format(col) for col in data[0].keys())
+    sql = 'INSERT INTO "{0}" ({1}) VALUES ({2})'.format(table, cols, vals)
+    cur = conn.cursor()
+    cur.executemany(sql, data)
+    conn.commit()
 
 def writeManyTags(conn, data):
     sql = ' INSERT INTO tags(ref,cat) VALUES(?,?) '
