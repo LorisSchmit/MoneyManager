@@ -10,9 +10,10 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from test_pdf import PdfImage
 import matplotlib.colors as mcolors
+from Year import Year
 
 
-class Month:
+class Month(Year):
     def __init__(self,month,year,projection=True):
         self.month = month
         self.month_name = self.monthNumberToMonthName()
@@ -274,10 +275,10 @@ def executeCreateSingleMonth(month,year):
 
 
 if __name__ == '__main__':
-    monthsPerYear(2019)
-    #month = Month(8, 2021)
-    #month.createGraph()
-    #month.createBalanceSheet()
-    #print(month.budget)
+    #monthsPerYear(2019)
+    month = Month(8, 2021)
+    month.createGraph()
+    month.createBalanceSheet()
+    print(month.budget)
 
 
