@@ -1,6 +1,6 @@
 class Account:
     def __init__(self,name):
-        self.balances_lookup = {'Compte courant': 0, 'Girokonto': 1, 'Compte épargne': 2,
+        self.balances_lookup = {'Compte courant': 0, 'Girokonto': 1, 'Compte epargne': 2,
                                 'PayPal': 3, 'Geldbeutel': 4, 'Visa': 5}
         self.name  = name
         #self.balance = self.getBalance(name)[0]
@@ -27,9 +27,10 @@ GK_DE = Account('Girokonto')
 PP = Account('PayPal')
 GB = Account('Geldbeutel')
 VISA = Account('Visa')
+CE_LUX = Account('Compte epargne')
 
 def accountsLookup(account_name):
-    accounts_lookup = {'Compte courant': CC_LUX, 'Girokonto': GK_DE, 'PayPal': PP, 'Geldbeutel': GB, 'Visa': VISA}
+    accounts_lookup = {'Compte courant': CC_LUX, 'Girokonto': GK_DE, 'PayPal': PP, 'Geldbeutel': GB, 'Visa': VISA, 'Compte epargne': CE_LUX}
     try:
         account = accounts_lookup[account_name]
     except KeyError:
