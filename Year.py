@@ -136,10 +136,6 @@ class Year:
                 data[proj["tag"]] = 0
             for proj in self.projections:
                 data[proj["tag"]] += proj["amount"]
-            #data_copy = {}
-            #for key in data.keys():
-                #if data[key] != 0:
-                   # data_copy[key] = data[key]
         else:
             data_temp = {}
             for cat in income_tags.values():
@@ -215,11 +211,5 @@ def createYearlySheet(year):
     createPDF(year)
 
 if __name__ == '__main__':
-    year0 = Year(2020)
-    print(year0.budget)
-    print(year0.analyzeBudget())
-    year = Year(2021)
-    print(year.budget)
-    print(year.analyzeBudget())
+    year = Year(2019)
     createYearlySheet(year)
-    #year.setProjections()

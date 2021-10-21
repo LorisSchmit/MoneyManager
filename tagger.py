@@ -2,7 +2,7 @@ from database_api import *
 import readline
 import sys
 
-known_tags = importKnownTags("tags")
+known_tags = importTable("tags",tags=True)
 
 
 def rlinput(prompt, prefill):

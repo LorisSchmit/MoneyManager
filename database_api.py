@@ -7,7 +7,7 @@ import ast
 
 
 def object2list(action):
-    l = [int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name,action.pb_assign]
+    l = [int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name,str(action.pb_assign)]
     return l
 
 

@@ -198,7 +198,7 @@ class Month:
             values = list(self.tags.values())
             pb_exist = False
             if "Rückzahlung" in labels:
-                pb_exist = True
+                #pb_exist = True
                 pb_ind = labels.index("Rückzahlung")
                 labels.pop(pb_ind)
                 values.pop(pb_ind)
@@ -274,8 +274,8 @@ def executeCreateSingleMonth(month,year):
 
 
 if __name__ == '__main__':
-    monthsPerYear(2020)
-    #month = Month(2, 2020)
+    monthsPerYear(2019)
+    #month = Month(8, 2021)
     #month.createGraph()
     #month.createBalanceSheet()
     #print(month.budget)

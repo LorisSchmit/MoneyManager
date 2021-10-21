@@ -45,6 +45,8 @@ def fixer():
 def cleaner():
     transacts = getAllTransacts()
     transacts.sort(key=lambda x: x.date)
+    for action in transacts:
+        print(object2list(action))
     deleteAllFromTable("transacts")
     writeTransacts2DB(transacts)
 
@@ -84,6 +86,7 @@ def assignPayback(month,year):
         if action.tag == "Rückzahlung":
             print(object2list(action))
             pb = int(input("of which action?"))
+            #pb = int(action.pb_assign)
             in_advance_action = all_transacts[pb-1]
             if in_advance_action.pb_assign is None:
                 in_advance_action.pb_assign = []
@@ -114,7 +117,8 @@ def removeNewLine():
 
 def main():
     #for i in range(1,8):
-    assignPayback(1,2020)
+     #assignPayback(,2021)
+    cleaner()
 
 if __name__ == '__main__':
     main()
