@@ -9,6 +9,7 @@ from database_api import *
 from Account import CC_LUX
 from Month import Month
 from commonFunctions import object2list
+from importer import importNewFile
 
 
 def migrate(year):
@@ -108,17 +109,25 @@ def assignPayback(month,year):
 
 
 def removeNewLine():
-    all_transacts = getAllTransacts()
-    for action in all_transacts:
-        action.tag = action.tag.rstrip()
-    deleteAllFromTable("transacts")
-    writeTransacts2DB(all_transacts)
+    #all_transacts = getAllTransacts()
+    known_tags = importTable("tags", tags=True)
+    known_tags_new = {}
+    for ref,tag in known_tags.items():
+        known_tags_new[ref.rstrip()] = tag.rstrip()
+        #known_tags.pop(ref)
+    print(known_tags_new)
+    #deleteAllFromTable("tags")
+    writeTags(known_tags_new)
+
+
 
 
 def main():
     #for i in range(1,8):
      #assignPayback(,2021)
-    cleaner()
+    #cleaner()
+    file = "/Users/lorisschmit1/Movements/Export_Card_Mouvements.csv"
+    importNewFile(file)
 
 if __name__ == '__main__':
     main()

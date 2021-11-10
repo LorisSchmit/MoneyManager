@@ -19,24 +19,24 @@ def printAction(action):
 def tag(transacts):
     for action in transacts:
         tag_found = False
-        for ref in known_tags:
-            if action.recipient.lower().find(ref.lower()) != -1:
-                tag = known_tags[ref]
+        for known_ref in known_tags:
+            if action.recipient.lower().find(known_ref.lower()) != -1:
+                tag = known_tags[known_ref]
                 tag_found = True
                 break
         if not tag_found:
             printAction(action)
             print("Tag: ")
             tag = sys.stdin.readline()
-            tag = tag.rstrip()
+            tag = tag.strip().rstrip()
             default = action.recipient
             print("Default reference is: ", default)
             print("Save as: ")
-            ref = str(sys.stdin.readline() or default)
+            ref = str(sys.stdin.readline().rstrip() or default)
             if ref != "none":
-                known_tags[ref] = tag.rstrip()
+                known_tags[ref] = tag.strip().rstrip()
         if tag != "none":
-            action.tag = tag.rstrip()
+            action.tag = tag.strip().rstrip()
             writeTags(known_tags)
         else:
             transacts.remove(action)

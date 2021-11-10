@@ -276,7 +276,7 @@ def executeCreateSingleMonth(month,year):
 
 if __name__ == '__main__':
     #monthsPerYear(2019)
-    month = Month(8, 2021)
+    month = Month(10, 2021)
     month.createGraph()
     month.createBalanceSheet()
     print(month.budget)
