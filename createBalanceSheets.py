@@ -26,11 +26,10 @@ home = str(Path.home())
 
 def drawPDF(month_obj):
     file_name = home + "/Balance Sheets/"+str(month_obj.year_no)+"/"+str(month_obj.year_no)+"-"+str(month_obj.month)+".pdf"
-
     image_path = "Graphs/"+str(month_obj.year_no)+" - "+str(month_obj.month)+".png"
     document_title = str(month_obj.month)+" "+str(month_obj.year_no)
     title = month_obj.month_name + " " + str(month_obj.year_no)
-    total_spent = month_obj.total
+    total_spent = month_obj.total_spent
 
     pdf = canvas.Canvas(file_name)
 

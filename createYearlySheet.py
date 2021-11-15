@@ -25,7 +25,7 @@ def createPDF(year):
 
     # Page 1
 
-    drawImage(graph_path_expenses, pdf, 0, 450, 0.7 )
+    drawImage(graph_path_expenses, pdf, 0, 450, 1)
 
     pdf.setFont("Helvetica-Bold", 30)
     pdf.drawCentredString(300, 790, title)
@@ -40,12 +40,12 @@ def createPDF(year):
 
     #Page 2
 
-    drawImage(graph_path_budget, pdf, -25, 510, 0.45)
+    drawImage(graph_path_budget, pdf, -25, 510, 0.7 )
     pdf.drawString(80, 430, "Budget: " + str(budget) + " €")
 
 
     pdf.line(50, 165, 530, 165)
-    drawBalanceTable(pdf, budget, total_spent, year.payback, 50, 50)
+    drawBalanceTable(pdf, budget, -total_spent, year.payback, 50, 50)
 
 
     pdf.save()

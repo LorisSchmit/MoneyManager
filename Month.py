@@ -4,13 +4,8 @@ import plotly.graph_objects as go
 from commonFunctions import weekNumberToDates
 from createBalanceSheets import drawPDF
 import threading
-import matplotlib.pyplot as plt
-import collections
-import numpy as np
-from matplotlib.colors import LinearSegmentedColormap
 from test_pdf import PdfImage
-import matplotlib.colors as mcolors
-from Year import Year
+from Year import *
 
 
 class Month(Year):
@@ -18,18 +13,17 @@ class Month(Year):
         self.month = month
         self.month_name = self.monthNumberToMonthName()
         self.year_no = year
-        #self.year = Year.Year(self.year_no)
         self.all_transacts = getAllTransacts()
-        self.transacts = self.getMonthlyTransacts(self.all_transacts)
-        self.lean_transacts = self.getLeanTransacts()
+        self.monthly_transacts = self.getMonthlyTransacts(self.all_transacts)
+        self.lean_transacts = self.getLeanTransacts(self.monthly_transacts)
         self.yearly_transacts = self.getYearlyTransacts()
-        if len(self.transacts)>0:
-            self.tags = self.perTag()
-            self.total = self.getTotalSpent()
+        if len(self.monthly_transacts) > 0:
+            self.tags = self.perTag()[0]
+            self.total_spent = self.getTotalSpent(self.monthly_transacts)
             if projection and self.year_no >= datetime.now().year:
                 self.projections = importTable("budget_projection")
-            self.budget = self.getBudget(projection=projection)
-            self.max = self.biggestTag()[1]
+            self.budget = self.getMonthlyBudget(projection=projection)
+            self.max = self.biggestTag(self.tags)[1]
             self.weeks = self.perWeek()
             self.pbs = self.getPayBacks()
             self.pbs_tags = self.paybackPerTag()
@@ -46,53 +40,15 @@ class Month(Year):
                 monthly_transacts.append(action)
         return monthly_transacts
 
-    def getIncome(self):
-        total = 0
-        for action in self.transacts:
-            if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Einkommen":
-                total += action.amount
-        return total
 
-    def getTotalSpent(self):
-        tot = 0
-        for action in self.transacts:
-            if action.tag != "Einkommen" and action.amount < 0 and action.tag != "Kapitaltransfer":
-                tot += action.amount
-        return round(tot, 2)
-
-    def getLeanTransacts(self):
-        lean_transacts = []
-        for action in self.transacts:
-            if action.tag != "Einkommen" and action.tag != "Kapitaltransfer":
-                lean_transacts.append(action)
-        return lean_transacts
-
-    def getYearlyTransacts(self):
-        start = datetime(self.year_no, 1, 1)
-        end = datetime(self.year_no+1, 1, 1)
-        yearly_transacts = []
-        for action in self.all_transacts:
-            if action.date >= start and action.date < end:
-                yearly_transacts.append(action)
-        return yearly_transacts
-
-    def getBudget(self,projection=True):
-        yearly_budget = 0
-        if projection and self.year_no >= datetime.now().year:
-            for proj in self.projections:
-                yearly_budget += proj["amount"]
-        else:
-            yearly_budget = 0
-            for action in self.yearly_transacts:
-                if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
-                    yearly_budget += action.amount
-
-        budget = round(yearly_budget/12.0,2)
-        return budget
+    def getMonthlyBudget(self,projection=True):
+        yearly_budget = self.getYearlyBudget(self)
+        monthly_budget = round(yearly_budget/12.0,2)
+        return monthly_budget
 
     def getPayBacks(self):
         pbs = []
-        for action in self.transacts:
+        for action in self.monthly_transacts:
             if action.tag == "Rückzahlung":
                 pbs.append(action)
         return pbs
@@ -102,49 +58,9 @@ class Month(Year):
                   'November', 'Dezember']
         return months[self.month-1]
 
-    def perTag(self):
-        tags_temp = {}
-        tags = {}
-        truth_table = []
-        #for act in self.transacts:
-           # print(act.tag)
-        for el in self.lean_transacts:
-            truth_table.append(True)
-        for i in range(0, len(self.lean_transacts)):
-            if truth_table[i]:
-                tot = self.lean_transacts[i].amount
-                tag = self.lean_transacts[i].tag
-                for j in range(i + 1, len(self.lean_transacts)):
-                    if self.lean_transacts[i].tag == self.lean_transacts[j].tag and truth_table[j]:
-                        tot += self.lean_transacts[j].amount
-                        truth_table[j] = False
-                tot = -round(tot, 2)
-                tags_temp[tag.rstrip()] = tot
-        rest = 0
-        for tag in tags_temp:
-            if tags_temp[tag] >= 20:
-                tags[tag.rstrip()] = tags_temp[tag]
-            elif tag.find("Rückzahlung") != -1:
-                tags[tag.rstrip()] = tags_temp[tag]
-            elif tags_temp[tag] > 0:
-                rest += float(tags_temp[tag.rstrip()])
-        rest = round(rest, 2)
-        tags['Rest'] = rest
-        tags = collections.OrderedDict(sorted(tags.items(), key=lambda x: x[1]))
-        return tags
-
-    def biggestTag(self):
-        max_key = next(iter(self.tags))
-        max = self.tags[max_key]
-        for tag in self.tags:
-            if self.tags[tag] > max:
-                max_key = tag
-                max = self.tags[tag]
-        return (max_key, max)
-
     def paybackPerTag(self):
         in_advances = {}
-        for action in self.transacts:
+        for action in self.monthly_transacts:
             if type(action.pb_assign) is list:
                 if len(action.pb_assign) > 0:
                     tag = action.tag
@@ -159,7 +75,6 @@ class Month(Year):
         pbs_labels.append("  ")
         pbs_values = []
         pbs_values.extend(in_advances.values())
-        #pbs_values.append(-self.total - in_advances["Ausflug"])
         in_advances = collections.OrderedDict(sorted(in_advances.items(), key=lambda x: x[1]))
         pbs_pie_dict = collections.OrderedDict()
         tags = self.tags.copy()
@@ -167,8 +82,12 @@ class Month(Year):
             tags.pop("Rückzahlung")
             for key,value in tags.items():
                 if key in in_advances:
-                    pbs_pie_dict[key] = in_advances[key]
-                    pbs_pie_dict[key+" fillup"] = round(value - in_advances[key],2)
+                    if value >= in_advances[key]:
+                        pbs_pie_dict[key] = in_advances[key]
+                        pbs_pie_dict[key+" fillup"] = round(value - in_advances[key], 2)
+                    else:
+                        pbs_pie_dict[key] = value
+                        pbs_pie_dict[key+" fillup"] = 0
                 else:
                     pbs_pie_dict[key+" fillup"] = value
         return pbs_pie_dict
@@ -193,13 +112,13 @@ class Month(Year):
         return weeks
 
     def createGraph(self):
-        if len(self.transacts) > 0:
+        if len(self.monthly_transacts) > 0:
             font_size = 12
             labels = list(self.tags.keys())
             values = list(self.tags.values())
             pb_exist = False
             if "Rückzahlung" in labels:
-                #pb_exist = True
+                pb_exist = True
                 pb_ind = labels.index("Rückzahlung")
                 labels.pop(pb_ind)
                 values.pop(pb_ind)
@@ -207,7 +126,7 @@ class Month(Year):
                 pbs_values = list(pbs_pie_dict.values())
                 pbs_labels = list(pbs_pie_dict.keys())
 
-            rot_fact = (3 / 8 - self.max / self.total) * 8 * 55
+            rot_fact = (3 / 8 - self.max / self.total_spent) * 8 * 55
             if rot_fact < 0:
                 rot_fact = 0
             if rot_fact > 360:
@@ -252,7 +171,7 @@ class Month(Year):
 
 
     def createBalanceSheet(self):
-        if len(self.transacts) > 0:
+        if len(self.monthly_transacts) > 0:
             drawPDF(self)
 
 def monthsPerYear(year):
@@ -275,10 +194,10 @@ def executeCreateSingleMonth(month,year):
 
 
 if __name__ == '__main__':
-    #monthsPerYear(2019)
-    month = Month(10, 2021)
-    month.createGraph()
-    month.createBalanceSheet()
-    print(month.budget)
+    monthsPerYear(2021)
+    #month = Month(4, 2021)
+    #month.createGraph()
+    #month.createBalanceSheet()
+    #print(month.budget)
 
 
