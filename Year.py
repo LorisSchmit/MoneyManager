@@ -31,7 +31,7 @@ class Year:
 
     def getTotalSpent(self,transacts):
         tot = 0
-        for action in transacts:
+        for id,action in transacts.items():
             if action.tag != "Einkommen" and action.amount < 0 and action.tag != "Kapitaltransfer":
                 tot += action.amount
         return round(tot, 2)
@@ -43,14 +43,14 @@ class Year:
                 yearly_budget += proj["amount"]
         else:
             yearly_budget = 0
-            for action in self.yearly_transacts:
+            for id,action in self.yearly_transacts.items():
                 if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
                     yearly_budget += action.amount
         return round(yearly_budget,2)
 
     def getPayback(self):
         total = 0
-        for action in self.yearly_transacts:
+        for id,action in self.yearly_transacts.items():
             if action.tag == "Rückzahlung":
                 total += action.amount
         return round(total,2)
@@ -58,46 +58,44 @@ class Year:
     def getYearlyTransacts(self):
         start = datetime(self.year_no, 1, 1)
         end = datetime(self.year_no+1, 1, 1)
-        yearly_transacts = []
-        for action in self.all_transacts:
+        yearly_transacts = {}
+        for id,action in self.all_transacts.items():
             if action.date >= start and action.date < end:
-                yearly_transacts.append(action)
+                yearly_transacts[id] = action
         return yearly_transacts
 
     def getLeanTransacts(self,transacts):
-        lean_transacts = []
-        for action in transacts:
+        lean_transacts = {}
+        for id,action in transacts.items():
             if action.tag != "Einkommen" and action.tag != "Kapitaltransfer":
-                lean_transacts.append(action)
+                lean_transacts[id] = action
         return lean_transacts
 
     def getIncomeTransacts(self):
-        income_transacts = []
-        for action in self.yearly_transacts:
+        income_transacts = {}
+        for id,action in self.yearly_transacts.items():
             if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
-                income_transacts.append(action)
+                income_transacts[id] = action
         return income_transacts
 
     def perTag(self):
         tags_temp = {}
         tags = {}
         tags_shortened = {}
-        truth_table = []
-        for el in self.lean_transacts:
-            truth_table.append(True)
-        for i in range(0, len(self.lean_transacts)):
-            if truth_table[i]:
-                tot = self.lean_transacts[i].amount
-                tag = self.lean_transacts[i].tag
-                for j in range(i + 1, len(self.lean_transacts)):
-                    if self.lean_transacts[i].tag == self.lean_transacts[j].tag and truth_table[j]:
-                        tot += self.lean_transacts[j].amount
-                        truth_table[j] = False
-                tot = -round(tot, 2)
-                tags_temp[tag] = tot
+
+        for id,action in self.lean_transacts.items():
+            tot = action.amount
+            tag = action.tag
+            if tag not in tags_temp.keys():
+                tags_temp[tag] = 0
+            tags_temp[tag] += tot
+
+        for tag,value in tags_temp.items():
+            tags_temp[tag] = -round(value, 2)
+
         rest = 0
         rest_shortened = 0
-        for tag in tags_temp:
+        for tag,value in tags_temp.items():
             if tags_temp[tag] >= 20:
                 tags[tag.rstrip()] = tags_temp[tag]
             elif tag == "Rückzahlung":
@@ -263,5 +261,5 @@ def createYearlySheet(year):
     createPDF(year)
 
 if __name__ == '__main__':
-    year = Year(2021 )
+    year = Year(2021)
     createYearlySheet(year)

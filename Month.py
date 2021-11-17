@@ -34,10 +34,10 @@ class Month(Year):
             end = datetime(self.year_no, self.month + 1, 1)
         else:
             end = datetime(self.year_no + 1, 1, 1)
-        monthly_transacts = []
-        for action in transacts:
+        monthly_transacts = {}
+        for id,action in transacts.items():
             if action.date >= start and action.date < end:
-                monthly_transacts.append(action)
+                monthly_transacts[id] = action
         return monthly_transacts
 
 
@@ -48,7 +48,7 @@ class Month(Year):
 
     def getPayBacks(self):
         pbs = []
-        for action in self.monthly_transacts:
+        for id,action in self.monthly_transacts.items():
             if action.tag == "Rückzahlung":
                 pbs.append(action)
         return pbs
@@ -60,14 +60,14 @@ class Month(Year):
 
     def paybackPerTag(self):
         in_advances = {}
-        for action in self.monthly_transacts:
+        for id,action in self.monthly_transacts.items():
             if type(action.pb_assign) is list:
                 if len(action.pb_assign) > 0:
                     tag = action.tag
                     if not (tag in in_advances):
                         in_advances[tag] = 0
                     for pb_assign in action.pb_assign:
-                        in_advances[tag] += self.all_transacts[pb_assign-1].amount
+                        in_advances[tag] += self.all_transacts[pb_assign].amount
 
                     in_advances[tag] = round(in_advances[tag], 2)
         pbs_labels = []
@@ -94,10 +94,10 @@ class Month(Year):
 
     def perWeek(self):
         weeks = {}
-        date = self.lean_transacts[0].date
+        date = min(action.date for action in self.lean_transacts.values())
         week_number0 = date.isocalendar()[1]
         tot = 0
-        for action in self.lean_transacts:
+        for id,action in self.lean_transacts.items():
             date = action.date
             week_number = date.isocalendar()[1]
             if week_number == week_number0:
@@ -195,7 +195,7 @@ def executeCreateSingleMonth(month,year):
 
 if __name__ == '__main__':
     monthsPerYear(2021)
-    #month = Month(4, 2021)
+    #month = Month(8, 2021)
     #month.createGraph()
     #month.createBalanceSheet()
     #print(month.budget)

@@ -17,7 +17,7 @@ def getAllTransacts():
     conn = create_connection(db_file)
     with conn:
         transacts_temp = fetchAllTransacts(conn)
-    transacts = []
+    transacts = {}
     for action in transacts_temp:
         if action[9] is None:
             pb_assign = []
@@ -26,7 +26,8 @@ def getAllTransacts():
                 pb_assign = []
             else:
                 pb_assign = ast.literal_eval(action[9])
-        transacts.append(Transaction(action[0],datetime.fromtimestamp(action[1]),action[2],action[3],action[4],action[5],action[6],action[7],accountsLookup(action[8]),pb_assign))
+        id = action[0]
+        transacts[id] = Transaction(id,datetime.fromtimestamp(action[1]),action[2],action[3],action[4],action[5],action[6],action[7],accountsLookup(action[8]),pb_assign)
     return transacts
 
 def writeTransacts2DB(transacts):
