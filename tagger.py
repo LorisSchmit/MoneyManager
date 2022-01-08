@@ -17,7 +17,7 @@ def printAction(action):
     print(action.date.strftime("%d/%m/%Y")+": "+action.recipient+" "+action.reference+" Amount: "+str(action.amount))
 
 def tag(transacts):
-    for action in transacts:
+    for id,action in transacts.items():
         tag_found = False
         for known_ref in known_tags:
             if action.recipient.lower().find(known_ref.lower()) != -1:

@@ -4,10 +4,14 @@ from datetime import datetime
 from Account import accountsLookup
 from pathlib import Path
 import ast
+from collections import OrderedDict
+from shutil import copyfile
+
+
 
 
 def object2list(action):
-    l = [int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name,str(action.pb_assign)]
+    l = [action.id,int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name,str(action.pb_assign)]
     return l
 
 
@@ -17,7 +21,7 @@ def getAllTransacts():
     conn = create_connection(db_file)
     with conn:
         transacts_temp = fetchAllTransacts(conn)
-    transacts = {}
+    transacts = OrderedDict()
     for action in transacts_temp:
         if action[9] is None:
             pb_assign = []
@@ -35,7 +39,7 @@ def writeTransacts2DB(transacts):
     db_file = home + "/Documents/db.db"
     conn = create_connection(db_file)
     data = []
-    for action in transacts:
+    for id,action in transacts.items():
         data.append(object2list(action))
     with conn:
         writeMany(conn,data)

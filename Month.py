@@ -34,7 +34,7 @@ class Month(Year):
             end = datetime(self.year_no, self.month + 1, 1)
         else:
             end = datetime(self.year_no + 1, 1, 1)
-        monthly_transacts = {}
+        monthly_transacts = OrderedDict()
         for id,action in transacts.items():
             if action.date >= start and action.date < end:
                 monthly_transacts[id] = action
@@ -63,20 +63,21 @@ class Month(Year):
         for id,action in self.monthly_transacts.items():
             if type(action.pb_assign) is list:
                 if len(action.pb_assign) > 0:
-                    tag = action.tag
-                    if not (tag in in_advances):
-                        in_advances[tag] = 0
-                    for pb_assign in action.pb_assign:
-                        in_advances[tag] += self.all_transacts[pb_assign].amount
+                    if action.pb_assign[0] != -1:
+                        tag = action.tag
+                        if not (tag in in_advances):
+                            in_advances[tag] = 0
+                        for pb_assign in action.pb_assign:
+                            in_advances[tag] += self.all_transacts[pb_assign].amount
 
-                    in_advances[tag] = round(in_advances[tag], 2)
+                        in_advances[tag] = round(in_advances[tag], 2)
         pbs_labels = []
         pbs_labels.extend(in_advances.keys())
         pbs_labels.append("  ")
         pbs_values = []
         pbs_values.extend(in_advances.values())
-        in_advances = collections.OrderedDict(sorted(in_advances.items(), key=lambda x: x[1]))
-        pbs_pie_dict = collections.OrderedDict()
+        in_advances = OrderedDict(sorted(in_advances.items(), key=lambda x: x[1]))
+        pbs_pie_dict = OrderedDict()
         tags = self.tags.copy()
         if "Rückzahlung" in tags:
             tags.pop("Rückzahlung")

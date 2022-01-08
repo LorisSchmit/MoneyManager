@@ -1,7 +1,6 @@
 from database_api import *
 import plotly.graph_objects as go
 from createYearlySheet import *
-import collections
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
@@ -58,21 +57,21 @@ class Year:
     def getYearlyTransacts(self):
         start = datetime(self.year_no, 1, 1)
         end = datetime(self.year_no+1, 1, 1)
-        yearly_transacts = {}
+        yearly_transacts = OrderedDict()
         for id,action in self.all_transacts.items():
             if action.date >= start and action.date < end:
                 yearly_transacts[id] = action
         return yearly_transacts
 
     def getLeanTransacts(self,transacts):
-        lean_transacts = {}
+        lean_transacts = OrderedDict()
         for id,action in transacts.items():
             if action.tag != "Einkommen" and action.tag != "Kapitaltransfer":
                 lean_transacts[id] = action
         return lean_transacts
 
     def getIncomeTransacts(self):
-        income_transacts = {}
+        income_transacts = OrderedDict()
         for id,action in self.yearly_transacts.items():
             if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
                 income_transacts[id] = action
@@ -112,8 +111,8 @@ class Year:
         rest = round(rest, 2)
         tags['Rest'] = rest
         tags_shortened['Rest'] = rest_shortened
-        tags = collections.OrderedDict(sorted(tags.items(), key=lambda x: x[1]))
-        tags_shortened = collections.OrderedDict(sorted(tags_shortened.items(), key=lambda x: x[1]))
+        tags = OrderedDict(sorted(tags.items(), key=lambda x: x[1]))
+        tags_shortened = OrderedDict(sorted(tags_shortened.items(), key=lambda x: x[1]))
         return tags,tags_shortened
 
     def biggestTag(self,tags):
@@ -138,7 +137,7 @@ class Year:
             for cat in income_tags.values():
                 data_temp[cat] = 0
             data_temp["Rest"] = 0
-            for action in self.income_transacts:
+            for id,action in self.income_transacts.items():
                 for ref in income_tags:
                     tag_found = False
                     if action.recipient.lower().find(ref.lower()) != -1:
