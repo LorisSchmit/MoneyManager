@@ -9,7 +9,7 @@ import threading
 
 def on_created(event):
     file = event.src_path
-    if (file.find("Export_Mouvements") >= 0 or file.find("Umsaetze") >= 0 or file.find("MSR") >= 0 or file.find("Export_Card") >= 0)  and file.find("imported") == -1:
+    if (file.find("Export_Mouvements") >= 0 or file.find("Umsaetze") >= 0 or file.find("MSR") >= 0 or file.find("WLEC") >= 0 or file.find("Export_Card") >= 0)  and file.find("imported") == -1:
         print("New File detected : " + file)
         importNewFile(file)
         ind = file.rfind("/")
