@@ -47,6 +47,8 @@ def writeTransacts2DB(transacts):
 def deleteAllFromTable(table):
     home = str(Path.home())
     db_file = home + "/Documents/db.db"
+    db_file_backup = home + "/Documents/db_backup.db"
+    copyfile(db_file, db_file_backup)
     conn = create_connection(db_file)
     with conn:
         deleteAll(conn,table)
