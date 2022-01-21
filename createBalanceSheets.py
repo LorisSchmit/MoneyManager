@@ -75,7 +75,6 @@ def drawPDF(month_obj):
 def drawImage(image_path,pdf,x,y,scale):
     drawing = svg2rlg(image_path)
     drawing.scale(scale,scale)
-    print("post-render")
 
     renderPDF.draw(drawing, pdf, x,y)
 

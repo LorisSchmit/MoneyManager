@@ -23,10 +23,10 @@ class Year:
         self.budget = self.getYearlyBudget(projection=projection)
         self.budget_tagged = self.analyzeBudget(projection=projection)
         tags = self.perTag()
-        self.tags = tags[0]
-        self.tags_shortened = tags[1]
+        self.tags = tags
         self.max = self.biggestTag(self.tags)[1]
         self.payback = self.getPayback()
+        self.perMonth = self.perMonth()
 
 
     def getTotalSpent(self,transacts):
@@ -103,18 +103,50 @@ class Year:
             elif tags_temp[tag] > 0:
                 rest += float(tags_temp[tag.rstrip()])
 
-            if tags_temp[tag] >= 200:
-                tags_shortened[tag.rstrip()] = tags_temp[tag]
-            elif tag == "Rückzahlung":
-                tags_shortened[tag] = tags_temp[tag]
-            elif tags_temp[tag] > 0:
-                rest_shortened += float(tags_temp[tag.rstrip()])
         rest = round(rest, 2)
         tags['Rest'] = rest
-        tags_shortened['Rest'] = rest_shortened
-        tags = OrderedDict(sorted(tags.items(), key=lambda x: x[1]))
-        tags_shortened = OrderedDict(sorted(tags_shortened.items(), key=lambda x: x[1]))
-        return tags,tags_shortened
+        tags_temp = {}
+        for tag,value in tags.items():
+            if value >= 1:
+                tags_temp[tag] = value
+        tags = OrderedDict(sorted(tags_temp.items(), key=lambda x: x[1]))
+
+        return tags
+
+    def paybackPerTag(self):
+        in_advances = {}
+        for id,action in self.yearly_transacts.items():
+            if type(action.pb_assign) is list:
+                if len(action.pb_assign) > 0:
+                    if action.pb_assign[0] != -1:
+                        tag = action.tag
+                        if not (tag in in_advances):
+                            in_advances[tag] = 0
+                        for pb_assign in action.pb_assign:
+                            in_advances[tag] += self.all_transacts[pb_assign].amount
+
+                        in_advances[tag] = round(in_advances[tag], 2)
+        pbs_labels = []
+        pbs_labels.extend(in_advances.keys())
+        pbs_labels.append("  ")
+        pbs_values = []
+        pbs_values.extend(in_advances.values())
+        in_advances = OrderedDict(sorted(in_advances.items(), key=lambda x: x[1]))
+        pbs_pie_dict = OrderedDict()
+        tags = self.tags.copy()
+        if "Rückzahlung" in tags:
+            tags.pop("Rückzahlung")
+            for key,value in tags.items():
+                if key in in_advances:
+                    if value >= in_advances[key]:
+                        pbs_pie_dict[key] = in_advances[key]
+                        pbs_pie_dict[key+" fillup"] = round(value - in_advances[key], 2)
+                    else:
+                        pbs_pie_dict[key] = value
+                        pbs_pie_dict[key+" fillup"] = 0
+                else:
+                    pbs_pie_dict[key+" fillup"] = value
+        return pbs_pie_dict
 
     def biggestTag(self,tags):
         max_key = next(iter(tags))
@@ -135,23 +167,17 @@ class Year:
                 data[proj["tag"]] += proj["amount"]
         else:
             data_temp = {}
-            for cat in income_tags.values():
-                data_temp[cat] = 0
-            data_temp["Rest"] = 0
-            for id,action in self.income_transacts.items():
-                for ref in income_tags:
-                    tag_found = False
-                    if action.recipient.lower().find(ref.lower()) != -1:
-                        tag = income_tags[ref]
-                        tag_found = True
-                        break
-                if not tag_found:
-                    tag = "Rest"
-                data_temp[tag] += action.amount
             data = {}
-            for key in data_temp.keys():
-                if data_temp[key] != 0:
-                    data[key] = data_temp[key]
+
+            for id, action in self.income_transacts.items():
+                tot = action.amount
+                tag = action.tag
+                if tag not in data_temp.keys():
+                    data_temp[tag] = 0
+                data_temp[tag] += tot
+
+            for tag, value in data_temp.items():
+                data[tag] = round(value, 2)
         return data
 
 
@@ -189,7 +215,10 @@ class Year:
         cs = [mcolors.rgb2hex(cs(i)) for i in range(cs.N)]
 
         fig, ax = plt.subplots()
-        pie = ax.pie(values, labels=labels, startangle=rot_fact, labeldistance=0.35, textprops={"color": "white", "fontsize": font_size, "rotation_mode": 'anchor', "va": 'center',"ha": 'right'}, rotatelabels=True, colors=cs)
+        pie = ax.pie(values, labels=labels, startangle=rot_fact, labeldistance=0.35,
+                     textprops={"color": "white", "fontsize": font_size, "rotation_mode": 'anchor', "va": 'center',
+                                "ha": 'right'}, rotatelabels=True, colors=cs)
+        fig.savefig("Graphs/Budget" + str(self.year_no) + ".svg", bbox_inches="tight", dpi=1000)
 
     def createExpensesGraph(self):
         labels = list(self.tags_shortened.keys())
@@ -199,14 +228,14 @@ class Year:
         values = list(self.tags.values())
         pb_exist = False
         if "Rückzahlung" in labels:
-            #pb_exist = True
-            pb_exist = False
+            pb_exist = True
+            #pb_exist = False
             pb_ind = labels.index("Rückzahlung")
             labels.pop(pb_ind)
             values.pop(pb_ind)
-            #pbs_pie_dict = self.paybackPerTag()
-            #pbs_values = list(pbs_pie_dict.values())
-            #pbs_labels = list(pbs_pie_dict.keys())
+            pbs_pie_dict = self.paybackPerTag()
+            pbs_values = list(pbs_pie_dict.values())
+            pbs_labels = list(pbs_pie_dict.keys())
 
         rot_fact = (3 / 8 - self.max / self.total_spent) * 8 * 55
         if rot_fact < 0:
@@ -254,10 +283,6 @@ class Year:
             ax.legend(legend_patches, legend_labels, loc="lower left", framealpha=0)
         fig.savefig("Graphs/Expenses" + str(self.year_no) + ".svg",bbox_inches="tight",dpi=1000)
 
-def createYearlySheet(year):
-    year.createBudgetGraph()
-    year.createExpensesGraph()
-    print(year.total_spent)
 
 
     def createBudgetTreemap(self):
@@ -284,8 +309,28 @@ def createYearlySheet(year):
         fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
         fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
         fig.write_image("Graphs/Expenses" + str(self.year_no) + ".svg")
+
+    def perMonth(self,num_top_tags = 5):
+        top_tags_candidates = list(reversed(self.tags.items()))
+        option4top_tags = ["Essen","Bar","Sport","Fahrrad","Auto","Sprit","Transport","Wohnen","Hardware","Drogerie","Amazon","Kleider"]
+        perMonth = OrderedDict()
+        i = 0
+        while len(perMonth.items()) < num_top_tags:
+            tag,value = top_tags_candidates[i]
+            if tag in option4top_tags:
+                perMonth[tag] = round(value/12,2)
+            i += 1
+
+        return perMonth
+
+
+
+def createYearlySheet(year,redraw_graphs=False):
+    if redraw_graphs:
+        year.createBudgetTreemap()
+        year.createExpensesTreemap()
     createPDF(year)
 
 if __name__ == '__main__':
     year = Year(2021)
-    createYearlySheet(year)
+    createYearlySheet(year)#,redraw_graphs=True)
