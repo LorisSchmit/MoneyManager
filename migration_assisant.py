@@ -52,7 +52,7 @@ def cleaner():
     writeTransacts2DB(transacts)
 
 def extractText():
-    pdf_document = "/Users/lorisschmit1/Desktop/7898649_2020_Nr.006_Kontoauszug_vom_30.06.2020_20210211092749.pdf"
+    pdf_document = "/Users/lorisschmit1/Desktop/7898649_2021_Nr.009_Kontoauszug_vom_01.10.2021_20220119062808-unlocked.pdf"
     with open(pdf_document, "rb") as filehandle:
         pdf = PdfFileReader(filehandle)
         info = pdf.getDocumentInfo()
@@ -63,23 +63,34 @@ def extractText():
 
         page1 = pdf.getPage(0)
         #print(page1)
+
         text_extract = page1.extractText()
-        lines = text_extract.split('                                        ')
+        print(text_extract.find("Wert"))
+        text_extract = text_extract[text_extract.find("Wert"):]
+        lines = text_extract.split('\n')
 
         lines = lines[1:]
         transacts = []
         for line in lines:
-            line = line.split('             ')
+            print(line)
+            line = line.replace(" ","")
+            line = line.split("\n")
             temp = []
             for el in line:
                 if el != '':
-                    temp.append(el[1:])
+                    temp.append(el)
             transacts.append(temp)
         for action in transacts:
             print(action)
 
 
-
+def retagIncome():
+    transacts = getAllTransacts()
+    for id,action in transacts.items():
+        if action.tag.find("Einkommen") != -1 and action.reference.find("Argent de poche et repas") != -1:
+            action.tag = "Eltern"
+    deleteAllFromTable("transacts")
+    writeTransacts2DB(transacts)
 
 
 def removeNewLine():
@@ -100,8 +111,10 @@ def main():
     #for i in range(1,8):
      #assignPayback(,2021)
     #cleaner()
-    file = "/Users/lorisschmit1/Movements/Export_Card_Mouvements.csv"
-    importNewFile(file)
+    #file = "/Users/lorisschmit1/Movements/Export_Card_Mouvements.csv"
+    #importNewFile(file)
+    retagIncome()
+    #extractText()
 
 if __name__ == '__main__':
     main()

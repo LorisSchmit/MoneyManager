@@ -14,6 +14,10 @@ def object2list(action):
     l = [action.id,int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name,str(action.pb_assign)]
     return l
 
+def displayTransact(action):
+    l = [action.id, action.date, action.type, action.recipient, action.reference, str(action.amount),
+         action.currency, action.tag, action.account.name, str(action.pb_assign)]
+    return l
 
 def getAllTransacts():
     home = str(Path.home())
