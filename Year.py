@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 import numpy as np
-
+import squarify
+import plotly.express as px
 
 income_tags = importTable("income_tags",tags=True)
 
@@ -257,6 +258,32 @@ def createYearlySheet(year):
     year.createBudgetGraph()
     year.createExpensesGraph()
     print(year.total_spent)
+
+
+    def createBudgetTreemap(self):
+        print("Drawing budget treemap for",self.year_no)
+        labels = list(self.budget_tagged.keys())
+        values = list(self.budget_tagged.values())
+        parents = ["" for _ in range(len(labels))]
+        fig = px.treemap(names=labels,values=values,parents=parents,width=510,height=400)#,color=cs)
+        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+        fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
+        fig.write_image("Graphs/Budget" + str(self.year_no) + ".svg")
+
+
+    def createExpensesTreemap(self):
+        print("Drawing expenses treemap for",self.year_no)
+        labels = list(self.tags.keys())
+        values = list(self.tags.values())
+        if "Rückzahlung" in labels:
+            pb_ind = labels.index("Rückzahlung")
+            labels.pop(pb_ind)
+            values.pop(pb_ind)
+        parents = ["" for _ in range(len(labels))]
+        fig = px.treemap(names=labels,values=values,parents=parents,width=510,height=710)#,color=cs)
+        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+        fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
+        fig.write_image("Graphs/Expenses" + str(self.year_no) + ".svg")
     createPDF(year)
 
 if __name__ == '__main__':
