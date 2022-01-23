@@ -6,7 +6,7 @@ from reportlab.lib import colors
 from operator import itemgetter
 from pathlib import Path
 
-def createPDF(year):
+def createPDF(year,pre_year):
     print("Drawing yearly sheet for",year.year_no)
     home = str(Path.home())
     file_name = home+"/Balance Sheets/Yearly Sheet"+str(year.year_no)+".pdf"
@@ -18,6 +18,7 @@ def createPDF(year):
     title = "Balance Sheet "+str(year.year_no)
 
     total_spent = -year.total_spent
+    pers_spent = -year.pers_spent
     budget = year.budget
 
     pdf = canvas.Canvas(file_name)
@@ -32,7 +33,7 @@ def createPDF(year):
     pdf.drawCentredString(300, 790, title)
 
     pdf.setFont("Helvetica-Bold", 18)
-    pdf.drawString(50, 50, "Gesamtausgaben: " + str(total_spent) + " €")
+    pdf.drawString(50, 50, "Gesamtausgaben (ohne Vorauszahlungen): " + str(pers_spent) + " €")
 
     pdf.showPage()
 
@@ -40,7 +41,7 @@ def createPDF(year):
 
     drawCategoryTable(pdf, year.tags,x=50,y=775)
 
-    drawPerMonthTable(pdf, year.perMonth, x=50, y=280)
+    drawPerMonthTable(pdf, year, x=50, y=275)
 
     pdf.showPage()
 
@@ -54,7 +55,6 @@ def createPDF(year):
     pdf.line(50, 773, 113, 773)
 
     drawBalanceTable(pdf,year, x=50, y=50)
-
 
     pdf.save()
 
@@ -94,7 +94,7 @@ def drawCategoryTable(pdf,tags,x,y,width=500,height=700):
         rowHeights = len(ar) * [row_height]
         colWidths = [col_width_tag,col_width_value]
         for index,element in enumerate(ar):
-            value = str(element[1])+" €"
+            value = "%.2f €"%element[1]
             ar[index][1] = value
             tag = ar[index][0]
             ar[index][0] = tag.replace("\n"," ")
@@ -110,20 +110,21 @@ def drawCategoryTable(pdf,tags,x,y,width=500,height=700):
         t.drawOn(pdf, x+175*index0, y-20-row_height*len(ar))
 
 def drawBalanceTable(pdf, year, x, y):
-    pdf.line(x, y+160, x+480, y+160)
-    spent = -year.total_spent
+    total_spent = -year.total_spent
     budget = year.budget
     payback = year.payback
+    pers_spent = -year.pers_spent
     if "Verkauf" in year.budget_tagged:
         sold = year.budget_tagged["Verkauf"]
     else:
         sold = 0
 
-    data = [['Gesamtausgaben', str(spent) + " €"],
+    data = [['Gesamtausgaben', str(total_spent) + " €"],
+            ['Rückzahlung', str(payback) + " €"],
+            ['Ausgaben ohne Vorauszahlungen', str(pers_spent) + " €"],
             ['Grundeinkommen', str(round(budget-sold,2)) + " €"],
-            ['Verkauf', str(sold) + " €"],
-            ['Rückzahlung', str(payback) + " €"]]
-    balance = round(payback + budget - spent, 2)
+            ['Verkauf', str(sold) + " €"]]
+    balance = round(payback + budget - total_spent, 2)
 
     style = [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
              ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -132,41 +133,41 @@ def drawBalanceTable(pdf, year, x, y):
              ]
     if balance > 0:
         balance_str = "Suffizit"
-        style.append(['BACKGROUND', (0, 4), (1, 4), colors.lightgreen])
+        style.append(['BACKGROUND', (0, 5), (1, 5), colors.lightgreen])
     else:
         balance_str = "Defizit"
-        style.append(['BACKGROUND', (0, 4), (1, 4), colors.rgb2cmyk(255, 150, 110)])
+        style.append(['BACKGROUND', (0, 5), (1, 5), colors.rgb2cmyk(255, 150, 110)])
 
     data.append([balance_str, str(balance) + " €"])
-
-    rowHeights = len(data) * [25]
-    pdf.drawString(x, y + 131, 'Bilanz')
-    pdf.line(x, y + 127, x + 55, y + 127)
+    row_height = 25
+    rowHeights = len(data) * [row_height]
+    pdf.line(x, y + row_height*(len(data)+1)+10, x + 480, y + row_height*(len(data)+1)+10)
+    pdf.drawString(x, y + 6 + row_height*len(data), 'Bilanz')
+    pdf.line(x, y + 4 + row_height*len(data), x + 55, y + 4 + row_height*len(data))
     t = Table(data, rowHeights=rowHeights)
     t.setStyle(TableStyle(style))
     t.wrapOn(pdf, 500, 300)
     t.drawOn(pdf, x, y)
     return t
 
-def drawPerMonthTable(pdf,perMonth,x,y):
+def drawPerMonthTable(pdf,year,x,y):
     pdf.setFont("Helvetica-Bold", 18)
     pdf.drawString(x, y, 'Top Ausgaben pro Monat')
-    pdf.line(x, y - 4, x + 210, y - 4)
-    tag_list = list(perMonth.items())
-    data = []
-    for index, element in tag_list:
-        data.append([index,element])
+    pdf.line(x, y - 2, x + 215, y - 2)
+    perMonth = list(year.perMonth.items())
+    perMonth_pre_year = list(year.perMonth_pre_year.items())
+    data = [["",str(year.year_no),str(year.year_no-1)]]
+    for ((tag,value),(pre_tag,pre_value)) in zip(perMonth,perMonth_pre_year):
+        data.append([tag,value,pre_value])
     row_height = 28
     col_width_tag = 90
     col_width_value = 70
     rowHeights = len(data) * [row_height]
     colWidths = [col_width_tag,col_width_value]
     for index,element in enumerate(data):
-        value = str(element[1])+" €"
-        data[index][1] = value
-        #tag = data[index][0]
-        #data[index][0] = tag.replace("\n"," ")
-
+        if index > 0:
+            data[index][1] = ("%.2f €" % element[1] if element[1] > 0 else "-  €")
+            data[index][2] = ("%.2f €" % element[2] if element[2] > 0 else "-  €")
     t = Table(data, rowHeights=rowHeights,colWidths=colWidths)
     t.setStyle(TableStyle([('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
                                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),

@@ -11,13 +11,14 @@ import plotly.express as px
 income_tags = importTable("income_tags",tags=True)
 
 class Year:
-    def __init__(self,year_no,projection=True):
+    def __init__(self,year_no,projection=True,pre_year=True):
         self.year_no = year_no
         self.all_transacts = getAllTransacts()
         self.yearly_transacts = self.getYearlyTransacts()
         self.income_transacts = self.getIncomeTransacts()
         self.lean_transacts = self.getLeanTransacts(self.yearly_transacts)
         self.total_spent = self.getTotalSpent(self.yearly_transacts)
+
         if projection and self.year_no >= datetime.now().year:
             self.projections = importTable("budget_projection")
         self.budget = self.getYearlyBudget(projection=projection)
@@ -26,7 +27,11 @@ class Year:
         self.tags = tags
         self.max = self.biggestTag(self.tags)[1]
         self.payback = self.getPayback()
-        self.perMonth = self.perMonth()
+        self.pers_spent = round(self.total_spent + self.payback,2)
+        if pre_year:
+            self.pre_year = Year(self.year_no-1,pre_year=False)
+        self.perMonth,self.perMonth_pre_year = self.perMonth(pre_year=pre_year)
+
 
 
     def getTotalSpent(self,transacts):
@@ -81,7 +86,6 @@ class Year:
     def perTag(self):
         tags_temp = {}
         tags = {}
-        tags_shortened = {}
 
         for id,action in self.lean_transacts.items():
             tot = action.amount
@@ -94,7 +98,7 @@ class Year:
             tags_temp[tag] = -round(value, 2)
 
         rest = 0
-        rest_shortened = 0
+
         for tag,value in tags_temp.items():
             if tags_temp[tag] >= 20:
                 tags[tag.rstrip()] = tags_temp[tag]
@@ -229,7 +233,6 @@ class Year:
         pb_exist = False
         if "Rückzahlung" in labels:
             pb_exist = True
-            #pb_exist = False
             pb_ind = labels.index("Rückzahlung")
             labels.pop(pb_ind)
             values.pop(pb_ind)
@@ -310,10 +313,11 @@ class Year:
         fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
         fig.write_image("Graphs/Expenses" + str(self.year_no) + ".svg")
 
-    def perMonth(self,num_top_tags = 5):
+    def perMonth(self,num_top_tags = 8,pre_year=True):
         top_tags_candidates = list(reversed(self.tags.items()))
         option4top_tags = ["Essen","Bar","Sport","Fahrrad","Auto","Sprit","Transport","Wohnen","Hardware","Drogerie","Amazon","Kleider"]
         perMonth = OrderedDict()
+        perMonth["Gesamt"] = round(-self.pers_spent/12,2)
         i = 0
         while len(perMonth.items()) < num_top_tags:
             tag,value = top_tags_candidates[i]
@@ -321,7 +325,15 @@ class Year:
                 perMonth[tag] = round(value/12,2)
             i += 1
 
-        return perMonth
+        perMonth_pre_year = OrderedDict()
+        if pre_year:
+            perMonth_pre_year["Gesamt"] = round(-self.pre_year.pers_spent / 12, 2)
+            for tag,value in list(perMonth.items()):
+                if tag in self.pre_year.tags:
+                    perMonth_pre_year[tag] = round(self.pre_year.tags[tag]/12,2)
+                elif tag != "Gesamt":
+                    perMonth_pre_year[tag] = 0
+        return perMonth,perMonth_pre_year
 
 
 
@@ -329,8 +341,8 @@ def createYearlySheet(year,redraw_graphs=False):
     if redraw_graphs:
         year.createBudgetTreemap()
         year.createExpensesTreemap()
-    createPDF(year)
+    createPDF(year,year.pre_year)
 
 if __name__ == '__main__':
-    year = Year(2021)
+    year = Year(2019)
     createYearlySheet(year)#,redraw_graphs=True)
