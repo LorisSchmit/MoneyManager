@@ -1,0 +1,17 @@
+Improvements:
+ - fix payback assign ✅
+ - Differentiate income (salary, parents, christmas, birthday, sell, ...) ✅
+ - add savings accounts movement from 2018 & 2019 & 2021  ✅
+ - add paybacks assign for 2020 ✅
+ - Year -> Month inheritance ✅
+ - Improve yearly balance sheet (with Treemap for expenses) ✅
+ - fix Matplotlib thread bug
+ - version for other users
+ - radio button for svg/png chart
+ - add per month expense for common categories & comparison to last year ✅
+ - add subtag/subcateory (eg. Essen - Restaurant,Einkaufen,...)
+ - remove in advance payments from yearly balance
+
+Add on:
+ - GUI to browse spending
+ - app to browse spending
