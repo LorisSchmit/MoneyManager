@@ -18,7 +18,7 @@ class Month(Year):
         self.lean_transacts = self.getLeanTransacts(self.monthly_transacts)
         self.yearly_transacts = self.getYearlyTransacts()
         if len(self.monthly_transacts) > 0:
-            self.tags = self.perTag()[0]
+            self.tags = self.perTag()
             self.total_spent = self.getTotalSpent(self.monthly_transacts)
             if projection and self.year_no >= datetime.now().year:
                 self.projections = importTable("budget_projection")
