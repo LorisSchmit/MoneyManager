@@ -1,6 +1,8 @@
 from database_api import *
 import readline
 import sys
+from PyQt6.QtWidgets import QTableWidgetItem
+import time
 
 known_tags = importTable("tags",tags=True)
 
@@ -16,8 +18,8 @@ def rlinput(prompt, prefill):
 def printAction(action):
     print(action.date.strftime("%d/%m/%Y")+": "+action.recipient+" "+action.reference+" Amount: "+str(action.amount))
 
-def tag(transacts):
-    for id,action in transacts.items():
+def tag(transacts,gui=None):
+    for i,(id,action) in enumerate(transacts.items()):
         tag_found = False
         for known_ref in known_tags:
             if action.recipient.lower().find(known_ref.lower()) != -1:
@@ -25,19 +27,29 @@ def tag(transacts):
                 tag_found = True
                 break
         if not tag_found:
-            printAction(action)
-            print("Tag: ")
-            tag = sys.stdin.readline()
-            tag = tag.strip().rstrip()
+            gui.taggingTableWidget.setItem(0, 0, QTableWidgetItem(action.date.strftime("%d/%m/%Y")))
+            gui.taggingTableWidget.setItem(0, 1, QTableWidgetItem(action.recipient))
+            gui.taggingTableWidget.setItem(0, 2, QTableWidgetItem(action.reference))
+            gui.taggingTableWidget.setItem(0, 3, QTableWidgetItem(str(action.amount)+" €"))
+            while not gui.tagReady:
+                time.sleep(.01)
+            tag = str(gui.taggingLineEdit.text())
+            gui.tagReady = False
             default = action.recipient
-            print("Default reference is: ", default)
-            print("Save as: ")
-            ref = str(sys.stdin.readline().rstrip() or default)
-            if ref != "none":
+            gui.tagReferenceEdit.setText(str(default))
+            while (not gui.saveTagReady) and (not gui.notSaveTag):
+                time.sleep(.01)
+            if gui.saveTagReady:
+                ref = str(gui.tagReferenceEdit.text())
                 known_tags[ref] = tag.strip().rstrip()
+            gui.saveTagReady = False
+            gui.notSave = False
+        gui.importProgressLabel.setText(" %d von %d Transaktionen importiert" % (i+1, len(transacts)))
+        gui.taggingLineEdit.setText("")
+        gui.tagReferenceEdit.setText("")
         if tag != "none":
             action.tag = tag.strip().rstrip()
-            writeTags(known_tags)
+            #writeTags(known_tags)
         else:
             transacts.remove(action)
 

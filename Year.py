@@ -1,12 +1,11 @@
 from database_api import *
-import plotly.graph_objects as go
 from createYearlySheet import *
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 import numpy as np
-import squarify
 import plotly.express as px
+import threading
 
 income_tags = importTable("income_tags",tags=True)
 
@@ -188,7 +187,6 @@ class Year:
 
     def setProjections(self):
         projections = importTable("budget_projection")
-        print(projections)
         exited = False
         print("Startup of budget projection...")
         while not exited:
@@ -199,7 +197,6 @@ class Year:
                 amount = float(input("Amount?"))
                 tag = input("Tag?")
                 projections.append({"name":name,"amount":amount, "tag":tag})
-        print(projections)
         writeTable("budget_projection", projections)
 
         return 0
@@ -337,12 +334,31 @@ class Year:
 
 
 
-def createYearlySheet(year,redraw_graphs=False):
+def createYearlySheet(year_no,redraw_graphs=False,gui=None):
+    if gui is not None:
+        gui.progressBarLabel.setText("Yearly balance sheet creation started")
+    year = Year(year_no)
+    if gui is not None:
+        gui.yearlySheetCreationProgressBar.setValue(25)
+        gui.progressBarLabel.setText("Drawing budget treemap for "+str(year_no))
     if redraw_graphs:
         year.createBudgetTreemap()
+        if gui is not None:
+            gui.yearlySheetCreationProgressBar.setValue(50)
+            gui.progressBarLabel.setText("Drawing expenses treemap for " +str(year_no))
         year.createExpensesTreemap()
+        if gui is not None:
+            gui.yearlySheetCreationProgressBar.setValue(75)
+            gui.progressBarLabel.setText("Drawing yearly balance sheet for " +str( year_no))
     createPDF(year,year.pre_year)
+    if gui is not None:
+        gui.yearlySheetCreationProgressBar.setValue(100)
+        gui.progressBarLabel.setText("Yearly balance sheet done!")
+
+def executeCreateSingleYear(year,redraw_graphs=False,gui=None):
+    print("Yearly Balance Sheet Creation started")
+    new_thread = threading.Thread(target=createYearlySheet,args=(year,redraw_graphs,gui,))
+    new_thread.start()
 
 if __name__ == '__main__':
-    year = Year(2019)
-    createYearlySheet(year)#,redraw_graphs=True)
+    createYearlySheet(2019)#,redraw_graphs=True)

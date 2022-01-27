@@ -96,13 +96,12 @@ class Importer:
         return last_element, last_index
 
 
-    def joiner(self):
+    def joiner(self,gui=None):
         lastAccountEntry = self.getLastEntry(self.old_transacts,account=self.account)
         first_new_index = 0
         new_transacts = OrderedDict()
-        print(list(self.new_transacts.items())[-1])
-        if lastAccountEntry[0].date > list(self.new_transacts.items())[-1][1].date:
-            print("all transactions already imported")
+        if lastAccountEntry[0].date >= list(self.new_transacts.items())[-1][1].date:
+            gui.importProgressLabel.setText("Alle Transaktionen bereits importiert")
             return 0
         else:
             for index,action in self.new_transacts.items():
@@ -118,7 +117,7 @@ class Importer:
             new_action.id = new_id
             new_transacts_reindexed[new_id] = new_action
         new_transacts = new_transacts_reindexed
-        new_transacts = tag(new_transacts)
+        new_transacts = tag(new_transacts,gui)
         joined_transacts = self.old_transacts
         for id,action in new_transacts.items():
             joined_transacts[id] = action
@@ -154,9 +153,9 @@ def displayTransacts(transacts):
     for action in transacts:
         print(action.__dict__)
 
-def importNewFile(file):
+def importNewFile(file,gui=None):
     importer = Importer(file)
-    importer.joiner()
+    importer.joiner(gui)
 
 if __name__ == '__main__':
     file = "/Users/lorisschmit1/Movements/WLEC3J2ALW5XJ-CSR-20211201000000-20211231235959-20220101074559.CSV"

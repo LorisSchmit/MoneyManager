@@ -62,7 +62,6 @@ def drawPDF(month_obj):
         payback = -month_obj.tags["Rückzahlung"]
     except KeyError:
         payback = 0
-        print(month_obj.tags)
     drawBalanceTable(pdf,month_obj.budget,-total_spent,payback,50,75)
 
     pdf.setFont("Helvetica-Bold", 22)

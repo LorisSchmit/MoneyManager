@@ -4,7 +4,6 @@ import plotly.graph_objects as go
 from commonFunctions import weekNumberToDates
 from createBalanceSheets import drawPDF
 import threading
-from test_pdf import PdfImage
 from Year import *
 
 
@@ -15,6 +14,7 @@ class Month(Year):
         self.year_no = year
         self.all_transacts = getAllTransacts()
         self.monthly_transacts = self.getMonthlyTransacts(self.all_transacts)
+        self.monthly_transacts_count = len(self.monthly_transacts)
         self.lean_transacts = self.getLeanTransacts(self.monthly_transacts)
         self.yearly_transacts = self.getYearlyTransacts()
         if len(self.monthly_transacts) > 0:
