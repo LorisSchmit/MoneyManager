@@ -2,19 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d7e51b9a-e878-4fc1-b09f-21ba0fd5ccc2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Account.py" beforeDir="false" afterPath="$PROJECT_DIR$/Account.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Money Manager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Month.py" beforeDir="false" afterPath="$PROJECT_DIR$/Month.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Year.py" beforeDir="false" afterPath="$PROJECT_DIR$/Year.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/createBalanceSheets.py" beforeDir="false" afterPath="$PROJECT_DIR$/createBalanceSheets.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/import_automation.py" beforeDir="false" afterPath="$PROJECT_DIR$/import_automation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/importer.py" beforeDir="false" afterPath="$PROJECT_DIR$/importer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/piechart_drawer.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/pyqt/mm_gui.ui" beforeDir="false" afterPath="$PROJECT_DIR$/pyqt/mm_gui.ui" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyqt/pyqt_gui.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tagger.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyqt/statement_detection.ui" beforeDir="false" afterPath="$PROJECT_DIR$/pyqt/statement_detection.ui" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -43,7 +35,7 @@
         <entry file="file://$PROJECT_DIR$/Year.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-75">
-              <caret line="7" column="16" lean-forward="true" selection-start-line="7" selection-start-column="16" selection-end-line="7" selection-end-column="16" />
+              <caret line="7" column="16" selection-start-line="7" selection-start-column="16" selection-end-line="7" selection-end-column="16" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
               </folding>
@@ -54,8 +46,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="559">
-              <caret line="194" column="39" selection-start-line="194" selection-start-column="39" selection-end-line="194" selection-end-column="39" />
+            <state relative-caret-position="582">
+              <caret line="73" column="59" selection-start-line="73" selection-start-column="59" selection-end-line="73" selection-end-column="59" />
               <folding>
                 <element signature="e#0#156#0" expanded="true" />
               </folding>
@@ -64,13 +56,49 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/enum.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="210">
+              <caret line="308" selection-start-line="308" selection-end-line="308" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/re.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="210">
+              <caret line="182" selection-start-line="182" selection-end-line="182" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Account.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="611">
-              <caret line="67" column="33" selection-start-line="67" selection-start-column="33" selection-end-line="67" selection-end-column="33" />
+            <state relative-caret-position="414">
+              <caret line="65" selection-start-line="65" selection-end-line="65" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/genericpath.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="465">
+              <caret line="32" selection-start-line="32" selection-end-line="32" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/pathlib.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="210">
+              <caret line="703" selection-start-line="703" selection-end-line="703" />
             </state>
           </provider>
         </entry>
@@ -82,30 +110,6 @@
               <caret line="8" column="1" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
               <folding>
                 <element signature="e#0#190#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/createYearlySheet.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
-              <folding>
-                <element signature="e#0#41#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/database_api.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="103">
-              <caret line="13" column="47" lean-forward="true" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="47" />
-              <folding>
-                <element signature="e#0#22#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -405,7 +409,7 @@
       <window_info anchor="bottom" id="Find" order="4" weight="0.32624114" />
       <window_info anchor="bottom" id="Version Control" order="5" weight="0.32826748" />
       <window_info active="true" anchor="bottom" id="Run" order="6" visible="true" weight="0.16616008" />
-      <window_info anchor="bottom" id="Debug" order="7" weight="0.19858156" />
+      <window_info anchor="bottom" id="Debug" order="7" weight="0.33535966" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="9" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="10" weight="0.32721713" />
@@ -417,13 +421,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/gui.py</url>
-          <line>202</line>
-          <option name="timeStamp" value="95" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -631,7 +628,7 @@
     <entry file="file://$PROJECT_DIR$/database_api.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="103">
-          <caret line="13" column="47" lean-forward="true" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="47" />
+          <caret line="13" column="47" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="47" />
           <folding>
             <element signature="e#0#22#0" expanded="true" />
           </folding>
@@ -642,13 +639,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="292">
           <caret line="170" selection-start-line="170" selection-end-line="170" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/enum.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="630" selection-start-line="630" selection-end-line="630" />
         </state>
       </provider>
     </entry>
@@ -710,30 +700,65 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Account.py">
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/re.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="611">
-          <caret line="67" column="33" selection-start-line="67" selection-start-column="33" selection-end-line="67" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="210">
+          <caret line="182" selection-start-line="182" selection-end-line="182" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Year.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-75">
-          <caret line="7" column="16" lean-forward="true" selection-start-line="7" selection-start-column="16" selection-end-line="7" selection-end-column="16" />
+          <caret line="7" column="16" selection-start-line="7" selection-start-column="16" selection-end-line="7" selection-end-column="16" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/datetime.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1124">
+          <caret line="1234" column="13" selection-start-line="1234" selection-start-column="13" selection-end-line="1234" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/enum.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="308" selection-start-line="308" selection-end-line="308" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/pathlib.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="703" selection-start-line="703" selection-end-line="703" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/genericpath.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="32" selection-start-line="32" selection-end-line="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Account.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="65" selection-start-line="65" selection-end-line="65" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="559">
-          <caret line="194" column="39" selection-start-line="194" selection-start-column="39" selection-end-line="194" selection-end-column="39" />
+        <state relative-caret-position="582">
+          <caret line="73" column="59" selection-start-line="73" selection-start-column="59" selection-end-line="73" selection-end-column="59" />
           <folding>
             <element signature="e#0#156#0" expanded="true" />
           </folding>

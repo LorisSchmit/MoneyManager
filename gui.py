@@ -8,6 +8,8 @@ import sys
 import os
 import subprocess
 import json
+import re
+import time
 
 from pathlib import Path
 from datetime import datetime
@@ -30,22 +32,6 @@ class MainGUI(QMainWindow):
         super(MainGUI, self).__init__()
         uic.loadUi(mm_dir_path / "pyqt" / "mm_gui.ui", self)
         self.show()
-
-        # Tab: Import
-        self.browseFolderButton.clicked.connect(self.selectFolder)
-        self.activateImportButton.clicked.connect(lambda: activateImport(self,str(self.browseFolderEdit.text())))
-
-        self.browseFileButton.clicked.connect(self.selectFile)
-        self.importButton.clicked.connect(lambda: newSingleFile(str(self.browseFileEdit.text()),self))
-
-        self.taggingTableWidget.setHorizontalHeaderLabels(['Datum', 'Sender', 'Referenz', 'Betrag'])
-        self.tagReady = False
-        self.saveTagReady = False
-        self.notSaveTag = False
-        self.taggingEnterButton.clicked.connect(self.tagEntered)
-        self.taggingLineEdit.returnPressed.connect(self.taggingEnterButton.click)
-        self.saveTagButton.clicked.connect(self.saveTag)
-        self.notSaveTagButton.clicked.connect(self.notSave)
 
 
         # Tab: Übersicht
@@ -70,6 +56,22 @@ class MainGUI(QMainWindow):
         self.transactsTableView.setSortingEnabled(True)
         self.allTransactsButton.clicked.connect(self.displayAllTransacts)
         self.displayTransacts()
+
+        # Tab: Import
+        self.browseFolderButton.clicked.connect(self.selectFolder)
+        self.activateImportButton.clicked.connect(lambda: activateImport(self, str(self.browseFolderEdit.text())))
+
+        self.browseFileButton.clicked.connect(self.selectFile)
+        self.importButton.clicked.connect(lambda: newSingleFile(str(self.browseFileEdit.text()), self))
+
+        self.taggingTableWidget.setHorizontalHeaderLabels(['Datum', 'Sender', 'Referenz', 'Betrag'])
+        self.tagReady = False
+        self.saveTagReady = False
+        self.notSaveTag = False
+        self.taggingEnterButton.clicked.connect(self.tagEntered)
+        self.taggingLineEdit.returnPressed.connect(self.taggingEnterButton.click)
+        self.saveTagButton.clicked.connect(self.saveTag)
+        self.notSaveTagButton.clicked.connect(self.notSave)
 
         # Tab: Monat
         self.CreateBalanceButton.clicked.connect(lambda: executeCreateSingleMonth(int(self.monthEdit.text()), int(self.yearEdit.text())))
@@ -195,14 +197,17 @@ class MainGUI(QMainWindow):
         self.accountsListWidget.clear()
         file = mm_dir_path / "accounts.json"
         self.account_data = importAllAccounts(file)
-        for account in self.account_data["accounts"]:
-            item = QListWidgetItem(account["name"])
-            self.accountsListWidget.addItem(item)
+        if "accounts" in self.account_data:
+            for account in self.account_data["accounts"]:
+                item = QListWidgetItem(account["name"])
+                self.accountsListWidget.addItem(item)
 
     def deleteSelectedAccount(self):
         selected_index = self.accountsListWidget.currentRow()
         deleteAccount(selected_index,self.account_data,mm_dir_path/"accounts.json")
         self.displayAccounts()
+
+
 
 class CreateAccountDialog(QDialog):
     def __init__(self):
@@ -224,7 +229,7 @@ class CreateAccountDialog(QDialog):
     def statementDetectionStarted(self):
         file = self.exampleFileEdit.text()
         transacts = statementDetection(file)
-        statementDetectionDialog = StatementDetectionDialog(transacts,self)
+        statementDetectionDialog = StatementDetectionDialog(transacts,file,self)
 
     def accepted(self):
         self.account_name = self.nameLineEdit.text()
@@ -234,16 +239,21 @@ class CreateAccountDialog(QDialog):
         with open(file, "w+",encoding="latin-1") as json_file:
             if not bool(data):
                 data = {'accounts': [{'name': self.account_name,
+                                      'balance': 0,
                                       'rowsDeleted': self.rowsDeleted,
                                       'colsDeleted': self.columnsDeleted,
-                                      'headers': self.headers}]}
+                                      'headers': self.headers,
+                                      'detectString':self.detect_string}]}
             else:
                 data['accounts'].append({'name': self.account_name,
-                                         'rowsDeleted': self.rowsDeleted,
-                                         'colsDeleted': self.columnsDeleted,
-                                         'headers': self.headers})
+                                      'balance': 0,
+                                      'rowsDeleted': self.rowsDeleted,
+                                      'colsDeleted': self.columnsDeleted,
+                                      'headers': self.headers,
+                                      'detectString':self.detect_string})
             json_string = json.dumps(data)
             json_file.write(json_string)
+        #time.sleep(0.2)
 
         self.close()
 
@@ -252,7 +262,7 @@ class CreateAccountDialog(QDialog):
 
 
 class StatementDetectionDialog(QDialog):
-    def __init__(self,transacts,account_dialog):
+    def __init__(self,transacts,file_name,account_dialog):
         super().__init__()
         uic.loadUi(mm_dir_path / "pyqt" / "statement_detection.ui", self)
         self.account_dialog = account_dialog
@@ -268,6 +278,13 @@ class StatementDetectionDialog(QDialog):
 
         self.options = ["Bitte auswählen..","Datum", "Typ", "Empfänger/Sender", "Referenz", "Betrag", "Währung"]
         self.csvView.horizontalHeader().sectionDoubleClicked.connect(self.changeHorizontalHeader)
+
+        detect_string = file_name[file_name.rfind("/")+1:]
+        detect_string = detect_string[:re.search(r"\d",detect_string).start()]
+        self.detectStringEdit.setText(detect_string)
+        self.account_dialog.detect_string = detect_string
+
+        self.saveDetectStringButton.clicked.connect(self.detectFileBy)
 
         self.buttonBox.accepted.connect(self.accepted)
         self.buttonBox.rejected.connect(self.reject)
@@ -306,6 +323,9 @@ class StatementDetectionDialog(QDialog):
             for index in index_list:
                 self.model.removeColumn(index.column())
 
+    def detectFileBy(self):
+        self.account_dialog.detect_string = self.detectStringEdit.text()
+
     def accepted(self):
         self.account_dialog.headers = []
         for index in range(self.model.columnCount()):
@@ -315,7 +335,7 @@ class StatementDetectionDialog(QDialog):
 
 def main():
     app = QApplication([])
-    app.setFont(QFont('Helvetica Neue'))
+    #app.setFont(QFont('Helvetica Neue'))
     window = MainGUI()
     app.exec()
 

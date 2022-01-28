@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>885</width>
-    <height>678</height>
+    <width>878</width>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,75 +24,12 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="transactsTab">
      <attribute name="title">
       <string>Übersicht</string>
      </attribute>
-     <widget class="QDateEdit" name="startDateEdit">
-      <property name="geometry">
-       <rect>
-        <x>180</x>
-        <y>30</y>
-        <width>110</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="dateTime">
-       <datetime>
-        <hour>0</hour>
-        <minute>0</minute>
-        <second>0</second>
-        <year>2021</year>
-        <month>1</month>
-        <day>1</day>
-       </datetime>
-      </property>
-      <property name="date">
-       <date>
-        <year>2021</year>
-        <month>1</month>
-        <day>1</day>
-       </date>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="allTransactsButton">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>20</y>
-        <width>141</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Alle Transaktionen</string>
-      </property>
-     </widget>
-     <widget class="QDateEdit" name="endDateEdit">
-      <property name="geometry">
-       <rect>
-        <x>310</x>
-        <y>30</y>
-        <width>110</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="locale">
-       <locale language="German" country="Germany"/>
-      </property>
-      <property name="date">
-       <date>
-        <year>2021</year>
-        <month>2</month>
-        <day>1</day>
-       </date>
-      </property>
-     </widget>
      <widget class="QTableView" name="transactsTableView">
       <property name="geometry">
        <rect>
@@ -186,158 +123,75 @@
        </rect>
       </property>
      </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>372</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QPushButton" name="allTransactsButton">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Alle Transaktionen</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateEdit" name="startDateEdit">
+         <property name="dateTime">
+          <datetime>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
+           <year>2021</year>
+           <month>1</month>
+           <day>1</day>
+          </datetime>
+         </property>
+         <property name="date">
+          <date>
+           <year>2021</year>
+           <month>1</month>
+           <day>1</day>
+          </date>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateEdit" name="endDateEdit">
+         <property name="locale">
+          <locale language="German" country="Germany"/>
+         </property>
+         <property name="date">
+          <date>
+           <year>2021</year>
+           <month>2</month>
+           <day>1</day>
+          </date>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
     <widget class="QWidget" name="importTab">
      <attribute name="title">
       <string>Importieren</string>
      </attribute>
-     <widget class="QPushButton" name="activateImportButton">
-      <property name="geometry">
-       <rect>
-        <x>80</x>
-        <y>70</y>
-        <width>221</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Import aktivieren</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="importPathLabel">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>301</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Ordner über den neue Dateien importiert werden:</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="browseFolderEdit">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>341</width>
-        <height>21</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="browseFolderButton">
-      <property name="geometry">
-       <rect>
-        <x>360</x>
-        <y>30</y>
-        <width>113</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Durchsuchen</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>160</x>
-        <y>120</y>
-        <width>41</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>20</pointsize>
-        <weight>50</weight>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>oder</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="importPathLabel_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>160</y>
-        <width>291</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Neue Datei einzeln importieren:</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="browseFileButton">
-      <property name="geometry">
-       <rect>
-        <x>360</x>
-        <y>170</y>
-        <width>113</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="text">
-       <string>Durchsuchen</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="browseFileEdit">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>180</y>
-        <width>341</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>/Users/lorisschmit1/Downloads/Export_Mouvements_Current acc. Green Code 18-30 Study.csv</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="importButton">
-      <property name="geometry">
-       <rect>
-        <x>80</x>
-        <y>210</y>
-        <width>221</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Importieren</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="taggingEnterButton">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>330</x>
-        <y>440</y>
-        <width>151</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Bestätigen</string>
-      </property>
-     </widget>
      <widget class="QTableWidget" name="taggingTableWidget">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>20</x>
         <y>360</y>
         <width>401</width>
         <height>51</height>
@@ -379,22 +233,6 @@
       <column/>
       <column/>
      </widget>
-     <widget class="QLabel" name="label_2">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>420</y>
-        <width>449</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Kategorie der Transaktion:</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="importProgressLabel">
       <property name="enabled">
        <bool>true</bool>
@@ -411,60 +249,173 @@
        <string/>
       </property>
      </widget>
-     <widget class="QLineEdit" name="taggingLineEdit">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
+     <widget class="QWidget" name="gridLayoutWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>450</y>
-        <width>311</width>
-        <height>21</height>
+        <y>10</y>
+        <width>521</width>
+        <height>261</height>
        </rect>
       </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0" alignment="Qt::AlignVCenter">
+        <widget class="QLabel" name="importPathLabel">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>15</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Ordner über den neue Dateien importiert werden:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="activateImportButton">
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Import aktivieren</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="browseFolderEdit"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="importPathLabel_2">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>15</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Neue Datei einzeln importieren:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLineEdit" name="browseFileEdit">
+         <property name="text">
+          <string>/Users/lorisschmit1/Downloads/Export_Mouvements_Current acc. Green Code 18-30 Study.csv</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" alignment="Qt::AlignHCenter">
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <pointsize>20</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>oder</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="importButton">
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Importieren</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QPushButton" name="browseFileButton">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Durchsuchen</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="browseFolderButton">
+         <property name="text">
+          <string>Durchsuchen</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
-     <widget class="QLineEdit" name="tagReferenceEdit">
+     <widget class="QWidget" name="gridLayoutWidget_2">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>490</y>
-        <width>311</width>
-        <height>21</height>
+        <x>20</x>
+        <y>420</y>
+        <width>441</width>
+        <height>95</height>
        </rect>
       </property>
-      <property name="inputMask">
-       <string/>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="saveTagButton">
-      <property name="geometry">
-       <rect>
-        <x>330</x>
-        <y>480</y>
-        <width>91</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Speichern</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="notSaveTagButton">
-      <property name="geometry">
-       <rect>
-        <x>420</x>
-        <y>480</y>
-        <width>61</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Nein</string>
-      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="2" column="0">
+        <widget class="QLineEdit" name="tagReferenceEdit">
+         <property name="inputMask">
+          <string/>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Kategorie der Transaktion:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="taggingEnterButton">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Bestätigen</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="taggingLineEdit">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="notSaveTagButton">
+         <property name="text">
+          <string>Nein</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="saveTagButton">
+         <property name="text">
+          <string>Speichern</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="monthTab">
@@ -497,44 +448,38 @@
        <string>Jahr</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="CreateBalanceButton">
+     <widget class="QWidget" name="verticalLayoutWidget">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>40</y>
+        <x>20</x>
+        <y>50</y>
         <width>311</width>
-        <height>41</height>
+        <height>121</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Monatliche Bilanz erstellen</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="AssignPaybackButton">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>311</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Rückzahlungen zuweisen</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="showBalanceSheetButton">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>120</y>
-        <width>311</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Monatliche Bilanz zeigen</string>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="CreateBalanceButton">
+         <property name="text">
+          <string>Monatliche Bilanz erstellen</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="AssignPaybackButton">
+         <property name="text">
+          <string>Rückzahlungen zuweisen</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="showBalanceSheetButton">
+         <property name="text">
+          <string>Monatliche Bilanz zeigen</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="yearTab">
@@ -552,32 +497,6 @@
       </property>
       <property name="placeholderText">
        <string>Jahr</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="showYearlyBalanceSheetButton">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>311</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Jährliche Bilanz zeigen</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="createYearlyBalanceButton">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>311</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Jährliche Bilanz erstellen</string>
       </property>
      </widget>
      <widget class="QProgressBar" name="yearlySheetCreationProgressBar">
@@ -605,6 +524,32 @@
       <property name="text">
        <string/>
       </property>
+     </widget>
+     <widget class="QWidget" name="verticalLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>291</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QPushButton" name="createYearlyBalanceButton">
+         <property name="text">
+          <string>Jährliche Bilanz erstellen</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="showYearlyBalanceSheetButton">
+         <property name="text">
+          <string>Jährliche Bilanz zeigen</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="accountsTab">
@@ -668,7 +613,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>885</width>
+     <width>878</width>
      <height>24</height>
     </rect>
    </property>
