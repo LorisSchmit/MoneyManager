@@ -3,7 +3,7 @@ from Transaction import Transaction
 import datetime
 import os
 
-from Account import CC_LUX,GK_DE,PP,VISA,GB
+#from Account import CC_LUX,GK_DE,PP,VISA,GB
 
 def listdir_nohidden(path):
     files = []

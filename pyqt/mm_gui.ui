@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="transactsTab">
      <attribute name="title">
@@ -268,7 +268,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Ordner über den neue Dateien importiert werden:</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -297,7 +297,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Neue Datei einzeln importieren:</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -318,7 +318,7 @@
           </font>
          </property>
          <property name="text">
-          <string>oder</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -380,7 +380,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Kategorie der Transaktion:</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -416,6 +416,19 @@
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QLabel" name="accountDetectedLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>280</y>
+        <width>391</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="monthTab">

@@ -6,11 +6,16 @@ from pathlib import Path
 from database_api import *
 from tagger import tag
 from copy import copy
+#import sys
+
+mm_dir_path = Path(__file__).parent
+#sys.path.append(mm_dir_path)
 
 class Importer:
-    def __init__(self,file):
+    def __init__(self,file,account):
         self.old_transacts = getAllTransacts()
-        self.new_transacts = self.import_transactions(file)
+        self.new_transacts = transacts = self.CSV2Object(file,account)
+        self.account = account
 
     def CSV2Object(self,file,account):
         start_found = False
@@ -65,23 +70,6 @@ class Importer:
         #transacts = OrderedDict(reversed(list(transacts.items())))
         return transacts
 
-    def import_transactions(self,file):
-        if file.find("Export_Mouvements_Current") >= 0:
-            account = CC_LUX
-        elif file.find("Export_Mouvements_Savings") >= 0:
-            account = CE_LUX
-        elif file.find("Umsaetze") >= 0:
-            account = GK_DE
-        elif file.find("MSR") >= 0 or file.find("WLEC") >= 0:
-            account = PP
-        elif file.find("Export_Card") >= 0:
-            account = VISA
-        else:
-            account = None
-        self.account = account
-        transacts = self.CSV2Object(file,account)
-
-        return transacts
 
     def display_transacts(self):
         for action in self.new_transacts:
@@ -153,8 +141,8 @@ def displayTransacts(transacts):
     for action in transacts:
         print(action.__dict__)
 
-def importNewFile(file,gui=None):
-    importer = Importer(file)
+def importNewFile(file,account,gui=None):
+    importer = Importer(file,account)
     importer.joiner(gui)
 
 if __name__ == '__main__':

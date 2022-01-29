@@ -5,6 +5,9 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 from importer import importNewFile
 import threading
+from Account import *
+
+mm_dir_path = Path(__file__).parent
 
 
 def newFileDetectedListener(event):
@@ -20,12 +23,19 @@ def newFileDetectedListener(event):
         print("Unknown file type")
 
 def newSingleFile(file,gui=None):
-    if (file.find("Export_Mouvements") >= 0 or file.find("Umsaetze") >= 0 or file.find("MSR") >= 0 or file.find(
-            "WLEC") >= 0 or file.find("Export_Card") >= 0) and file.find("imported") == -1:
-        sec_thread = threading.Thread(target=importNewFile, args=(file,gui))
+    account_detected = False
+    for acc in accounts:
+        if file.find(acc.detectString) >= 0:
+            account = acc
+            account_detected = True
+
+    if account_detected:
+        gui.accountDetectedLabel.setText("Konto erkannt: " + account.name)
+        sec_thread = threading.Thread(target=importNewFile, args=(file,account,gui))
         sec_thread.start()
     else:
-        print("Unknown file type")
+        gui.accountDetectedLabel.setText("Unbekanntes Konto")
+        #print("Unknown file type")
 
 
 

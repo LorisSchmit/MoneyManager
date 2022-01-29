@@ -20,7 +20,7 @@ sys.path.append(mm_dir_path)
 from Month import executeCreateSingleMonth, executeAssignPayback, Month
 from Year import executeCreateSingleYear
 from import_automation import activateImport,newSingleFile
-from Account import statementDetection, importAllAccounts,deleteAccount
+from Account import Account,statementDetection, importAllAccounts,deleteAccount,exportAllAccounts,accounts
 
 
 from database_api import getAllTransacts
@@ -195,16 +195,14 @@ class MainGUI(QMainWindow):
 
     def displayAccounts(self):
         self.accountsListWidget.clear()
-        file = mm_dir_path / "accounts.json"
-        self.account_data = importAllAccounts(file)
-        if "accounts" in self.account_data:
-            for account in self.account_data["accounts"]:
-                item = QListWidgetItem(account["name"])
+        if len(accounts)>0:
+            for account in accounts:
+                item = QListWidgetItem(account.name)
                 self.accountsListWidget.addItem(item)
 
     def deleteSelectedAccount(self):
         selected_index = self.accountsListWidget.currentRow()
-        deleteAccount(selected_index,self.account_data,mm_dir_path/"accounts.json")
+        deleteAccount(selected_index,mm_dir_path/"accounts.json")
         self.displayAccounts()
 
 
@@ -234,25 +232,8 @@ class CreateAccountDialog(QDialog):
     def accepted(self):
         self.account_name = self.nameLineEdit.text()
         file = mm_dir_path / "accounts.json"
-        data = importAllAccounts(file)
-
-        with open(file, "w+",encoding="latin-1") as json_file:
-            if not bool(data):
-                data = {'accounts': [{'name': self.account_name,
-                                      'balance': 0,
-                                      'rowsDeleted': self.rowsDeleted,
-                                      'colsDeleted': self.columnsDeleted,
-                                      'headers': self.headers,
-                                      'detectString':self.detect_string}]}
-            else:
-                data['accounts'].append({'name': self.account_name,
-                                      'balance': 0,
-                                      'rowsDeleted': self.rowsDeleted,
-                                      'colsDeleted': self.columnsDeleted,
-                                      'headers': self.headers,
-                                      'detectString':self.detect_string})
-            json_string = json.dumps(data)
-            json_file.write(json_string)
+        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.columnsDeleted, self.headers,self.detectString))
+        exportAllAccounts(accounts,file)
         #time.sleep(0.2)
 
         self.close()
@@ -279,10 +260,10 @@ class StatementDetectionDialog(QDialog):
         self.options = ["Bitte auswählen..","Datum", "Typ", "Empfänger/Sender", "Referenz", "Betrag", "Währung"]
         self.csvView.horizontalHeader().sectionDoubleClicked.connect(self.changeHorizontalHeader)
 
-        detect_string = file_name[file_name.rfind("/")+1:]
-        detect_string = detect_string[:re.search(r"\d",detect_string).start()]
-        self.detectStringEdit.setText(detect_string)
-        self.account_dialog.detect_string = detect_string
+        detectString = file_name[file_name.rfind("/")+1:]
+        detectString = detectString[:re.search(r"\d",detectString).start()]
+        self.detectStringEdit.setText(detectString)
+        self.account_dialog.detectString = detectString
 
         self.saveDetectStringButton.clicked.connect(self.detectFileBy)
 
@@ -324,7 +305,7 @@ class StatementDetectionDialog(QDialog):
                 self.model.removeColumn(index.column())
 
     def detectFileBy(self):
-        self.account_dialog.detect_string = self.detectStringEdit.text()
+        self.account_dialog.detectString = self.detectStringEdit.text()
 
     def accepted(self):
         self.account_dialog.headers = []
