@@ -232,9 +232,10 @@ class CreateAccountDialog(QDialog):
     def accepted(self):
         self.account_name = self.nameLineEdit.text()
         file = mm_dir_path / "accounts.json"
-        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.columnsDeleted, self.headers,self.detectString))
+        if not hasattr(self, 'signs'):
+            self.signs = None
+        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.colsDeleted, self.headers,self.detectString,self.dmy_format,signs=self.signs))
         exportAllAccounts(accounts,file)
-        #time.sleep(0.2)
 
         self.close()
 
@@ -257,7 +258,7 @@ class StatementDetectionDialog(QDialog):
         self.deleteSelectedButton.clicked.connect(self.removeSelected)
 
 
-        self.options = ["Bitte auswählen..","Datum", "Typ", "Empfänger/Sender", "Referenz", "Betrag", "Währung"]
+        self.options = ["Bitte auswählen..","Datum", "Typ", "Empfänger/Sender", "Referenz", "Betrag", "Währung","Vorzeichen"]
         self.csvView.horizontalHeader().sectionDoubleClicked.connect(self.changeHorizontalHeader)
 
         detectString = file_name[file_name.rfind("/")+1:]
@@ -282,24 +283,37 @@ class StatementDetectionDialog(QDialog):
                 self.model.setHorizontalHeaderItem(index, QStandardItem(newHeader))
             if len(oldHeader) > 1:
                 self.options.append(oldHeader)
+            if newHeader == "Vorzeichen":
+                self.ask4sign = Ask4Sign(self.account_dialog)
 
 
     def removeSelected(self):
         if len(self.csvView.selectionModel().selectedRows())>0:
             index_list = []
+            toAppend = []
             for model_index in self.csvView.selectionModel().selectedRows():
                 index = QPersistentModelIndex(model_index)
                 index_list.append(index)
-                self.account_dialog.rowsDeleted.append(model_index.row())
+                index_row = index.row()
+
+                if index_row >= len(self.transacts)-2 and index_row >= 3:
+                    toAppend.append(index_row - len(self.transacts))
+                else:
+                    toAppend.append(index_row)
+            if -2 in toAppend and -1 in toAppend and len(toAppend) == 2:
+                toAppend = [-1,-1]
+            self.account_dialog.rowsDeleted.append(toAppend)
 
             for index in index_list:
                 self.model.removeRow(index.row())
         elif len(self.csvView.selectionModel().selectedColumns())>0:
             index_list = []
+            toAppend = []
             for model_index in self.csvView.selectionModel().selectedColumns():
                 index = QPersistentModelIndex(model_index)
                 index_list.append(index)
-                self.account_dialog.columnsDeleted.append(model_index.column())
+                toAppend.append(index.column())
+            self.account_dialog.colsDeleted.append(toAppend)
 
             for index in index_list:
                 self.model.removeColumn(index.column())
@@ -312,7 +326,53 @@ class StatementDetectionDialog(QDialog):
         for index in range(self.model.columnCount()):
             header = str(self.model.headerData(index, Qt.Orientation.Horizontal))
             self.account_dialog.headers.append(header)
+        if self.dmyRadio.isChecked():
+            self.account_dialog.dmy_format = True
+        else:
+            self.account_dialog.dmy_format = False
 
+
+class Ask4Sign(QDialog):
+    def __init__(self, account_dialog, parent=None):
+        super(Ask4Sign, self).__init__(parent)
+        self.setWindowTitle('Vorzeichen')
+        self.account_dialog = account_dialog
+        outerLayout = QVBoxLayout()
+        layout = QGridLayout()
+
+        self.descriptionLabel = QLabel("Bitte geben sie an welches Zeichen, welcher Art von Transaktion entspricht")
+
+        self.plusLabel = QLabel("Zeichen für Einnahmen:")
+        self.plusSignEdit = QLineEdit()
+
+        self.minusLabel = QLabel("Zeichen für Ausgaben:")
+        self.minusSignEdit = QLineEdit()
+
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+
+        layout.addWidget(self.plusLabel,0,0)
+        layout.addWidget(self.plusSignEdit, 0, 1)
+        layout.addWidget(self.minusLabel, 1, 0)
+        layout.addWidget(self.minusSignEdit, 1, 1)
+
+        outerLayout.addWidget(self.descriptionLabel)
+        outerLayout.addLayout(layout)
+        outerLayout.addWidget(self.buttonBox)
+
+        self.setLayout(outerLayout)
+
+        self.buttonBox.accepted.connect(self.getSigns)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.exec()
+
+    def getSigns(self):
+        self.plusSign = self.plusSignEdit.text()
+        self.minusSign = self.minusSignEdit.text()
+
+        self.account_dialog.signs = {"+":self.plusSign,"-":self.minusSign}
+
+        self.close()
 
 def main():
     app = QApplication([])

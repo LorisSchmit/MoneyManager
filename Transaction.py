@@ -1,5 +1,5 @@
 class Transaction:
-    def __init__(self,id, date, type, recipient, reference, amount, currency, tag, account, pb_assign):
+    def __init__(self,id, date, type="", recipient="", reference="", amount=0, currency="", tag="", account=None, pb_assign=[]):
         self.id = id
         self.date = date
         self.type = type

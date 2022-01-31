@@ -7,13 +7,15 @@ from pathlib import Path
 mm_dir_path = Path(__file__).parent
 
 class Account:
-    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString):
+    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString,dmy_format,signs=None):
         self.name  = name
         self.balance = balance
         self.rowsDeleted = rowsDeleted
         self.colsDeleted = colsDeleted
         self.headers = headers
         self.detectString = detectString
+        self.dmy_format = dmy_format
+        self.signs = signs
         #self.balance = self.getBalance(name)[0]
         #self.date = self.getBalance(name)[1]
 
@@ -25,9 +27,6 @@ class Account:
 
     def getDate(self):
         return self.date
-
-
-
 
 
 def accountsLookup(account_name):
@@ -60,7 +59,8 @@ def importAllAccounts(file):
 
             if "accounts" in account_data:
                 for acc in account_data["accounts"]:
-                    accounts.append(Account(acc["name"], acc["balance"],acc["rowsDeleted"], acc["colsDeleted"], acc["headers"],acc["detectString"]))
+                    signs = (acc["signs"] if "signs" in acc else None)
+                    accounts.append(Account(acc["name"], acc["balance"],acc["rowsDeleted"], acc["colsDeleted"], acc["headers"],acc["detectString"],acc["dmy_format"],signs=signs))
 
     return accounts
 
@@ -68,12 +68,17 @@ def exportAllAccounts(accounts,file):
     if os.path.isfile(file) and len(accounts)>0:
         data = {"accounts":[]}
         for acc in accounts:
-            data['accounts'].append({'name': acc.name,
-                                     'balance': acc.balance,
-                                     'rowsDeleted': acc.rowsDeleted,
-                                     'colsDeleted': acc.colsDeleted,
-                                     'headers': acc.headers,
-                                     'detectString': acc.detectString})
+            new_account = {'name': acc.name,
+             'balance': acc.balance,
+             'rowsDeleted': acc.rowsDeleted,
+             'colsDeleted': acc.colsDeleted,
+             'headers': acc.headers,
+             'detectString': acc.detectString,
+             'dmy_format': acc.dmy_format}
+            if acc.signs is not None:
+                new_account['signs'] = acc.signs
+            data['accounts'].append(new_account)
+
         with open(file, "w+", encoding="latin-1") as json_file:
             json_string = json.dumps(data)
             json_file.write(json_string)

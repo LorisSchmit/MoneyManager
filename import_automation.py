@@ -45,7 +45,7 @@ def launchEventListener(gui,path):
     ignore_directories = False
     case_sensitive = True
     my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
-    my_event_handler.on_created = newFileDetectedListener
+    my_event_handler.on_created = lambda event,gui_obj=gui: newFileDetectedListener(event,gui_obj)
     #home = str(Path.home())
     #path = home + "/Movements"
     go_recursively = True
