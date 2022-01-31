@@ -6,7 +6,8 @@ from pathlib import Path
 from database_api import *
 from tagger import tag
 from copy import copy
-#import sys
+import numpy as np
+import dateutil
 
 mm_dir_path = Path(__file__).parent
 #sys.path.append(mm_dir_path)
@@ -20,54 +21,67 @@ class Importer:
     def CSV2Object(self,file,account):
         start_found = False
         transacts = OrderedDict()
-        with open(file,mode="r",encoding="latin-1") as csv_file:
-            if account == PP:
-                csv_reader = csv.reader(csv_file,delimiter=",")
-            else:
-                csv_reader = reversed(list(csv.reader(csv_file, delimiter=";")))
+        transacts_list = []
+        transacts_temp = []
+        with open(file, mode="r", encoding="latin-1") as csv_file:
+            dialect = csv.Sniffer().sniff(csv_file.read(1024), delimiters=";,")
+            csv_file.seek(0)
+            csv_reader = csv.reader(csv_file, dialect)
 
-            #start_index = self.getLastEntry(self.old_transacts)[1]
-            start_index = -1
-            counter = 0
             for index,row in enumerate(csv_reader):
                 if len(row)>0:
                     if row[0][0] >= '0' and row[0][0] <= '9':
-                        if account == CC_LUX or account == CE_LUX:
-                            if row[1] != "DECOMPTE VISA":
-                                comma_pos = row[4].rfind(",")
-                                recipient = row[4][:comma_pos].replace(",", "")
-                                reference = row[4][comma_pos + 2:].replace(",", "")
-                                counter += 1
-                                id = start_index + counter
-                                transacts[id] = Transaction(id,datetime.strptime(row[0],"%d/%m/%Y"),row[1],recipient,reference,float(row[2].replace(',', '.')),row[3],'',account,[])
-                        elif account == GK_DE and not (row[3] == "" and row[8] == ""):
-                            amount_str = ('-') * (row[12] == 'S') + row[11].replace(',', '.')
-                            amount = float(amount_str)
-                            counter += 1
-                            id = start_index + counter
-                            transacts[id] = Transaction(id,datetime.strptime(row[0], '%d.%m.%Y'), row[2], row[3],
-                                                   row[8].replace("\n", " "), amount, row[10], '',account,[])
-                        elif account == PP:
-                            if row[3] != "Bank Deposit to PP Account" and row[3] != "Reversal of General Account Hold" and row[3] != "Account Hold for Open Authorization" and row[4] == "EUR":
-                                if row[9] != "":
-                                    amount = float(row[7])
-                                else:
-                                    amount = float(row[5])
-                                date = datetime.strptime(row[0], "%m/%d/%Y")
-                                counter += 1
-                                id = start_index + counter
-                                transacts[id] = Transaction(id,date, row[3], row[11], '', amount, row[4], '', account,[])
-                        elif account == VISA:
-                            recipient = row[6].replace(",", "")
-                            reference = ''
-                            amount = float(row[8].replace(",", "."))
-                            date = datetime.strptime(row[5], "%d/%m/%Y")
-                            self.settlement_date = datetime.strptime(row[2], "%d/%m/%Y")
-                            counter += 1
-                            id = start_index + counter
-                            transacts[id] = Transaction(id,date, 'Credit Card Transaction', recipient, reference, amount, row[4], '', account,[])
+                        transacts_list.append(row)
+            transacts_list = np.array(transacts_list)
+            for group in account.rowsDeleted:
+                for deleteRow in list(reversed(sorted(group))):
+                    transacts_list = np.delete(transacts_list,deleteRow,0)
+            for group in account.colsDeleted:
+                for deleteCol in list(reversed(sorted(group))):
+                    transacts_list = np.delete(transacts_list,deleteCol,1)
 
-        #transacts = OrderedDict(reversed(list(transacts.items())))
+            start_index = -1
+            counter = 0
+
+            for action in transacts_list:
+                values = {}
+                for index,header in enumerate(account.headers):
+                    value = action[index]
+                    if header == "Betrag":
+                        value = float(value.replace(",","."))
+                    if header == "Referenz":
+                        value = value.replace("\n"," ")
+                    if header == "Datum":
+                        value = dateutil.parser.parse(value,dayfirst=account.dmy_format)
+                    values[header] = value
+                counter += 1
+                id = start_index + counter
+                params = {"id":id,"date":values["Datum"],"account":account}
+                if "Typ" in values:
+                    params["type"] = values["Typ"]
+                if "Empfänger/Sender" in values:
+                    params["recipient"] = values["Empfänger/Sender"]
+                if "Referenz" in values:
+                    params["reference"] = values["Referenz"]
+                if "Betrag" in values:
+                    sign = 1
+                    if account.signs is not None:
+                        if "Vorzeichen" in values:
+                            if values["Vorzeichen"] == account.signs["-"]:
+                                sign = -1
+                    params["amount"] = sign*values["Betrag"]
+                if "Währung" in values:
+                    params["currency"] = values["Währung"]
+
+                transacts_temp.append(Transaction(**params))
+        transacts_temp = sorted(transacts_temp, key=lambda action: action.date)
+        start_index = -1
+        counter = 0
+        for action in transacts_temp:
+            counter += 1
+            id = start_index + counter
+            transacts[id] = action
+        print(transacts)
         return transacts
 
 
@@ -110,6 +124,7 @@ class Importer:
         for id,action in new_transacts.items():
             joined_transacts[id] = action
         final_transacts = OrderedDict()
+        """
         if self.account == PP:
             for id,action in joined_transacts.items():
                 if not (action.tag == "PayPal" and action.date <= list(self.new_transacts.items())[1][-1].date + dt.timedelta(days=1)):
@@ -119,7 +134,8 @@ class Importer:
                 if not (action.tag == "Visa" and action.date <= self.settlement_date):
                     final_transacts[id] = action
         else:
-            final_transacts = joined_transacts
+        """
+        final_transacts = joined_transacts
 
         final_transacts = OrderedDict(sorted(final_transacts.items(),key=lambda x: x[1].date))
         self.updated_transacts = final_transacts

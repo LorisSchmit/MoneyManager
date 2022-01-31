@@ -42,15 +42,12 @@ def tag(transacts,gui=None):
             if gui.saveTagReady:
                 ref = str(gui.tagReferenceEdit.text())
                 known_tags[ref] = tag.strip().rstrip()
+                writeTags(known_tags)
             gui.saveTagReady = False
-            gui.notSave = False
+            gui.notSaveTag = False
+        transacts[id].tag = tag
         gui.importProgressLabel.setText(" %d von %d Transaktionen importiert" % (i+1, len(transacts)))
         gui.taggingLineEdit.setText("")
         gui.tagReferenceEdit.setText("")
-        if tag != "none":
-            action.tag = tag.strip().rstrip()
-            #writeTags(known_tags)
-        else:
-            transacts.remove(action)
 
     return transacts

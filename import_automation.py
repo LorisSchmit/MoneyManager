@@ -10,17 +10,24 @@ from Account import *
 mm_dir_path = Path(__file__).parent
 
 
-def newFileDetectedListener(event):
+def newFileDetectedListener(event,gui):
     file = event.src_path
-    if (file.find("Export_Mouvements") >= 0 or file.find("Umsaetze") >= 0 or file.find("MSR") >= 0 or file.find(
-            "WLEC") >= 0 or file.find("Export_Card") >= 0) and file.find("imported") == -1:
+    account_detected = False
+    for acc in accounts:
+        if file.find(acc.detectString) >= 0:
+            account = acc
+            account_detected = True
+
+    if account_detected:
+        gui.accountDetectedLabel.setText("Konto erkannt: " + account.name)
         print("New File detected : " + file)
-        importNewFile(file)
+        importNewFile(file,account,gui=gui)
         ind = file.rfind("/")
         dest_file = file[:ind + 1] + "imported" + file[ind:]
         os.rename(file, dest_file)
     else:
-        print("Unknown file type")
+        gui.accountDetectedLabel.setText("Unbekanntes Konto")
+
 
 def newSingleFile(file,gui=None):
     account_detected = False
