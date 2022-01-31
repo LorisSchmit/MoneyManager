@@ -1,7 +1,7 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QDialog, QListView, QLineEdit,QInputDialog,QComboBox,QListWidgetItem
-from PyQt6 import uic
+from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QFont, QStandardItemModel,QStandardItem
 from PyQt6.QtCore import QDate,QSortFilterProxyModel,Qt,QPersistentModelIndex
+from PyQt6 import uic
 import threading
 from collections import OrderedDict
 import sys
@@ -45,6 +45,7 @@ class MainGUI(QMainWindow):
 
                 widget.textChanged.connect(lambda: self.filterApplied(self.filter_proxy_model[i],str(widget.text()),i))
         """
+        self.all_transacts = getAllTransacts()
         self.transactsTableView.setModel(self.model)
 
         self.transactsTableView.setColumnWidth(0, 40)
@@ -55,7 +56,8 @@ class MainGUI(QMainWindow):
         self.transactsTableView.setColumnWidth(5, 50)
         self.transactsTableView.setSortingEnabled(True)
         self.allTransactsButton.clicked.connect(self.displayAllTransacts)
-        self.displayTransacts()
+        self.refreshButton.clicked.connect(self.refreshTransacts)
+        #self.displayTransacts()
 
         # Tab: Import
         self.browseFolderButton.clicked.connect(self.selectFolder)
@@ -133,7 +135,6 @@ class MainGUI(QMainWindow):
         startDate = datetime.combine(startDate, datetime.min.time())
         endDate = datetime.combine(endDate, datetime.min.time())
 
-        self.all_transacts = getAllTransacts()
         self.show_transacts = OrderedDict()
         for id, action in self.all_transacts.items():
             if int(action.date.timestamp()) >= int(startDate.timestamp()) and int(action.date.timestamp()) < int(endDate.timestamp()):
@@ -167,6 +168,10 @@ class MainGUI(QMainWindow):
                     item_value = entry
                 item.setData(item_value, Qt.ItemDataRole.DisplayRole)
                 self.model.setItem(row, col, item)
+
+    def refreshTransacts(self):
+        self.all_transacts = getAllTransacts()
+        self.displayTransacts()
 
 
     def filterApplied(self,filter_proxy_model,search_str,i):
@@ -215,7 +220,7 @@ class CreateAccountDialog(QDialog):
 
         self.headers = []
         self.rowsDeleted = []
-        self.columnsDeleted = []
+        self.colsDeleted = []
         self.statementDetectionButton.clicked.connect(self.statementDetectionStarted)
         self.buttonBox.accepted.connect(self.accepted)
         self.buttonBox.rejected.connect(self.reject)
@@ -250,7 +255,8 @@ class StatementDetectionDialog(QDialog):
         self.account_dialog = account_dialog
         self.model = QStandardItemModel()
         self.csvView.setModel(self.model)
-        for row,action in enumerate(transacts):
+        self.transacts = transacts
+        for row,action in enumerate(self.transacts):
             for col,entry in enumerate(action):
                 item = QStandardItem(str(entry))
                 self.model.setItem(row,col,item)
