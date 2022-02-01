@@ -94,23 +94,26 @@ class Importer:
             if account is None or action.account == account:
                 last_element = action
                 last_index = id
-                break
-        return last_element, last_index
+                return last_element, last_index
+        return None
 
 
     def joiner(self,gui=None):
         lastAccountEntry = self.getLastEntry(self.old_transacts,account=self.account)
         first_new_index = 0
         new_transacts = OrderedDict()
-        if lastAccountEntry[0].date >= list(self.new_transacts.items())[-1][1].date:
-            gui.importProgressLabel.setText("Alle Transaktionen bereits importiert")
-            return 0
+        if lastAccountEntry is not None:
+            if lastAccountEntry[0].date >= list(self.new_transacts.items())[-1][1].date:
+                gui.importProgressLabel.setText("Alle Transaktionen bereits importiert")
+                return 0
+            else:
+                for index,action in self.new_transacts.items():
+                    if __eq__(action, lastAccountEntry[0], 'date', 'amount', 'account'):
+                        first_new_index = index + 1
+                        break
+                new_transacts = OrderedDict(list(self.new_transacts.items())[first_new_index:])
         else:
-            for index,action in self.new_transacts.items():
-                if __eq__(action, lastAccountEntry[0], 'date', 'amount', 'account'):
-                    first_new_index = index + 1
-                    break
-            new_transacts = OrderedDict(list(self.new_transacts.items())[first_new_index:])
+            new_transacts = OrderedDict(list(self.new_transacts.items()))
         lastEntryIndex = self.getLastEntry(self.old_transacts)[1]
         new_transacts_reindexed = OrderedDict()
         for counter,(id,action) in enumerate(new_transacts.items()):
