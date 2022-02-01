@@ -114,7 +114,7 @@ class Importer:
                 new_transacts = OrderedDict(list(self.new_transacts.items())[first_new_index:])
         else:
             new_transacts = OrderedDict(list(self.new_transacts.items()))
-        lastEntryIndex = self.getLastEntry(self.old_transacts)[1]
+        lastEntryIndex = (lastAccountEntry[1] if lastAccountEntry is not None else 0)
         new_transacts_reindexed = OrderedDict()
         for counter,(id,action) in enumerate(new_transacts.items()):
             new_id = lastEntryIndex+1+counter
@@ -163,7 +163,3 @@ def displayTransacts(transacts):
 def importNewFile(file,account,gui=None):
     importer = Importer(file,account)
     importer.joiner(gui)
-
-if __name__ == '__main__':
-    file = "/Users/lorisschmit1/Movements/WLEC3J2ALW5XJ-CSR-20211201000000-20211231235959-20220101074559.CSV"
-    importNewFile(file)
