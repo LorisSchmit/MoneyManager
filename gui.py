@@ -9,7 +9,7 @@ import os
 import subprocess
 import json
 import re
-import time
+import xml.etree.ElementTree as ET
 
 from pathlib import Path
 from datetime import datetime
@@ -57,11 +57,13 @@ class MainGUI(QMainWindow):
         self.transactsTableView.setSortingEnabled(True)
         self.allTransactsButton.clicked.connect(self.displayAllTransacts)
         self.refreshButton.clicked.connect(self.refreshTransacts)
-        #self.displayTransacts()
+        self.displayTransacts()
 
         # Tab: Import
         self.browseFolderButton.clicked.connect(self.selectFolder)
-        self.activateImportButton.clicked.connect(lambda: activateImport(self, str(self.browseFolderEdit.text())))
+        if self.browseFolderEdit.text() != "":
+            self.importFolder = self.browseFolderEdit.text()
+        self.activateImportButton.clicked.connect(lambda: activateImport(self, self.importFolder))
 
         self.browseFileButton.clicked.connect(self.selectFile)
         self.importButton.clicked.connect(lambda: newSingleFile(str(self.browseFileEdit.text()), self))
@@ -75,13 +77,15 @@ class MainGUI(QMainWindow):
         self.saveTagButton.clicked.connect(self.saveTag)
         self.notSaveTagButton.clicked.connect(self.notSave)
 
-        # Tab: Monat
-        self.CreateBalanceButton.clicked.connect(lambda: executeCreateSingleMonth(int(self.monthEdit.text()), int(self.yearEdit.text())))
+        # Tab: Bilanz
+        if self.balanceSheetFolderEdit.text() != "":
+            self.balanceSheetFolder = self.balanceSheetFolderEdit.text()
+        self.CreateBalanceButton.clicked.connect(lambda: executeCreateSingleMonth(int(self.monthEdit.text()), int(self.yearEdit.text()),self.balanceSheetFolder,gui=self))
         self.showBalanceSheetButton.clicked.connect(self.openBalanceSheet)
-
-        # Tab: Jahr
-        self.createYearlyBalanceButton.clicked.connect(lambda: executeCreateSingleYear(int(self.yearlySheetEdit.text()),redraw_graphs=True,gui=self))
+        self.createYearlyBalanceButton.clicked.connect(lambda: executeCreateSingleYear(int(self.yearlySheetEdit.text()),self.balanceSheetFolder,redraw_graphs=True,gui=self))
         self.showYearlyBalanceSheetButton.clicked.connect(self.openYearlyBalanceSheet)
+
+        self.balanceSheetFolderButton.clicked.connect(self.selectBalanceSheetFolder)
 
         # Tab: Konten
         self.createAccountButton.clicked.connect(self.createAccount)
@@ -90,9 +94,38 @@ class MainGUI(QMainWindow):
 
     def selectFolder(self):
         self.browseFolderEdit.setText(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        text = self.browseFolderEdit.text()
+        self.importFolder = text
+        self.addText2LineEdit("browseFolderEdit", text)
 
     def selectFile(self):
         self.browseFileEdit.setText(QFileDialog.getOpenFileName()[0])
+
+    def selectBalanceSheetFolder(self):
+        self.balanceSheetFolderEdit.setText(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        text = self.balanceSheetFolderEdit.text()
+        self.balanceSheetFolder = text
+        self.addText2LineEdit("balanceSheetFolderEdit",text)
+
+    def addText2LineEdit(self,widget_name,text):
+        xml_path = mm_dir_path / "pyqt" / "mm_gui.ui"
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
+        for widget in root.iter("widget"):
+            if widget.attrib['name'] == widget_name:
+                if len(widget):
+                    widget[0][0].text = text
+                else:
+                    new_element = widget.makeelement("property", {"name":"text"})
+                    sub_element = new_element.makeelement("string",{})
+                    sub_element.text = text
+                    new_element.append(sub_element)
+                    widget.append(new_element)
+
+        tree = ET.ElementTree(root)
+        with open(xml_path, "wb") as fh:
+            tree.write(fh)
+
 
     def tagEntered(self):
         self.tagReady = True
@@ -185,13 +218,13 @@ class MainGUI(QMainWindow):
         year = self.yearEdit.text()
         month = self.monthEdit.text()
         if len(month) > 0 and len(year) > 0:
-            file = Path("/Users/lorisschmit1/Balance Sheets") / year / str(year+"-"+month+".pdf")
+            file = Path(self.balanceSheetFolder) / year / str(year+"-"+month+".pdf")
             subprocess.call(('open', file))
 
     def openYearlyBalanceSheet(self):
         year = self.yearlySheetEdit.text()
         if len(year) > 0:
-            file = Path("/Users/lorisschmit1/Balance Sheets") / str("Yearly Sheet"+year+".pdf")
+            file = Path(self.balanceSheetFolder) / str("Yearly Sheet"+year+".pdf")
             subprocess.call(('open', file))
 
     def createAccount(self):

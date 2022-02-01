@@ -1,9 +1,6 @@
-from datetime import datetime
-from database_api import *
-import plotly.graph_objects as go
 from commonFunctions import weekNumberToDates
-from createBalanceSheets import drawPDF
-import threading
+from createBalanceSheets import drawPDF,prepare4Saving
+import os
 from Year import *
 
 
@@ -112,7 +109,7 @@ class Month(Year):
         weeks[week_dates] = str(-round(tot, 2))
         return weeks
 
-    def createGraph(self):
+    def createGraph(self,vector=False):
         if len(self.monthly_transacts) > 0:
             font_size = 12
             labels = list(self.tags.keys())
@@ -168,7 +165,15 @@ class Month(Year):
                             legend_labels.append("Rückzahlung")
                 ax.legend(legend_patches,legend_labels,loc="lower left",framealpha=0)
 
-            fig.savefig("Graphs/" + str(self.year_no) + " - " + str(self.month) + ".png",bbox_inches="tight",dpi=1000)
+            file_name = str(self.year_no) + " - " + str(self.month)
+            if vector:
+                file_name += ".svg"
+            else:
+                file_name += ".png"
+            graph_path = mm_dir_path / "Graphs" / file_name
+            if not (mm_dir_path / "Graphs").is_dir():
+                os.makedir(mm_dir_path / "Graphs")
+            fig.savefig(graph_path,bbox_inches="tight",dpi=1000)
 
     def assignPayback(self):
         all_transacts = getAllTransacts()
@@ -200,9 +205,9 @@ class Month(Year):
         updateMany(assigns)
 
 
-    def createBalanceSheet(self):
+    def createBalanceSheet(self,folder):
         if len(self.monthly_transacts) > 0:
-            drawPDF(self)
+            drawPDF(self,folder)
 
 def monthsPerYear(year):
     for i in range(1, 13):
@@ -211,14 +216,26 @@ def monthsPerYear(year):
         month.createBalanceSheet()
     return "All Balances for "+str(year)+" created"
 
-def createSingleMonth(month,year):
+def createSingleMonth(month,year,folder,gui=None,redraw_graphs=False):
+    if gui is not None:
+        gui.progressBarMonthLabel.setText("Monatliche Bilanz PDF Erstellung gestartet")
     month = Month(month, year)
-    month.createGraph()
-    month.createBalanceSheet()
+    if redraw_graphs:
+        if gui is not None:
+            gui.monthlySheetCreationProgressBar.setValue(33)
+            gui.progressBarMonthLabel.setText("Erstellen des Ausgaben Diagramms für "+str(month.month_name)+" "+str(month.year_no))
+        month.createGraph()
+        if gui is not None:
+            gui.monthlySheetCreationProgressBar.setValue(66)
+            gui.progressBarMonthLabel.setText("Erstellen der monatlichen Bilanz PDF für "+str(month.month_name)+" "+str(month.year_no))
+    month.createBalanceSheet(folder)
+    if gui is not None:
+        gui.monthlySheetCreationProgressBar.setValue(100)
+        gui.progressBarMonthLabel.setText("Monatliche Bilanz PDF fertig!")
 
-def executeCreateSingleMonth(month,year):
+def executeCreateSingleMonth(month,year,folder,gui=None):
     print("Balance Sheet Creation started")
-    main_thread = threading.Thread(target=createSingleMonth,args=(month,year,))
+    main_thread = threading.Thread(target=createSingleMonth,args=(month,year,folder,gui))
     main_thread.start()
 
 def executeAssignPayback(month,year):

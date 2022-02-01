@@ -9,6 +9,15 @@ from shutil import copyfile
 
 
 
+mm_dir_path = Path(__file__).parent
+home = Path.home()
+if str(home) == "/Users/lorisschmit1":
+    db_file = home / "Documents" /"db_private.db"
+    db_file_backup = home / "Documents" / "db_private_backup.db"
+else:
+    db_file = mm_dir_path / "db.db"
+    db_file_backup = mm_dir_path / "db_backup.db"
+
 
 def object2list(action):
     l = [action.id,int(action.date.timestamp()), action.type, action.recipient, action.reference, str(action.amount), action.currency, action.tag,action.account.name,str(action.pb_assign)]
@@ -20,8 +29,8 @@ def displayTransact(action):
     return l
 
 def getAllTransacts():
-    home = str(Path.home())
-    db_file = home+"/Documents/db.db"
+    #home = str(Path.home())
+    #db_file = home+"/Documents/db.db"
     conn = create_connection(db_file)
     with conn:
         transacts_temp = fetchAllTransacts(conn)
@@ -39,8 +48,9 @@ def getAllTransacts():
     return transacts
 
 def writeTransacts2DB(transacts):
-    home = str(Path.home())
-    db_file = home + "/Documents/db.db"
+    #home = str(Path.home())
+    #db_file = home + "/Documents/db.db"
+    #db_file = mm_dir_path / "db.db"
     conn = create_connection(db_file)
     data = []
     for id,action in transacts.items():
@@ -49,17 +59,20 @@ def writeTransacts2DB(transacts):
         writeMany(conn,data)
 
 def deleteAllFromTable(table):
-    home = str(Path.home())
-    db_file = home + "/Documents/db.db"
-    db_file_backup = home + "/Documents/db_backup.db"
+    #home = str(Path.home())
+    #db_file = home + "/Documents/db.db"
+    #db_file_backup = home + "/Documents/db_backup.db"
+    #db_file = mm_dir_path / "db.db"
+
     copyfile(db_file, db_file_backup)
     conn = create_connection(db_file)
     with conn:
         deleteAll(conn,table)
 
 def importTable(table,tags=False):
-    home = str(Path.home())
-    db_file = home + "/Documents/db.db"
+    #home = str(Path.home())
+    #db_file = home + "/Documents/db.db"
+    #db_file = mm_dir_path / "db.db"
     conn = create_connection(db_file)
     with conn:
         raw_data,cnames = read(conn, table)
@@ -79,8 +92,8 @@ def importTable(table,tags=False):
 
 def writeTable(table,data):
     deleteAllFromTable(table)
-    home = str(Path.home())
-    db_file = home + "/Documents/db.db"
+    #home = str(Path.home())
+    #db_file = home + "/Documents/db.db"
     conn = create_connection(db_file)
     with conn:
         writeManyTable(conn, table, data)
@@ -88,8 +101,8 @@ def writeTable(table,data):
 
 
 def writeTags(tags):
-    home = str(Path.home())
-    db_file = home + "/Documents/db.db"
+    #home = str(Path.home())
+    #db_file = home + "/Documents/db.db"
     conn = create_connection(db_file)
     deleteAllFromTable("tags")
     data = []
@@ -101,8 +114,8 @@ def writeTags(tags):
 
 
 def updateMany(transacts):
-    home = str(Path.home())
-    db_file = home + "/Documents/db.db"
+    #home = str(Path.home())
+    #db_file = home + "/Documents/db.db"
     conn = create_connection(db_file)
     with conn:
         for action in transacts:

@@ -3,16 +3,9 @@ from reportlab.lib import colors
 from operator import itemgetter
 from pathlib import Path
 from PIL import Image,EpsImagePlugin
-from pdfrw.buildxobj import pagexobj
-from pdfrw.toreportlab import makerl
-from pdfrw import PdfReader, PdfDict
-
-
-
 
 import os
 
-from commonFunctions import perWeek,readCSVtoObjectExpense,monthNumberToMonthName,total,perTag,defineFiles
 from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
 
@@ -20,34 +13,25 @@ from database_api import *
 
 from reportlab.platypus import Table, TableStyle
 
-#from budget import getBudgetPerMonth,getBudget
 
 home = str(Path.home())
 
-def drawPDF(month_obj):
-    file_name = home + "/Balance Sheets/"+str(month_obj.year_no)+"/"+str(month_obj.year_no)+"-"+str(month_obj.month)+".pdf"
-    image_path = "Graphs/"+str(month_obj.year_no)+" - "+str(month_obj.month)+".png"
+def drawPDF(month_obj,folder):
+    file_name = folder / Path(str(month_obj.year_no)) / Path(str(str(month_obj.year_no)+"-"+str(month_obj.month)+".pdf"))
+    image_path = mm_dir_path / "Graphs" / Path(str(str(month_obj.year_no)+" - "+str(month_obj.month)+".png"))
     document_title = str(month_obj.month)+" "+str(month_obj.year_no)
     title = month_obj.month_name + " " + str(month_obj.year_no)
     total_spent = month_obj.total_spent
 
-    pdf = canvas.Canvas(file_name)
+    pdf = canvas.Canvas(str(file_name))
 
     myImage = Image.open(image_path)
 
     pdf.setPageCompression(0)
     pdf.drawInlineImage(myImage, 0, 400, width=400,height=400)
 
-
     pdf.setTitle(document_title)
 
-    # drawImage(image_path,pdf,-10, 390,1)
-    #page = PdfReader(image_path, decompress=False).pages[0]
-    #xobj = pagexobj(page)
-    #xobj_name = makerl(pdf, xobj)
-    #pdf.translate(0, 150)
-    #pdf.scale(1, 1)
-    #pdf.doForm(xobj_name)
 
     drawCategoryTable(pdf,month_obj.tags)
 
@@ -67,8 +51,8 @@ def drawPDF(month_obj):
     pdf.setFont("Helvetica-Bold", 22)
     pdf.drawString(50,35,"Gesamtausgaben: "+str(-total_spent)+" €")
 
-    if not (str(month_obj.year_no) in os.listdir(home+"/Balance Sheets")):
-        os.mkdir(home+"/Balance Sheets/"+str(month_obj.year_no))
+    if not str(month_obj.year_no) in os.listdir(folder):
+        os.mkdir(Path(folder)/str(month_obj.year_no))
     pdf.save()
 
 def drawImage(image_path,pdf,x,y,scale):
@@ -78,7 +62,6 @@ def drawImage(image_path,pdf,x,y,scale):
     renderPDF.draw(drawing, pdf, x,y)
 
 def drawWeeksTable(pdf,weeks,month,year):
-    print("Drawing "+str(month)+" - "+str(year))
     data = []
     week_dates =[]
     for week in weeks.keys():
@@ -159,6 +142,18 @@ def drawBalanceTable(pdf,budget,spent,payback,x,y):
     t.wrapOn(pdf, 500, 300)
     t.drawOn(pdf, x, y)
     return t
+
+
+def prepare4Saving(file_name,vector):
+    if vector:
+        file_name += ".svg"
+    else:
+        file_name += ".png"
+    graph_path = mm_dir_path / "Graphs" / file_name
+    if not (mm_dir_path / "Graphs").is_dir():
+        os.mkdir(mm_dir_path / "Graphs")
+
+    return graph_path
 
 def main():
     drawPDFCollection(2018)

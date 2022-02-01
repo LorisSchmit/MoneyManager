@@ -1,18 +1,17 @@
-from createBalanceSheets import drawImage
+from createBalanceSheets import drawImage,prepare4Saving
 
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from operator import itemgetter
 from pathlib import Path
+from database_api import mm_dir_path
 
-def createPDF(year,pre_year):
-    print("Drawing yearly sheet for",year.year_no)
-    home = str(Path.home())
-    file_name = home+"/Balance Sheets/Yearly Sheet"+str(year.year_no)+".pdf"
+def createPDF(year,pre_year,folder):
+    file_name = Path(folder) / str("Yearly Sheet"+str(year.year_no)+".pdf")
 
-    graph_path_budget = "Graphs/Budget"+str(year.year_no)+".svg"
-    graph_path_expenses = "Graphs/Expenses"+str(year.year_no)+".svg"
+    graph_path_budget = mm_dir_path / "Graphs" /str("Budget"+str(year.year_no)+".svg")
+    graph_path_expenses = mm_dir_path / "Graphs" /str("Expenses"+str(year.year_no)+".svg")
 
     document_title = "Balance Sheet "+str(year.year_no)
     title = "Balance Sheet "+str(year.year_no)
@@ -21,7 +20,7 @@ def createPDF(year,pre_year):
     pers_spent = -year.pers_spent
     budget = year.budget
 
-    pdf = canvas.Canvas(file_name)
+    pdf = canvas.Canvas(str(file_name))
     pdf.setTitle(document_title)
 
 

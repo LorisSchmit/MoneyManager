@@ -1,4 +1,6 @@
 import sqlite3
+from pathlib import Path
+
 
 def create_connection(db_file):
     conn = None
@@ -59,13 +61,6 @@ def updatePBAssign(conn,id,pb_assign):
     cur.execute(sql,(pb_assign,id))
     return cur.lastrowid
 
-def main():
-    home = "/Users/lorisschmit1"
-    db_file = home + "/Documents/db.db"
-    conn = create_connection(db_file)
-    with conn:
-        updatePBAssign(conn, 1522, 1517)
-
 
 def deleteAll(conn,table):
     sql = "delete from "+table
@@ -75,5 +70,3 @@ def deleteAll(conn,table):
     cur.execute(sql)
     return 0
 
-if __name__ == '__main__':
-    main()

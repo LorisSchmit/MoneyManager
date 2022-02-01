@@ -6,6 +6,7 @@ import matplotlib.colors as mcolors
 import numpy as np
 import plotly.express as px
 import threading
+import os
 
 income_tags = importTable("income_tags",tags=True)
 
@@ -201,7 +202,7 @@ class Year:
 
         return 0
 
-    def createBudgetGraph(self):
+    def createBudgetGraph(self,vector=True):
         font_size = 12
         labels = list(self.budget_tagged.keys())
         values = list(self.budget_tagged.values())
@@ -219,9 +220,11 @@ class Year:
         pie = ax.pie(values, labels=labels, startangle=rot_fact, labeldistance=0.35,
                      textprops={"color": "white", "fontsize": font_size, "rotation_mode": 'anchor', "va": 'center',
                                 "ha": 'right'}, rotatelabels=True, colors=cs)
-        fig.savefig("Graphs/Budget" + str(self.year_no) + ".svg", bbox_inches="tight", dpi=1000)
+        file_name = "Budget"+str(self.year_no)
+        graph_path = prepare4Saving(file_name, vector)
+        fig.savefig(graph_path, bbox_inches="tight", dpi=1000)
 
-    def createExpensesGraph(self):
+    def createExpensesGraph(self,vector=True):
         labels = list(self.tags_shortened.keys())
         values = list(self.tags_shortened.values())
         font_size = 12
@@ -281,11 +284,14 @@ class Year:
                         legend_patches.append(pbs_pie[0][i])
                         legend_labels.append("Rückzahlung")
             ax.legend(legend_patches, legend_labels, loc="lower left", framealpha=0)
-        fig.savefig("Graphs/Expenses" + str(self.year_no) + ".svg",bbox_inches="tight",dpi=1000)
+
+        file_name = "Expenses" + str(self.year_no)
+        graph_path = prepare4Saving(file_name, vector)
+        fig.savefig(graph_path, bbox_inches="tight", dpi=1000)
 
 
 
-    def createBudgetTreemap(self):
+    def createBudgetTreemap(self,vector=True):
         print("Drawing budget treemap for",self.year_no)
         labels = list(self.budget_tagged.keys())
         values = list(self.budget_tagged.values())
@@ -293,10 +299,12 @@ class Year:
         fig = px.treemap(names=labels,values=values,parents=parents,width=510,height=400)#,color=cs)
         fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
         fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
-        fig.write_image("Graphs/Budget" + str(self.year_no) + ".svg")
+        file_name = "Budget" + str(self.year_no)
+        graph_path = prepare4Saving(file_name, vector)
+        fig.write_image(graph_path)
 
 
-    def createExpensesTreemap(self):
+    def createExpensesTreemap(self,vector=True):
         print("Drawing expenses treemap for",self.year_no)
         labels = list(self.tags.keys())
         values = list(self.tags.values())
@@ -308,7 +316,9 @@ class Year:
         fig = px.treemap(names=labels,values=values,parents=parents,width=510,height=710)#,color=cs)
         fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
         fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
-        fig.write_image("Graphs/Expenses" + str(self.year_no) + ".svg")
+        file_name = "Expenses" + str(self.year_no)
+        graph_path = prepare4Saving(file_name, vector)
+        fig.write_image(graph_path)
 
     def perMonth(self,num_top_tags = 8,pre_year=True):
         top_tags_candidates = list(reversed(self.tags.items()))
@@ -334,30 +344,30 @@ class Year:
 
 
 
-def createYearlySheet(year_no,redraw_graphs=False,gui=None):
+def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
     if gui is not None:
-        gui.progressBarLabel.setText("Yearly balance sheet creation started")
+        gui.progressBarLabel.setText("Jährliche Bilanz PDF Erstellung gestartet")
     year = Year(year_no)
     if gui is not None:
         gui.yearlySheetCreationProgressBar.setValue(25)
-        gui.progressBarLabel.setText("Drawing budget treemap for "+str(year_no))
+        gui.progressBarLabel.setText("Erstellen des Budget Diagramms für "+str(year_no))
     if redraw_graphs:
         year.createBudgetTreemap()
         if gui is not None:
             gui.yearlySheetCreationProgressBar.setValue(50)
-            gui.progressBarLabel.setText("Drawing expenses treemap for " +str(year_no))
+            gui.progressBarLabel.setText("Erstellen des Ausgaben Diagramms für " +str(year_no))
         year.createExpensesTreemap()
         if gui is not None:
             gui.yearlySheetCreationProgressBar.setValue(75)
-            gui.progressBarLabel.setText("Drawing yearly balance sheet for " +str( year_no))
-    createPDF(year,year.pre_year)
+            gui.progressBarLabel.setText("Erstellen der jährlichen Bilanz PDF für " +str(year_no))
+    createPDF(year,year.pre_year,folder)
     if gui is not None:
         gui.yearlySheetCreationProgressBar.setValue(100)
-        gui.progressBarLabel.setText("Yearly balance sheet done!")
+        gui.progressBarLabel.setText("Jährliche Bilanz PDF fertig!")
 
-def executeCreateSingleYear(year,redraw_graphs=False,gui=None):
+def executeCreateSingleYear(year,folder,redraw_graphs=False,gui=None):
     print("Yearly Balance Sheet Creation started")
-    new_thread = threading.Thread(target=createYearlySheet,args=(year,redraw_graphs,gui,))
+    new_thread = threading.Thread(target=createYearlySheet,args=(year,folder,redraw_graphs,gui,))
     new_thread.start()
 
 if __name__ == '__main__':
