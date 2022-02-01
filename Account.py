@@ -65,7 +65,8 @@ def importAllAccounts(file):
     return accounts
 
 def exportAllAccounts(accounts,file):
-    if os.path.isfile(file) and len(accounts)>0:
+    data = {}
+    if len(accounts)>0:
         data = {"accounts":[]}
         for acc in accounts:
             new_account = {'name': acc.name,
