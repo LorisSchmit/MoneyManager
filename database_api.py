@@ -11,12 +11,12 @@ from shutil import copyfile
 
 mm_dir_path = Path(__file__).parent
 home = Path.home()
-if str(home) == "/Users/lorisschmit1":
-    db_file = home / "Documents" /"db_private.db"
-    db_file_backup = home / "Documents" / "db_private_backup.db"
-else:
-    db_file = mm_dir_path / "db.db"
-    db_file_backup = mm_dir_path / "db_backup.db"
+#if str(home) == "/Users/lorisschmit1":
+ #   db_file = home / "Documents" /"db_private.db"
+ #   db_file_backup = home / "Documents" / "db_private_backup.db"
+#else:
+db_file = mm_dir_path / "db.db"
+db_file_backup = mm_dir_path / "db_backup.db"
 
 
 def object2list(action):

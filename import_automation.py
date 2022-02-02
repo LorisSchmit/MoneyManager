@@ -23,7 +23,9 @@ def newFileDetectedListener(event,gui):
         print("New File detected : " + file)
         importNewFile(file,account,gui=gui)
         ind = file.rfind("/")
-        dest_file = file[:ind + 1] + "imported" + file[ind:]
+        dest_file = Path(file[:ind + 1]) / "imported" / Path(file[ind:]) #+ "imported" + file[ind:]
+        if not (Path(file[:ind + 1]) / "imported").is_dir():
+            os.mkdir(Path(file[:ind + 1]) / "imported")
         os.rename(file, dest_file)
     else:
         gui.accountDetectedLabel.setText("Unbekanntes Konto")
@@ -53,8 +55,6 @@ def launchEventListener(gui,path):
     case_sensitive = True
     my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
     my_event_handler.on_created = lambda event,gui_obj=gui: newFileDetectedListener(event,gui_obj)
-    #home = str(Path.home())
-    #path = home + "/Movements"
     go_recursively = True
     my_observer = Observer()
     my_observer.schedule(my_event_handler, path, recursive=go_recursively)

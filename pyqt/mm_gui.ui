@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
@@ -23,11 +24,11 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="transactsTab">
      <attribute name="title">
-      <string>&#220;bersicht</string>
+      <string>Übersicht</string>
      </attribute>
      <widget class="QTableView" name="transactsTableView">
       <property name="geometry">
@@ -166,7 +167,7 @@
        <item>
         <widget class="QDateEdit" name="endDateEdit">
          <property name="locale">
-          <locale country="Germany" language="German" />
+          <locale language="German" country="Germany"/>
          </property>
          <property name="date">
           <date>
@@ -233,11 +234,11 @@
       <attribute name="verticalHeaderVisible">
        <bool>false</bool>
       </attribute>
-      <row />
-      <column />
-      <column />
-      <column />
-      <column />
+      <row/>
+      <column/>
+      <column/>
+      <column/>
+      <column/>
      </widget>
      <widget class="QLabel" name="importProgressLabel">
       <property name="enabled">
@@ -252,7 +253,7 @@
        </rect>
       </property>
       <property name="text">
-       <string />
+       <string/>
       </property>
      </widget>
      <widget class="QWidget" name="gridLayoutWidget">
@@ -265,7 +266,7 @@
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item alignment="Qt::AlignVCenter" column="0" row="0">
+       <item row="0" column="0" alignment="Qt::AlignVCenter">
         <widget class="QLabel" name="importPathLabel">
          <property name="maximumSize">
           <size>
@@ -274,11 +275,11 @@
           </size>
          </property>
          <property name="text">
-          <string>Ordner &#252;ber den neue Dateien importiert werden:</string>
+          <string>Ordner über den neue Dateien importiert werden:</string>
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignHCenter" column="0" row="2">
+       <item row="2" column="0" alignment="Qt::AlignHCenter">
         <widget class="QPushButton" name="activateImportButton">
          <property name="maximumSize">
           <size>
@@ -291,14 +292,14 @@
          </property>
         </widget>
        </item>
-       <item column="0" row="1">
+       <item row="1" column="0">
         <widget class="QLineEdit" name="browseFolderEdit">
          <property name="text">
-          <string>/Users/lorisschmit1/Movements</string>
+          <string/>
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignHCenter" column="0" row="6">
+       <item row="6" column="0" alignment="Qt::AlignHCenter">
         <widget class="QPushButton" name="importButton">
          <property name="maximumSize">
           <size>
@@ -311,24 +312,24 @@
          </property>
         </widget>
        </item>
-       <item column="1" row="1">
+       <item row="1" column="1">
         <widget class="QPushButton" name="browseFolderButton">
          <property name="text">
           <string>Durchsuchen</string>
          </property>
         </widget>
        </item>
-       <item column="1" row="5">
+       <item row="5" column="1">
         <widget class="QPushButton" name="browseFileButton">
          <property name="styleSheet">
-          <string notr="true" />
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Durchsuchen</string>
          </property>
         </widget>
        </item>
-       <item column="0" row="4">
+       <item row="4" column="0">
         <widget class="QLabel" name="importPathLabel_2">
          <property name="maximumSize">
           <size>
@@ -341,14 +342,14 @@
          </property>
         </widget>
        </item>
-       <item column="0" row="5">
+       <item row="5" column="0">
         <widget class="QLineEdit" name="browseFileEdit">
          <property name="text">
-          <string>/Users/lorisschmit1/Movements/Umsaetze_DE22660908000007898649_2021.10.09.csv</string>
+          <string/>
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignHCenter" column="0" row="3">
+       <item row="3" column="0" alignment="Qt::AlignHCenter">
         <widget class="QLabel" name="label">
          <property name="font">
           <font>
@@ -374,17 +375,17 @@
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item column="0" row="3">
+       <item row="3" column="0">
         <widget class="QLineEdit" name="tagReferenceEdit">
          <property name="inputMask">
-          <string />
+          <string/>
          </property>
          <property name="text">
-          <string />
+          <string/>
          </property>
         </widget>
        </item>
-       <item column="0" row="0">
+       <item row="0" column="0">
         <widget class="QLabel" name="label_2">
          <property name="enabled">
           <bool>true</bool>
@@ -394,38 +395,38 @@
          </property>
         </widget>
        </item>
-       <item column="1" row="1">
+       <item row="1" column="1">
         <widget class="QPushButton" name="taggingEnterButton">
          <property name="enabled">
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Best&#228;tigen</string>
+          <string>Bestätigen</string>
          </property>
         </widget>
        </item>
-       <item column="0" row="1">
+       <item row="1" column="0">
         <widget class="QLineEdit" name="taggingLineEdit">
          <property name="enabled">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item column="2" row="3">
+       <item row="3" column="2">
         <widget class="QPushButton" name="notSaveTagButton">
          <property name="text">
           <string>Nein</string>
          </property>
         </widget>
        </item>
-       <item column="1" row="3">
+       <item row="3" column="1">
         <widget class="QPushButton" name="saveTagButton">
          <property name="text">
           <string>Speichern</string>
          </property>
         </widget>
        </item>
-       <item column="0" row="2">
+       <item row="2" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>Speichern als:</string>
@@ -444,7 +445,7 @@
        </rect>
       </property>
       <property name="text">
-       <string />
+       <string/>
       </property>
      </widget>
      <widget class="QLabel" name="label_5">
@@ -566,7 +567,7 @@
        <item>
         <widget class="QPushButton" name="AssignPaybackButton">
          <property name="text">
-          <string>R&#252;ckzahlungen zuweisen</string>
+          <string>Rückzahlungen zuweisen</string>
          </property>
         </widget>
        </item>
@@ -595,7 +596,7 @@
        </rect>
       </property>
       <property name="text">
-       <string />
+       <string/>
       </property>
      </widget>
      <widget class="QWidget" name="gridLayoutWidget_3">
@@ -608,17 +609,21 @@
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item column="0" row="1">
-        <widget class="QLineEdit" name="balanceSheetFolderEdit"><property name="text"><string>/Users/lorisschmit1/Desktop</string></property></widget>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="balanceSheetFolderEdit">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </item>
-       <item column="1" row="1">
+       <item row="1" column="1">
         <widget class="QPushButton" name="balanceSheetFolderButton">
          <property name="text">
           <string>Durchsuchen</string>
          </property>
         </widget>
        </item>
-       <item column="0" row="0">
+       <item row="0" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
           <string>Ordner in den die PDFs gespeichert werden:</string>
@@ -640,14 +645,14 @@
        <item>
         <widget class="QPushButton" name="createYearlyBalanceButton">
          <property name="text">
-          <string>J&#228;hrliche Bilanz PDF erstellen</string>
+          <string>Jährliche Bilanz PDF erstellen</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="showYearlyBalanceSheetButton">
          <property name="text">
-          <string>J&#228;hrliche Bilanz PDF zeigen</string>
+          <string>Jährliche Bilanz PDF zeigen</string>
          </property>
         </widget>
        </item>
@@ -689,7 +694,7 @@
        </rect>
       </property>
       <property name="text">
-       <string />
+       <string/>
       </property>
      </widget>
     </widget>
@@ -723,14 +728,14 @@
        <item>
         <widget class="QPushButton" name="createAccountButton">
          <property name="text">
-          <string>Konto hinzuf&#252;gen</string>
+          <string>Konto hinzufügen</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="deleteAccountButton">
          <property name="text">
-          <string>Konto l&#246;schen</string>
+          <string>Konto löschen</string>
          </property>
         </widget>
        </item>
@@ -759,8 +764,8 @@
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar" />
+  <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources />
- <connections />
+ <resources/>
+ <connections/>
 </ui>
