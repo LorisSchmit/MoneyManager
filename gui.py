@@ -57,7 +57,7 @@ class MainGUI(QMainWindow):
         self.transactsTableView.setSortingEnabled(True)
         self.allTransactsButton.clicked.connect(self.displayAllTransacts)
         self.refreshButton.clicked.connect(self.refreshTransacts)
-        #self.displayTransacts()
+        self.displayTransacts()
 
         # Tab: Import
         self.browseFolderButton.clicked.connect(self.selectFolder)
@@ -177,8 +177,8 @@ class MainGUI(QMainWindow):
 
         self.model.setRowCount(len(self.show_transacts))
         for row, (id, action) in enumerate(self.show_transacts.items()):
-            item_list = [action.id, action.date, action.recipient, action.reference,
-                    action.amount, action.currency, action.tag, action.account.name]
+            account = (action.account.name if action.account is not None else "")
+            item_list = [action.id, action.date, action.recipient, action.reference,action.amount, action.currency, action.tag, account]
             for col, entry in enumerate(item_list):
                 item = QStandardItem()
                 if type(entry) is datetime:
