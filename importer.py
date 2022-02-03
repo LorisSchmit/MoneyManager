@@ -24,18 +24,32 @@ class Importer:
         transacts_list = []
         transacts_temp = []
         with open(file, mode="r", encoding="latin-1") as csv_file:
-            dialect = csv.Sniffer().sniff(csv_file.read(1024), delimiters=";,")
+            delimiterFound = False
+            while not delimiterFound:
+                try:
+                    dialect = csv.Sniffer().sniff(csv_file.readline(), delimiters=";,")
+                    delimiterFound = True
+                except:
+                    pass
             csv_file.seek(0)
             csv_reader = csv.reader(csv_file, dialect)
-
+            max_col_num = 0
             for index,row in enumerate(csv_reader):
                 if len(row)>0:
-                    if row[0][0] >= '0' and row[0][0] <= '9':
-                        transacts_list.append(row)
+                    #if row[0][0] >= '0' and row[0][0] <= '9':
+                    transacts_list.append(row)
+                    if len(row)>max_col_num:
+                        max_col_num = len(row)
+            for row in transacts_list:
+                if len(row) < max_col_num:
+                    row.extend(["" for _ in range(max_col_num-len(row))])
+
             transacts_list = np.array(transacts_list)
             for group in account.rowsDeleted:
                 for deleteRow in list(reversed(sorted(group))):
                     transacts_list = np.delete(transacts_list,deleteRow,0)
+
+
             for group in account.colsDeleted:
                 for deleteCol in list(reversed(sorted(group))):
                     transacts_list = np.delete(transacts_list,deleteCol,1)
