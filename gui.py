@@ -254,6 +254,7 @@ class CreateAccountDialog(QDialog):
         self.headers = []
         self.rowsDeleted = []
         self.colsDeleted = []
+        self.detectString = ""
         self.statementDetectionButton.clicked.connect(self.statementDetectionStarted)
         self.buttonBox.accepted.connect(self.accepted)
         self.buttonBox.rejected.connect(self.reject)
@@ -335,12 +336,15 @@ class StatementDetectionDialog(QDialog):
                 index_list.append(index)
                 index_row = index.row()
 
-                if index_row >= len(self.transacts)-2 and index_row >= 3:
+                if index_row >= len(self.transacts)-3 and index_row >= 4:
                     toAppend.append(index_row - len(self.transacts))
                 else:
                     toAppend.append(index_row)
             if -2 in toAppend and -1 in toAppend and len(toAppend) == 2:
-                toAppend = [-1,-1]
+                if -3 in toAppend:
+                    toAppend = [-1,-1,-1]
+                else:
+                    toAppend = [-1,-1]
             self.account_dialog.rowsDeleted.append(toAppend)
 
             for index in index_list:

@@ -6,6 +6,7 @@ from watchdog.events import PatternMatchingEventHandler
 from importer import importNewFile
 import threading
 from Account import *
+from datetime import datetime
 
 mm_dir_path = Path(__file__).parent
 
@@ -23,9 +24,13 @@ def newFileDetectedListener(event,gui):
         print("New File detected : " + file)
         importNewFile(file,account,gui=gui)
         ind = file.rfind("/")
-        dest_file = Path(file[:ind + 1]) / "imported" / Path(file[ind:]) #+ "imported" + file[ind:]
-        if not (Path(file[:ind + 1]) / "imported").is_dir():
-            os.mkdir(Path(file[:ind + 1]) / "imported")
+        dest_file = Path(file[:ind + 1]) / "imported" / Path(file[ind+1:])
+        dir = Path(file[:ind + 1]) / "imported"
+        if not dir.is_dir():
+            os.mkdir(dir)
+        if dest_file.exists():
+            now = datetime.now()
+            dest_file = dest_file.parent / (dest_file.name + now.strftime("%d-%m-%Y")+".csv")
         os.rename(file, dest_file)
     else:
         gui.accountDetectedLabel.setText("Unbekanntes Konto")

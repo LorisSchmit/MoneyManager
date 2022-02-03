@@ -7,7 +7,7 @@ from pathlib import Path
 mm_dir_path = Path(__file__).parent
 
 class Account:
-    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString,dmy_format,signs=None):
+    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString="",dmy_format=True,signs=None):
         self.name  = name
         self.balance = balance
         self.rowsDeleted = rowsDeleted
@@ -40,13 +40,18 @@ def accountsLookup(account_name):
 def statementDetection(file):
     transacts = []
     with open(file,mode="r",encoding="latin-1") as csv_file:
-        dialect = csv.Sniffer().sniff(csv_file.read(1024), delimiters=";,")
+        delimiterFound = False
+        while not delimiterFound:
+            try:
+                dialect = csv.Sniffer().sniff(csv_file.readline(), delimiters=";,")
+                delimiterFound = True
+            except:
+                pass
         csv_file.seek(0)
         csv_reader = csv.reader(csv_file, dialect)
         for index, row in enumerate(csv_reader):
             if len(row) > 0:
-                if row[0][0] >= '0' and row[0][0] <= '9':
-                    transacts.append(row)
+                transacts.append(row)
     return transacts
 
 
