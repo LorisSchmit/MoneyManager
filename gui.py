@@ -57,7 +57,7 @@ class MainGUI(QMainWindow):
         self.transactsTableView.setSortingEnabled(True)
         self.allTransactsButton.clicked.connect(self.displayAllTransacts)
         self.refreshButton.clicked.connect(self.refreshTransacts)
-        self.displayTransacts()
+        #self.displayTransacts()
 
         # Tab: Import
         self.browseFolderButton.clicked.connect(self.selectFolder)
@@ -69,6 +69,8 @@ class MainGUI(QMainWindow):
         self.importButton.clicked.connect(lambda: newSingleFile(str(self.browseFileEdit.text()), self))
 
         self.taggingTableWidget.setHorizontalHeaderLabels(['Datum', 'Sender', 'Referenz', 'Betrag'])
+        self.taggingTableWidget.setColumnWidth(1, 150)
+        self.taggingTableWidget.setColumnWidth(2, 300)
         self.tagReady = False
         self.saveTagReady = False
         self.notSaveTag = False
@@ -143,7 +145,7 @@ class MainGUI(QMainWindow):
         if currentMonth < 12:
             QendDate = QDate(currentYear, currentMonth + 1, 1)
         else:
-            QendDate = QDate(currentYear + 1, currentMonth, 1)
+            QendDate = QDate(currentYear + 1, 1, 1)
         self.startDateEdit.setDate(QstartDate)
         self.endDateEdit.setDate(QendDate)
         self.model = QStandardItemModel(0, 8)
@@ -160,7 +162,7 @@ class MainGUI(QMainWindow):
             if startDate.month < 12:
                 QendDate = QDate(startDate.year, startDate.month + 1, 1)
             else:
-                QendDate = QDate(startDate.year, + 1, startDate.month, 1)
+                QendDate = QDate(startDate.year + 1, 1, 1)
             self.endDateEdit.setDate(QendDate)
 
         endDate = self.endDateEdit.date().toPyDate()

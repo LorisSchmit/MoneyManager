@@ -199,9 +199,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>375</y>
-        <width>401</width>
-        <height>31</height>
+        <y>360</y>
+        <width>641</width>
+        <height>61</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -217,7 +217,7 @@
        <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustIgnored</enum>
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
       </property>
       <property name="rowCount">
        <number>1</number>
@@ -228,11 +228,23 @@
       <attribute name="horizontalHeaderVisible">
        <bool>false</bool>
       </attribute>
+      <attribute name="horizontalHeaderCascadingSectionResizes">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>100</number>
+      </attribute>
       <attribute name="horizontalHeaderHighlightSections">
        <bool>true</bool>
       </attribute>
+      <attribute name="horizontalHeaderMinimumSectionSize">
+       <number>19</number>
+      </attribute>
       <attribute name="verticalHeaderVisible">
        <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>60</number>
       </attribute>
       <row/>
       <column/>
@@ -247,7 +259,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>415</y>
+        <y>430</y>
         <width>449</width>
         <height>21</height>
        </rect>
@@ -295,7 +307,7 @@
        <item row="1" column="0">
         <widget class="QLineEdit" name="browseFolderEdit">
          <property name="text">
-          <string/>
+          <string>/Users/lorisschmit1/Movements</string>
          </property>
         </widget>
        </item>
@@ -369,7 +381,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>445</y>
+        <y>460</y>
         <width>441</width>
         <height>125</height>
        </rect>
@@ -452,7 +464,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>330</y>
+        <y>320</y>
         <width>141</width>
         <height>31</height>
        </rect>
@@ -470,7 +482,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>310</y>
+        <y>300</y>
         <width>511</width>
         <height>16</height>
        </rect>
@@ -612,7 +624,7 @@
        <item row="1" column="0">
         <widget class="QLineEdit" name="balanceSheetFolderEdit">
          <property name="text">
-          <string/>
+          <string>/Users/lorisschmit1/Desktop/BalanceSheets</string>
          </property>
         </widget>
        </item>

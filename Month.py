@@ -216,7 +216,7 @@ def monthsPerYear(year):
         month.createBalanceSheet()
     return "All Balances for "+str(year)+" created"
 
-def createSingleMonth(month,year,folder,gui=None,redraw_graphs=False):
+def createSingleMonth(month,year,folder,gui=None,redraw_graphs=True):
     if gui is not None:
         gui.progressBarMonthLabel.setText("Monatliche Bilanz PDF Erstellung gestartet")
     month = Month(month, year)
