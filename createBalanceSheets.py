@@ -18,17 +18,17 @@ home = str(Path.home())
 
 def drawPDF(month_obj,folder):
     file_name = folder / Path(str(month_obj.year_no)) / Path(str(str(month_obj.year_no)+"-"+str(month_obj.month)+".pdf"))
-    image_path = mm_dir_path / "Graphs" / Path(str(str(month_obj.year_no)+" - "+str(month_obj.month)+".png"))
+    image_path = mm_dir_path / "Graphs" / Path(str(str(month_obj.year_no)+" - "+str(month_obj.month)+".svg"))
     document_title = str(month_obj.month)+" "+str(month_obj.year_no)
     title = month_obj.month_name + " " + str(month_obj.year_no)
     total_spent = month_obj.total_spent
 
     pdf = canvas.Canvas(str(file_name))
 
-    myImage = Image.open(image_path)
+    drawImage(image_path, pdf, 45, 350, 1)
 
-    pdf.setPageCompression(0)
-    pdf.drawInlineImage(myImage, 0, 400, width=400,height=400)
+    #pdf.setPageCompression(0)
+    #pdf.drawInlineImage(myImage, 0, 400, width=400,height=400)
 
     pdf.setTitle(document_title)
 
@@ -111,7 +111,7 @@ def drawCategoryTable(pdf,tags):
     pdf.setFont("Helvetica", 18)
     pdf.drawString(350, 720, 'Ausgaben pro Kategorie')
     pdf.line(350, 718, 546, 718)
-    t.wrapOn(pdf, 500, 300)
+    t.wrapOn(pdf, 400, 300)
     t.drawOn(pdf, 400, 700 - len(tags) * 25)
 
 def drawBalanceTable(pdf,budget,spent,payback,x,y):

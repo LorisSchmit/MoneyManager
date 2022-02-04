@@ -166,14 +166,27 @@ class Month(Year):
                 ax.legend(legend_patches,legend_labels,loc="lower left",framealpha=0)
 
             file_name = str(self.year_no) + " - " + str(self.month)
-            if vector:
-                file_name += ".svg"
-            else:
-                file_name += ".png"
-            graph_path = mm_dir_path / "Graphs" / file_name
-            if not (mm_dir_path / "Graphs").is_dir():
-                os.makedir(mm_dir_path / "Graphs")
+            graph_path = prepare4Saving(file_name, vector)
+
             fig.savefig(graph_path,bbox_inches="tight",dpi=1000)
+
+    def createExpensesTreemap(self,vector=True):
+        print("Drawing expenses treemap for",self.month_name,"-",self.year_no)
+        labels = list(self.tags.keys())
+        values = list(self.tags.values())
+        if "Rückzahlung" in labels:
+            pb_ind = labels.index("Rückzahlung")
+            labels.pop(pb_ind)
+            values.pop(pb_ind)
+        parents = ["" for _ in range(len(labels))]
+        fig = px.treemap(names=labels,values=values,parents=parents,width=300,height=400)#,color=cs)
+        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+        fig.data[0].texttemplate = "%{label} <br> %{percentEntry}"
+
+        file_name = str(self.year_no) + " - " + str(self.month)
+        graph_path = prepare4Saving(file_name, vector)
+
+        fig.write_image(graph_path)
 
     def assignPayback(self):
         all_transacts = getAllTransacts()
@@ -224,7 +237,7 @@ def createSingleMonth(month,year,folder,gui=None,redraw_graphs=True):
         if gui is not None:
             gui.monthlySheetCreationProgressBar.setValue(33)
             gui.progressBarMonthLabel.setText("Erstellen des Ausgaben Diagramms für "+str(month.month_name)+" "+str(month.year_no))
-        month.createGraph()
+        month.createExpensesTreemap()
         if gui is not None:
             gui.monthlySheetCreationProgressBar.setValue(66)
             gui.progressBarMonthLabel.setText("Erstellen der monatlichen Bilanz PDF für "+str(month.month_name)+" "+str(month.year_no))

@@ -95,7 +95,6 @@ class Importer:
             counter += 1
             id = start_index + counter
             transacts[id] = action
-        print(transacts)
         return transacts
 
 
