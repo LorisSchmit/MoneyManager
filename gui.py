@@ -21,9 +21,8 @@ from Month import executeCreateSingleMonth, executeAssignPayback, Month
 from Year import executeCreateSingleYear
 from import_automation import activateImport,newSingleFile
 from Account import Account,statementDetection, importAllAccounts,deleteAccount,exportAllAccounts,accounts
-
-
 from database_api import getAllTransacts
+from tagger import unique_tags
 
 
 
@@ -76,6 +75,12 @@ class MainGUI(QMainWindow):
         self.notSaveTag = False
         self.taggingEnterButton.clicked.connect(self.tagEntered)
         self.taggingLineEdit.returnPressed.connect(self.taggingEnterButton.click)
+        completer = QCompleter()
+        self.taggingLineEdit.setCompleter(completer)
+        self.completer_model = QStringListModel()
+        completer.setModel(self.completer_model)
+        self.completer_model.setStringList(unique_tags)
+        #completer.activated.connect(self.onActivated)
         self.saveTagButton.clicked.connect(self.saveTag)
         self.notSaveTagButton.clicked.connect(self.notSave)
 
