@@ -133,6 +133,9 @@ class MainGUI(QMainWindow):
         with open(xml_path, "wb") as fh:
             tree.write(fh)
 
+    def onActivated(self):
+        QTimer.singleShot(0, self.taggingLineEdit.clear)
+
 
     def tagEntered(self):
         self.tagReady = True
@@ -275,12 +278,26 @@ class CreateAccountDialog(QDialog):
         transacts = statementDetection(file)
         statementDetectionDialog = StatementDetectionDialog(transacts,file,self)
 
-    def accepted(self):
+    def checkFile(self):
+        file = Path(self.exampleFileEdit.text())
+        if file.is_file() and (file.suffix == ".csv" or file.suffix == ".CSV"):
+            self.statementDetectionButton.setEnabled(True)
+        else:
+            dlg = QMessageBox.information(self, "CSV-Datei", "Datei zur Auszugserkennung ist ungültig.",
+                                          QMessageBox.StandardButton.Ok)
+
+    def accountCreated(self):
+        if self.nameLineEdit.text() == "":
+            dlg = QMessageBox.information(self,"Kontoname","Bitte gib ein Name für das Konto ein.",QMessageBox.StandardButton.Ok)
+            return 0
+        if not self.statementDetectionDone:
+            dlg = QMessageBox.information(self, "Auszugerkennung", "Bitte führe die Auszugserkennung durch.",QMessageBox.StandardButton.Ok)
+            return 0
         self.account_name = self.nameLineEdit.text()
         file = mm_dir_path / "accounts.json"
         if not hasattr(self, 'signs'):
             self.signs = None
-        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.colsDeleted, self.headers,self.detectString,self.dmy_format,signs=self.signs))
+        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.colsDeleted, self.headers,self.detectString,self.dmy_format,self.ignoreTypes,signs=self.signs))
         exportAllAccounts(accounts,file)
 
         self.close()
@@ -312,8 +329,12 @@ class StatementDetectionDialog(QDialog):
         detectString = detectString[:re.search(r"\d",detectString).start()]
         self.detectStringEdit.setText(detectString)
         self.account_dialog.detectString = detectString
+        self.detectStringEdit.textChanged.connect(lambda: self.enableIf(self.detectStringEdit,self.saveDetectStringButton))
 
         self.saveDetectStringButton.clicked.connect(self.detectFileBy)
+
+        self.ignoreTypeEdit.textChanged.connect(lambda: self.enableIf(self.ignoreTypeEdit,self.ignoreTypeSaveButton))
+        self.ignoreTypeSaveButton.clicked.connect(self.addIgnore)
 
         self.buttonBox.accepted.connect(self.accepted)
         self.buttonBox.rejected.connect(self.reject)

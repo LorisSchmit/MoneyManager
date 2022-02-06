@@ -75,8 +75,13 @@ class Importer:
                     params["type"] = values["Typ"]
                 if "Empfänger/Sender" in values:
                     params["recipient"] = values["Empfänger/Sender"]
-                if "Referenz" in values:
+                if account.name in ["Compte epargne","Compte courant"] and "Referenz" in values:
+                    reference_ind = values["Referenz"].rfind(",")
+                    params["recipient"] = values["Referenz"][:reference_ind]
+                    params["reference"] = values["Referenz"][reference_ind+1:]
+                elif "Referenz" in values:
                     params["reference"] = values["Referenz"]
+
                 if "Betrag" in values:
                     sign = 1
                     if account.signs is not None:
