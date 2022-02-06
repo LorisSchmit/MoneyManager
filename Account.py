@@ -7,7 +7,7 @@ from pathlib import Path
 mm_dir_path = Path(__file__).parent
 
 class Account:
-    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString="",dmy_format=True,signs=None):
+    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString="",dmy_format=True,ignoreTypes=[],signs=None):
         self.name  = name
         self.balance = balance
         self.rowsDeleted = rowsDeleted
@@ -16,6 +16,7 @@ class Account:
         self.detectString = detectString
         self.dmy_format = dmy_format
         self.signs = signs
+        self.ignoreTypes = ignoreTypes
         #self.balance = self.getBalance(name)[0]
         #self.date = self.getBalance(name)[1]
 
@@ -59,13 +60,13 @@ def importAllAccounts(file):
     accounts = []
     if os.path.isfile(file):
         if os.stat(file).st_size > 0:
-            with open(file, "r", encoding="latin-1") as json_file:
+            with open(file, "r", encoding="utf-8") as json_file:
                 account_data = json.load(json_file)
 
             if "accounts" in account_data:
                 for acc in account_data["accounts"]:
                     signs = (acc["signs"] if "signs" in acc else None)
-                    accounts.append(Account(acc["name"], acc["balance"],acc["rowsDeleted"], acc["colsDeleted"], acc["headers"],acc["detectString"],acc["dmy_format"],signs=signs))
+                    accounts.append(Account(acc["name"], acc["balance"],acc["rowsDeleted"], acc["colsDeleted"], acc["headers"],acc["detectString"],acc["dmy_format"],acc["ignoreTypes"],signs=signs))
 
     return accounts
 
@@ -80,12 +81,13 @@ def exportAllAccounts(accounts,file):
              'colsDeleted': acc.colsDeleted,
              'headers': acc.headers,
              'detectString': acc.detectString,
-             'dmy_format': acc.dmy_format}
+             'dmy_format': acc.dmy_format,
+             'ignoreTypes': acc.ignoreTypes}
             if acc.signs is not None:
                 new_account['signs'] = acc.signs
             data['accounts'].append(new_account)
 
-        with open(file, "w+", encoding="latin-1") as json_file:
+        with open(file, "w+", encoding="utf-8") as json_file:
             json_string = json.dumps(data)
             json_file.write(json_string)
     return data

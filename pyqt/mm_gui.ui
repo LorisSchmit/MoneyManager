@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="transactsTab">
      <attribute name="title">
@@ -389,6 +389,9 @@
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="3" column="0">
         <widget class="QLineEdit" name="tagReferenceEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="inputMask">
           <string/>
          </property>
@@ -426,6 +429,9 @@
        </item>
        <item row="3" column="2">
         <widget class="QPushButton" name="notSaveTagButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Nein</string>
          </property>
@@ -433,6 +439,9 @@
        </item>
        <item row="3" column="1">
         <widget class="QPushButton" name="saveTagButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Speichern</string>
          </property>
@@ -451,7 +460,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>290</y>
+        <y>280</y>
         <width>401</width>
         <height>20</height>
        </rect>
@@ -603,7 +612,7 @@
        <rect>
         <x>20</x>
         <y>180</y>
-        <width>311</width>
+        <width>321</width>
         <height>16</height>
        </rect>
       </property>

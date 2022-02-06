@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QFont, QStandardItemModel,QStandardItem
-from PyQt6.QtCore import QDate,QSortFilterProxyModel,Qt,QPersistentModelIndex
+from PyQt6.QtCore import QDate,QSortFilterProxyModel,Qt,QPersistentModelIndex,QStringListModel,QTimer
 from PyQt6 import uic
 import threading
 from collections import OrderedDict
@@ -265,9 +265,12 @@ class CreateAccountDialog(QDialog):
         self.rowsDeleted = []
         self.colsDeleted = []
         self.detectString = ""
+        self.ignoreTypes = []
+        self.statementDetectionDone = False
         self.statementDetectionButton.clicked.connect(self.statementDetectionStarted)
-        self.buttonBox.accepted.connect(self.accepted)
-        self.buttonBox.rejected.connect(self.reject)
+        self.exampleFileEdit.textChanged.connect(self.checkFile)
+        self.pushButtonOk.clicked.connect(self.accountCreated)
+        self.pushButtonCancel.clicked.connect(self.reject)
         self.exec()
 
     def search4File(self):
@@ -392,6 +395,17 @@ class StatementDetectionDialog(QDialog):
     def detectFileBy(self):
         self.account_dialog.detectString = self.detectStringEdit.text()
 
+    def addIgnore(self):
+        ignore_type = self.ignoreTypeEdit.text()
+        self.account_dialog.ignoreTypes.append(ignore_type)
+        self.ignoreTypeEdit.clear()
+
+    def enableIf(self,lineEdit,button):
+        if len(lineEdit.text()) > 0:
+            button.setEnabled(True)
+        else:
+            button.setEnabled(False)
+
     def accepted(self):
         self.account_dialog.headers = []
         for index in range(self.model.columnCount()):
@@ -401,6 +415,7 @@ class StatementDetectionDialog(QDialog):
             self.account_dialog.dmy_format = True
         else:
             self.account_dialog.dmy_format = False
+        self.account_dialog.statementDetectionDone = True
 
 
 class Ask4Sign(QDialog):

@@ -91,8 +91,8 @@ class Importer:
                     params["amount"] = sign*values["Betrag"]
                 if "Währung" in values:
                     params["currency"] = values["Währung"]
-
-                transacts_temp.append(Transaction(**params))
+                if values["Währung"].lower() == "eur" and values["Typ"] not in account.ignoreTypes:
+                    transacts_temp.append(Transaction(**params))
         transacts_temp = sorted(transacts_temp, key=lambda action: action.date)
         start_index = -1
         counter = 0
@@ -145,17 +145,6 @@ class Importer:
         for id,action in new_transacts.items():
             joined_transacts[id] = action
         final_transacts = OrderedDict()
-        """
-        if self.account == PP:
-            for id,action in joined_transacts.items():
-                if not (action.tag == "PayPal" and action.date <= list(self.new_transacts.items())[1][-1].date + dt.timedelta(days=1)):
-                    final_transacts[id] = action
-        elif self.account == VISA:
-            for id,action in joined_transacts.items():
-                if not (action.tag == "Visa" and action.date <= self.settlement_date):
-                    final_transacts[id] = action
-        else:
-        """
         final_transacts = joined_transacts
 
         final_transacts = OrderedDict(sorted(final_transacts.items(),key=lambda x: x[1].date))
