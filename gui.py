@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QFont, QStandardItemModel,QStandardItem
+from PyQt6.QtGui import QFont, QStandardItemModel,QStandardItem,QPixmap
 from PyQt6.QtCore import QDate,QSortFilterProxyModel,Qt,QPersistentModelIndex,QStringListModel,QTimer
 from PyQt6 import uic
 import threading
@@ -60,9 +60,18 @@ class MainGUI(QMainWindow):
 
         # Tab: Import
         self.browseFolderButton.clicked.connect(self.selectFolder)
-        if self.browseFolderEdit.text() != "":
-            self.importFolder = self.browseFolderEdit.text()
-        self.activateImportButton.clicked.connect(lambda: activateImport(self, self.importFolder))
+
+        self.importFolder = self.browseFolderEdit.text()
+        self.importActive = False
+        self.importThreadActive = False
+        self.ICON_RED_LED = str(mm_dir_path/"images"/Path("led-red-on.png"))
+        self.ICON_GREEN_LED = str(mm_dir_path/"images"/Path("green-led-on.png"))
+        self.pixmap_red = QPixmap(self.ICON_RED_LED)
+        self.pixmap_red = self.pixmap_red.scaled(18,18)
+        self.pixmap_green = QPixmap(self.ICON_GREEN_LED)
+        self.pixmap_green = self.pixmap_green.scaled(18, 18)
+        self.ledLabel.setPixmap(self.pixmap_red)
+        self.activateImportButton.clicked.connect(self.activateImportClicked)
 
         self.browseFileButton.clicked.connect(self.selectFile)
         self.importButton.clicked.connect(lambda: newSingleFile(str(self.browseFileEdit.text()), self))
@@ -80,7 +89,6 @@ class MainGUI(QMainWindow):
         self.completer_model = QStringListModel()
         completer.setModel(self.completer_model)
         self.completer_model.setStringList(unique_tags)
-        #completer.activated.connect(self.onActivated)
         self.saveTagButton.clicked.connect(self.saveTag)
         self.notSaveTagButton.clicked.connect(self.notSave)
 
@@ -107,6 +115,32 @@ class MainGUI(QMainWindow):
 
     def selectFile(self):
         self.browseFileEdit.setText(QFileDialog.getOpenFileName()[0])
+
+    def activateImportClicked(self):
+
+        self.importFolder = self.browseFolderEdit.text()
+        if self.importFolder == "":
+            dlg = QMessageBox.information(self, "Import Ablageort", "Bitte gib einen Ablageort für die Import csv-Dateien an.",
+                                          QMessageBox.StandardButton.Ok)
+            return
+        elif not Path(self.importFolder).is_dir():
+            dlg = QMessageBox.information(self, "Import Ablageort",
+                                          "Der angegebene Ablageort ist ungültig.",
+                                          QMessageBox.StandardButton.Ok)
+            return
+
+        self.importActive = not self.importActive
+
+        if not self.importThreadActive:
+            activateImport(self, self.importFolder)
+        if self.importActive:
+            self.ledLabel.setPixmap(self.pixmap_green)
+            self.importStatusLabel.setText("Import aktiv")
+            self.activateImportButton.setText("Import deaktivieren")
+        else:
+            self.ledLabel.setPixmap(self.pixmap_red)
+            self.importStatusLabel.setText("Import inaktiv")
+            self.activateImportButton.setText("Import aktivieren")
 
     def selectBalanceSheetFolder(self):
         self.balanceSheetFolderEdit.setText(QFileDialog.getExistingDirectory(self, "Select Directory"))

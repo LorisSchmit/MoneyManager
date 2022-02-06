@@ -12,28 +12,29 @@ mm_dir_path = Path(__file__).parent
 
 
 def newFileDetectedListener(event,gui):
-    file = event.src_path
-    account_detected = False
-    for acc in accounts:
-        if file.find(acc.detectString) >= 0:
-            account = acc
-            account_detected = True
+    if gui.importActive:
+        file = event.src_path
+        account_detected = False
+        for acc in accounts:
+            if file.find(acc.detectString) >= 0:
+                account = acc
+                account_detected = True
 
-    if account_detected:
-        gui.accountDetectedLabel.setText("Konto erkannt: " + account.name)
-        print("New File detected : " + file)
-        importNewFile(file,account,gui=gui)
-        ind = file.rfind("/")
-        dest_file = Path(file[:ind + 1]) / "imported" / Path(file[ind+1:])
-        dir = Path(file[:ind + 1]) / "imported"
-        if not dir.is_dir():
-            os.mkdir(dir)
-        if dest_file.exists():
-            now = datetime.now()
-            dest_file = dest_file.parent / (dest_file.name + now.strftime("%d-%m-%Y")+".csv")
-        os.rename(file, dest_file)
-    else:
-        gui.accountDetectedLabel.setText("Unbekanntes Konto")
+        if account_detected:
+            gui.accountDetectedLabel.setText("Konto erkannt: " + account.name)
+            print("New File detected : " + file)
+            importNewFile(file,account,gui=gui)
+            ind = file.rfind("/")
+            dest_file = Path(file[:ind + 1]) / "imported" / Path(file[ind+1:])
+            dir = Path(file[:ind + 1]) / "imported"
+            if not dir.is_dir():
+                os.mkdir(dir)
+            if dest_file.exists():
+                now = datetime.now()
+                dest_file = dest_file.parent / (dest_file.name + now.strftime("%d-%m-%Y")+".csv")
+            os.rename(file, dest_file)
+        else:
+            gui.accountDetectedLabel.setText("Unbekanntes Konto")
 
 
 def newSingleFile(file,gui=None):
@@ -76,4 +77,5 @@ def activateImport(gui,import_path):
     print("Import Activated")
     main_thread = threading.Thread(target=launchEventListener,args=(gui,import_path,))
     main_thread.start()
+    gui.importThreadActive = True
     return "Balance Creation started"
