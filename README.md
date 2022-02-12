@@ -50,7 +50,7 @@ Die Auszugserkennung ist nötig um aus den csv-Dateien, die essenziellen Informa
 
 Unnötigen Zeilen und Reihen können mit einem Einfach-Klick auf die Kopfzeile ausgewählt werden und mit dem __Ausgewählte löschen__-Button gelöscht werden.
 
-![ausgewaehlt loeschen] (readmepics/loeschen.png)
+![ausgewaehlt loeschen](readmepics/loeschen.png)
 
 Wenn das erledigt ist werden die einzelnen Spalten dem entsprechende Titel zugewiesen. Dafür mit Doppelklick auf die Kopfzeile und dann den entsprechenden Begriff auswählen.  
 <sub> (Gibt es noch eine Spalte für das Vorzeichen, weil alle Beträge im Absolutwert dargestellt sind, müssen nach der Definition der Vorzeichenspalte noch die Zeichen angegeben werden, die für Ein- und Ausgabe stehen)</sub> 
@@ -68,7 +68,7 @@ Um den Import zu starten gibt es zwei Möglichkeiten:
 1. ein Import-Ordner wird festgelegt, über den Dateien per Drag&Drop importiert werden können
 2. Dateien können auch einzeln ausgewählt werden und importiert werden
 
-![import] (readmepics/import.png)
+![import](readmepics/import.png)
 
 Wird ein Datei geladen, müssen alle Transaktionen kategorisiert werden. Dafür erscheinen der Reihe nach Transaktionen in der Tabelle. Diesen muss jetzt in der Textzeile eine Kategorie zugewiesen werden. In der __Speicher als__-Textzeile wird ein Vorschlag gegeben Zahlungsempfänger/Sender zu speichern damit in Zukunft Zahlung von/an diesen automatisch erkannt werden. Wird dies gewünscht dann auf __Speicher__ drücken ansonsten auf __Nein__.
 
