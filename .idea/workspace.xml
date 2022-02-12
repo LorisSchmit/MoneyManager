@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d7e51b9a-e878-4fc1-b09f-21ba0fd5ccc2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/import_automation.py" beforeDir="false" afterPath="$PROJECT_DIR$/import_automation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyqt/mm_gui.ui" beforeDir="false" afterPath="$PROJECT_DIR$/pyqt/mm_gui.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,7 +18,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/importer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="464">
+            <state relative-caret-position="1260">
               <caret line="93" column="52" selection-start-line="93" selection-start-column="52" selection-end-line="93" selection-end-column="52" />
               <folding>
                 <element signature="e#0#35#0" expanded="true" />
@@ -32,7 +30,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/import_automation.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="662">
+            <state relative-caret-position="1065">
               <caret line="79" column="10" selection-start-line="79" selection-end-line="80" />
               <folding>
                 <element signature="e#0#24#0" expanded="true" />
@@ -140,6 +138,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -160,7 +159,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -337,7 +335,7 @@
       <window_info anchor="bottom" id="Message" order="3" />
       <window_info anchor="bottom" id="Find" order="4" weight="0.32624114" />
       <window_info anchor="bottom" id="Version Control" order="5" weight="0.32826748" />
-      <window_info active="true" anchor="bottom" id="Run" order="6" visible="true" weight="0.1935157" />
+      <window_info anchor="bottom" id="Run" order="6" weight="0.1935157" />
       <window_info anchor="bottom" id="Debug" order="7" weight="0.27355623" />
       <window_info anchor="bottom" id="Cvs" order="8" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="9" weight="0.4" />
@@ -690,22 +688,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/import_automation.py">
+    <entry file="file://$PROJECT_DIR$/importer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="662">
-          <caret line="79" column="10" selection-start-line="79" selection-end-line="80" />
+        <state relative-caret-position="1260">
+          <caret line="93" column="52" selection-start-line="93" selection-start-column="52" selection-end-line="93" selection-end-column="52" />
           <folding>
-            <element signature="e#0#24#0" expanded="true" />
+            <element signature="e#0#35#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/importer.py">
+    <entry file="file://$PROJECT_DIR$/import_automation.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="464">
-          <caret line="93" column="52" selection-start-line="93" selection-start-column="52" selection-end-line="93" selection-end-column="52" />
+        <state relative-caret-position="1065">
+          <caret line="79" column="10" selection-start-line="79" selection-end-line="80" />
           <folding>
-            <element signature="e#0#35#0" expanded="true" />
+            <element signature="e#0#24#0" expanded="true" />
           </folding>
         </state>
       </provider>
