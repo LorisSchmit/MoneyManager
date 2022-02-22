@@ -11,7 +11,7 @@ import os
 income_tags = importTable("income_tags",tags=True)
 
 class Year:
-    def __init__(self,year_no,projection=True,pre_year=True):
+    def __init__(self,year_no,projection=True,pre_year=True,setBudget=False,budget=0):
         self.year_no = year_no
         self.all_transacts = getAllTransacts()
         self.yearly_transacts = self.getYearlyTransacts()
@@ -19,10 +19,18 @@ class Year:
         self.lean_transacts = self.getLeanTransacts(self.yearly_transacts)
         self.total_spent = self.getTotalSpent(self.yearly_transacts)
 
-        if projection and self.year_no >= datetime.now().year:
-            self.projections = importTable("budget_projection")
-        self.budget = self.getYearlyBudget(projection=projection)
-        self.budget_tagged = self.analyzeBudget(projection=projection)
+        if projection and self.year_no >= datetime.now().year and not setBudget:
+            projs = importTable("budget_projection")
+            self.projections = []
+            for proj in projs:
+                if proj["year"] == datetime.now().year:
+                    self.projections.append(proj)
+            self.budget = self.getYearlyBudget(projection=projection)
+            self.budget_tagged = self.analyzeBudget(projection=projection)
+        elif setBudget and self.year_no >= datetime.now().year:
+            self.budget = budget
+        self.setBudget = setBudget
+
         tags = self.perTag()
         self.tags = tags
         self.max = self.biggestTag(self.tags)[1]
@@ -326,7 +334,7 @@ class Year:
         perMonth = OrderedDict()
         perMonth["Gesamt"] = round(-self.pers_spent/12,2)
         i = 0
-        while len(perMonth.items()) < num_top_tags:
+        while len(perMonth.items()) < num_top_tags and i < len(top_tags_candidates):
             tag,value = top_tags_candidates[i]
             if tag in option4top_tags:
                 perMonth[tag] = round(value/12,2)
@@ -345,25 +353,34 @@ class Year:
 
 
 def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
+    projection = False
+    budget = 0
+    setBudget = False
     if gui is not None:
-        gui.progressBarLabel.setText("Jährliche Bilanz PDF Erstellung gestartet")
-    year = Year(year_no)
+        #gui.progressBarLabel.setText("Jährliche Bilanz PDF Erstellung gestartet")
+        if gui.takeProjRadio.isChecked():
+            projection = True
+        if gui.setBudgetRadio.isChecked():
+            budget = gui.budget
+            setBudget = True
+    year = Year(year_no,projection=projection,setBudget=setBudget,budget=budget)
     if gui is not None:
         gui.yearlySheetCreationProgressBar.setValue(25)
-        gui.progressBarLabel.setText("Erstellen des Budget Diagramms für "+str(year_no))
+        #gui.progressBarLabel.setText("Erstellen des Budget Diagramms für "+str(year_no))
     if redraw_graphs:
-        year.createBudgetTreemap()
+        if not setBudget:
+            year.createBudgetTreemap()
         if gui is not None:
             gui.yearlySheetCreationProgressBar.setValue(50)
-            gui.progressBarLabel.setText("Erstellen des Ausgaben Diagramms für " +str(year_no))
+            #gui.progressBarLabel.setText("Erstellen des Ausgaben Diagramms für " +str(year_no))
         year.createExpensesTreemap()
         if gui is not None:
             gui.yearlySheetCreationProgressBar.setValue(75)
-            gui.progressBarLabel.setText("Erstellen der jährlichen Bilanz PDF für " +str(year_no))
-    createPDF(year,year.pre_year,folder)
+            #gui.progressBarLabel.setText("Erstellen der jährlichen Bilanz PDF für " +str(year_no))
+    createPDF(year,year.pre_year,folder,setBudget=setBudget)
     if gui is not None:
         gui.yearlySheetCreationProgressBar.setValue(100)
-        gui.progressBarLabel.setText("Jährliche Bilanz PDF fertig!")
+        #gui.progressBarLabel.setText("Jährliche Bilanz PDF fertig!")
 
 def executeCreateSingleYear(year,folder,redraw_graphs=False,gui=None):
     print("Yearly Balance Sheet Creation started")

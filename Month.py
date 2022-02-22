@@ -5,7 +5,7 @@ from Year import *
 
 
 class Month(Year):
-    def __init__(self,month,year,projection=True):
+    def __init__(self,month,year,projection=True,setBudget=False,budget=0):
         self.month = month
         self.month_name = self.monthNumberToMonthName()
         self.year_no = year
@@ -18,8 +18,15 @@ class Month(Year):
             self.tags = self.perTag()
             self.total_spent = self.getTotalSpent(self.monthly_transacts)
             if projection and self.year_no >= datetime.now().year:
-                self.projections = importTable("budget_projection")
-            self.budget = self.getMonthlyBudget(projection=projection)
+                projs = importTable("budget_projection")
+                self.projections = []
+                for proj in projs:
+                    if proj["year"] == datetime.now().year:
+                        self.projections.append(proj)
+            if not setBudget:
+                self.budget = self.getMonthlyBudget(projection=projection)
+            else:
+                self.budget = round(budget/12,2)
             self.max = self.biggestTag(self.tags)[1]
             self.weeks = self.perWeek()
             self.pbs = self.getPayBacks()
@@ -39,7 +46,7 @@ class Month(Year):
 
 
     def getMonthlyBudget(self,projection=True):
-        yearly_budget = self.getYearlyBudget(self)
+        yearly_budget = self.getYearlyBudget(projection=projection)
         monthly_budget = round(yearly_budget/12.0,2)
         return monthly_budget
 
@@ -230,9 +237,17 @@ def monthsPerYear(year):
     return "All Balances for "+str(year)+" created"
 
 def createSingleMonth(month,year,folder,gui=None,redraw_graphs=True):
+    projection = False
+    budget = 0
+    setBudget = False
     if gui is not None:
         gui.progressBarMonthLabel.setText("Monatliche Bilanz PDF Erstellung gestartet")
-    month = Month(month, year)
+        if gui.takeProjRadio.isChecked():
+            projection = True
+        if gui.setBudgetRadio.isChecked():
+            budget = gui.budget
+            setBudget = True
+    month = Month(month, year,projection=projection,setBudget=setBudget,budget=budget)
     if redraw_graphs:
         if gui is not None:
             gui.monthlySheetCreationProgressBar.setValue(33)

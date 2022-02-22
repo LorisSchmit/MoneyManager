@@ -1,9 +1,9 @@
 # MoneyManager: Finance Organizer with Python
 
-##Beschreibung
+## Beschreibung
 Der MoneyManager hilft dabei die Übersicht über die eigenen Finanzen zu behalten. Dabei können alle unterschiedlichen Arten von (Bank) Konten oder Bezahlmethoden (PayPal, etc.) eingebunden werden. Die Ein- und Ausgaben werden semi-automatisch kategorisiert und es können monatliche und jährliche Bilanz PDFs erstellt werden, die einem somit den Überblick über die eigenen Finanzen ermöglichen.
 
-##Voraussetzungen
+## Voraussetzungen
 Die Voraussetzung an das Konto bzw. Bezahlmethode, die man in das Programm einbinden möchte, ist das man im Online-Banking die Kontoauszüge oder ausgewählte Transaktionen als csv-Datei exportieren kann.
 
 Das Skript läuft komplett unter Python. Entsprechend dafür sind Python und einige Python packages, die in requirements.txt definiert sind, nötig. Zur Installation von denen ist pip,conda, o.ä. notwendig.   
@@ -79,5 +79,4 @@ Wenn nun alle Transaktionen importiert wurden kann unter dem Tab Bilanz eine mon
 Dann kann man ganz einfach über die jeweilige Textzeile den entsprechenden Monat oder Jahr angeben und die Bilanz PDF wird automatisch erstellt.
 
 
-
-
+Zusätzlich dazu kann noch für das laufende Jahr ausgewählt werden ob das Budget sich aus den bisherigen Einnahmen oder aus einer voraussichtlichen Schätzung des Budgets bestimmt wird. Das voraussichtliche Budget kann durch eine Vielzahl an Einkommen gesetzt werden oder ein bestimmter Betrag kann auch eingegeben werden.

@@ -21,7 +21,7 @@ from Month import executeCreateSingleMonth, executeAssignPayback, Month
 from Year import executeCreateSingleYear
 from import_automation import activateImport,newSingleFile
 from Account import Account,statementDetection, importAllAccounts,deleteAccount,exportAllAccounts,accounts
-from database_api import getAllTransacts
+from database_api import getAllTransacts,importTable,deleteAllFromTable, writeTable
 from tagger import unique_tags
 
 
@@ -101,6 +101,20 @@ class MainGUI(QMainWindow):
         self.showYearlyBalanceSheetButton.clicked.connect(self.openYearlyBalanceSheet)
 
         self.balanceSheetFolderButton.clicked.connect(self.selectBalanceSheetFolder)
+
+        self.projRadio.toggled.connect(self.projToggled)
+        self.projToggled()
+            # Budget: Projections
+        self.budgetProjections = importTable("budget_projection")
+        self.budgetModel = QStandardItemModel(0, 3)
+        self.budgetModel.setHorizontalHeaderLabels(['Name','Betrag','Kategorie'])
+        self.budgetProjectionsTableView.setModel(self.budgetModel)
+        self.displayBudgetProjections()
+        self.addIncomeButton.clicked.connect(self.ask4Projection)
+        self.deleteProjButton.clicked.connect(self.deleteBudgetProjection)
+
+            # Budget: set fixed
+        self.saveBudget.clicked.connect(self.setBudget)
 
         # Tab: Konten
         self.createAccountButton.clicked.connect(self.createAccount)
@@ -258,6 +272,79 @@ class MainGUI(QMainWindow):
         self.transactsTableView.setModel(filter_proxy_model)
 
 
+    def projToggled(self):
+        if self.projRadio.isChecked():
+            self.projLabel.setEnabled(True)
+            self.budgetProjectionsTableView.setEnabled(True)
+            self.addIncomeButton.setEnabled(True)
+            self.deleteProjButton.setEnabled(True)
+
+            self.setBudgetLabel.setEnabled(False)
+            self.budgetLineEdit.setEnabled(False)
+            self.saveBudget.setEnabled(False)
+        else:
+            self.projLabel.setEnabled(False)
+            self.budgetProjectionsTableView.setEnabled(False)
+            self.addIncomeButton.setEnabled(False)
+            self.deleteProjButton.setEnabled(False)
+
+            self.setBudgetLabel.setEnabled(True)
+            self.budgetLineEdit.setEnabled(True)
+            self.saveBudget.setEnabled(True)
+
+
+    def displayBudgetProjections(self):
+        #self.budgetModel.setRowCount(len(self.budgetProjections))
+        row = 0
+        self.budget = 0
+        for proj in self.budgetProjections:
+            if proj["year"] == datetime.now().year:
+                item_list = [proj["name"],proj["amount"],proj["tag"]]
+                self.budget += proj["amount"]
+                for col, entry in enumerate(item_list):
+                    item = QStandardItem()
+                    item.setData(entry, Qt.ItemDataRole.DisplayRole)
+                    self.budgetModel.setItem(row, col, item)
+                row += 1
+        self.totalBudgetLabel.setText("%.2f" % self.budget)
+
+    def deleteBudgetProjection(self):
+        if len(self.budgetProjectionsTableView.selectionModel().selectedRows()) > 0:
+            for model_index in self.budgetProjectionsTableView.selectionModel().selectedRows():
+                name = self.budgetProjectionsTableView.model().data(self.budgetProjectionsTableView.model().index(model_index.row(),0))
+                amount = self.budgetProjectionsTableView.model().data(self.budgetProjectionsTableView.model().index(model_index.row(),1))
+                tag = self.budgetProjectionsTableView.model().data(self.budgetProjectionsTableView.model().index(model_index.row(),2))
+                year = datetime.now().year
+                found = False
+                toDelete = 0
+                for ind,proj in enumerate(self.budgetProjections):
+                    if proj["name"] == name and proj["amount"] == amount and proj["tag"] == tag and proj["year"] == year:
+                        toDelete = ind
+                        found = True
+                        break
+
+                if found:
+                    self.budgetProjections.pop(toDelete)
+                    deleteAllFromTable("budget_projection")
+                    writeTable("budget_projection",self.budgetProjections)
+                    self.budgetModel.removeRow(model_index.row())
+                    self.displayBudgetProjections()
+
+
+
+    def ask4Projection(self):
+        Ask4ProjectionDialog(self)
+
+    def setBudget(self):
+        try:
+            self.budget = float(self.budgetLineEdit.text())
+            self.totalBudgetLabel.setText("%.2f" % self.budget)
+        except TypeError:
+            QMessageBox.warning(self, "Budget", "Budget ist ungültig.",
+                                    QMessageBox.StandardButton.Ok)
+
+
+
     def openBalanceSheet(self):
         year = self.yearEdit.text()
         month = self.monthEdit.text()
@@ -286,6 +373,7 @@ class MainGUI(QMainWindow):
         selected_index = self.accountsListWidget.currentRow()
         deleteAccount(selected_index,mm_dir_path/"accounts.json")
         self.displayAccounts()
+
 
 
 
@@ -492,6 +580,61 @@ class Ask4Sign(QDialog):
 
         self.account_dialog.signs = {"+":self.plusSign,"-":self.minusSign}
 
+        self.close()
+
+
+
+class Ask4ProjectionDialog(QDialog):
+    def __init__(self,gui, parent=None):
+        super(Ask4ProjectionDialog, self).__init__(parent)
+        self.setWindowTitle('Vorausichtliches Einkommen')
+
+        self.gui = gui
+
+        outerLayout = QVBoxLayout()
+        layout = QGridLayout()
+
+        self.descriptionLabel = QLabel("Bitte gib das vorausichtliche Einkommen an")
+
+        self.nameLabel = QLabel("Name:")
+        self.nameEdit = QLineEdit()
+
+        self.amountLabel = QLabel("Betrag:")
+        self.amountEdit = QLineEdit()
+
+        self.tagLabel = QLabel("Kategorie:")
+        self.tagEdit = QLineEdit()
+
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+
+        layout.addWidget(self.nameLabel,0,0)
+        layout.addWidget(self.nameEdit, 0, 1)
+        layout.addWidget(self.amountLabel, 1, 0)
+        layout.addWidget(self.amountEdit, 1, 1)
+        layout.addWidget(self.tagLabel, 2, 0)
+        layout.addWidget(self.tagEdit, 2, 1)
+
+        outerLayout.addWidget(self.descriptionLabel)
+        outerLayout.addLayout(layout)
+        outerLayout.addWidget(self.buttonBox)
+
+        self.setLayout(outerLayout)
+
+        self.buttonBox.accepted.connect(self.getProj)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.exec()
+
+    def getProj(self):
+        name = self.nameEdit.text()
+        amount = float(self.amountEdit.text())
+        tag = self.tagEdit.text()
+        year = datetime.now().year
+
+        self.gui.budgetProjections.append({"name":name,"amount":amount,"tag":tag,"year":year})
+        deleteAllFromTable("budget_projection")
+        writeTable("budget_projection",self.gui.budgetProjections)
+        self.gui.displayBudgetProjections()
         self.close()
 
 def main():

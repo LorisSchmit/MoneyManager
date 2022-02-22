@@ -7,7 +7,7 @@ from operator import itemgetter
 from pathlib import Path
 from database_api import mm_dir_path
 
-def createPDF(year,pre_year,folder):
+def createPDF(year,pre_year,folder,setBudget=False):
     file_name = Path(folder) / str("Yearly Sheet"+str(year.year_no)+".pdf")
 
     graph_path_budget = mm_dir_path / "Graphs" /str("Budget"+str(year.year_no)+".svg")
@@ -46,7 +46,8 @@ def createPDF(year,pre_year,folder):
 
     #Page 3
     pdf.setFont("Helvetica-Bold", 18)
-    drawImage(graph_path_budget, pdf, 45, 380, 1)
+    if not setBudget:
+        drawImage(graph_path_budget, pdf, 45, 380, 1)
     pdf.drawString(50, 350, "Gesamtbudget: " + str(budget) + " €")
 
 
@@ -113,8 +114,8 @@ def drawBalanceTable(pdf, year, x, y):
     budget = year.budget
     payback = year.payback
     pers_spent = -year.pers_spent
-    if "Verkauf" in year.budget_tagged:
-        sold = year.budget_tagged["Verkauf"]
+    if not year.setBudget:
+        sold = (year.budget_tagged["Verkauf"] if "Verkauf" in year.budget_tagged else 0)
     else:
         sold = 0
 
