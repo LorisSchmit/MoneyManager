@@ -8,6 +8,7 @@ from tagger import tag
 from copy import copy
 import numpy as np
 import dateutil
+import re
 
 mm_dir_path = Path(__file__).parent
 #sys.path.append(mm_dir_path)
@@ -62,6 +63,13 @@ class Importer:
                 for index,header in enumerate(account.headers):
                     value = action[index]
                     if header == "Betrag":
+                        value = value.strip()
+                        separators = re.sub('[0-9]', '', value)
+                        for sep in separators[:-1]:
+                            if sep != "-":
+                                value = value.replace(sep, '')
+                        if separators:
+                            value = value.replace(separators[-1], '.')
                         value = float(value.replace(",","."))
                     if header == "Referenz":
                         value = value.replace("\n"," ")
@@ -70,7 +78,10 @@ class Importer:
                     values[header] = value
                 counter += 1
                 id = start_index + counter
-                params = {"id":id,"date":values["Datum"],"account":account}
+
+                params = {"id":id,"account":account}
+                if "Datum" in values:
+                    params["date"] = values["Datum"]
                 if "Typ" in values:
                     params["type"] = values["Typ"]
                 if "Empfänger/Sender" in values:
@@ -81,7 +92,6 @@ class Importer:
                     params["reference"] = values["Referenz"][reference_ind+1:]
                 elif "Referenz" in values:
                     params["reference"] = values["Referenz"]
-
                 if "Betrag" in values:
                     sign = 1
                     if account.signs is not None:
@@ -91,7 +101,10 @@ class Importer:
                     params["amount"] = sign*values["Betrag"]
                 if "Währung" in values:
                     params["currency"] = values["Währung"]
-                if values["Währung"].lower() == "eur" and values["Typ"] not in account.ignoreTypes:
+                if "Währung" in values and "Typ" in values:
+                    if values["Währung"].lower() == "eur" and values["Typ"] not in account.ignoreTypes:
+                        transacts_temp.append(Transaction(**params))
+                else:
                     transacts_temp.append(Transaction(**params))
         transacts_temp = sorted(transacts_temp, key=lambda action: action.date)
         start_index = -1
@@ -120,7 +133,7 @@ class Importer:
         lastAccountEntry = self.getLastEntry(self.old_transacts,account=self.account)
         first_new_index = 0
         new_transacts = OrderedDict()
-        if lastAccountEntry is not None:
+        if lastAccountEntry is not None and len(self.new_transacts.items())>0:
             if lastAccountEntry[0].date >= list(self.new_transacts.items())[-1][1].date:
                 gui.importProgressLabel.setText("Alle Transaktionen bereits importiert")
                 return 0

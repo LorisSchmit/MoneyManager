@@ -489,11 +489,11 @@ class StatementDetectionDialog(QDialog):
                 index_list.append(index)
                 index_row = index.row()
 
-                if index_row >= len(self.transacts)-3 and index_row >= 4:
-                    toAppend.append(index_row - len(self.transacts))
+                if index_row >= self.csvView.model().rowCount()-3 and index_row >= 4:
+                    toAppend.append(index_row - self.csvView.model().rowCount())
                 else:
                     toAppend.append(index_row)
-            if -2 in toAppend and -1 in toAppend and len(toAppend) == 2:
+            if -2 in toAppend and -1 in toAppend and len(toAppend) >= 2:
                 if -3 in toAppend:
                     toAppend = [-1,-1,-1]
                 else:

@@ -19,7 +19,7 @@ class Year:
         self.lean_transacts = self.getLeanTransacts(self.yearly_transacts)
         self.total_spent = self.getTotalSpent(self.yearly_transacts)
 
-        if projection and self.year_no >= datetime.now().year and not setBudget:
+        if projection and not setBudget:
             projs = importTable("budget_projection")
             self.projections = []
             for proj in projs:
@@ -27,7 +27,10 @@ class Year:
                     self.projections.append(proj)
             self.budget = self.getYearlyBudget(projection=projection)
             self.budget_tagged = self.analyzeBudget(projection=projection)
-        elif setBudget and self.year_no >= datetime.now().year:
+        elif not projection:
+            self.budget = self.getYearlyBudget(projection=projection)
+            self.budget_tagged = self.analyzeBudget(projection=projection)
+        else:
             self.budget = budget
         self.setBudget = setBudget
 
@@ -358,7 +361,7 @@ def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
     setBudget = False
     if gui is not None:
         #gui.progressBarLabel.setText("Jährliche Bilanz PDF Erstellung gestartet")
-        if gui.takeProjRadio.isChecked():
+        if gui.takeProjRadio.isChecked() and year_no >= datetime.now().year:
             projection = True
         if gui.setBudgetRadio.isChecked():
             budget = gui.budget
