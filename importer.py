@@ -128,6 +128,9 @@ class Importer:
                 return last_element, last_index
         return None
 
+    def getLastIndex(self,transacts):
+        return list(transacts.items())[-1][0]
+
 
     def joiner(self,gui=None):
         lastAccountEntry = self.getLastEntry(self.old_transacts,account=self.account)
@@ -145,7 +148,7 @@ class Importer:
                 new_transacts = OrderedDict(list(self.new_transacts.items())[first_new_index:])
         else:
             new_transacts = OrderedDict(list(self.new_transacts.items()))
-        lastEntryIndex = (lastAccountEntry[1] if lastAccountEntry is not None else 0)
+        lastEntryIndex = (self.getLastIndex(self.old_transacts) if lastAccountEntry is not None else 0)
         new_transacts_reindexed = OrderedDict()
         for counter,(id,action) in enumerate(new_transacts.items()):
             new_id = lastEntryIndex+1+counter
