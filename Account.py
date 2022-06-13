@@ -2,14 +2,18 @@ import csv
 import os
 import json
 from pathlib import Path
+from datetime import datetime
 
 
 mm_dir_path = Path(__file__).parent
 
 class Account:
-    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString="",dmy_format=True,ignoreTypes=[],signs=None):
+    def __init__(self,name,balance,balance_base,rowsDeleted,colsDeleted,headers,detectString="",dmy_format=True,ignoreTypes=[],signs=None):
         self.name  = name
         self.balance = balance
+        self.balance_base = {}
+        for date, base in balance_base.items():
+            self.balance_base[datetime.strptime(date,"%Y-%m-%d")] = base
         self.rowsDeleted = rowsDeleted
         self.colsDeleted = colsDeleted
         self.headers = headers
@@ -17,8 +21,6 @@ class Account:
         self.dmy_format = dmy_format
         self.signs = signs
         self.ignoreTypes = ignoreTypes
-        #self.balance = self.getBalance(name)[0]
-        #self.date = self.getBalance(name)[1]
 
 
     def transfer(self,amount, account):
@@ -66,7 +68,7 @@ def importAllAccounts(file):
             if "accounts" in account_data:
                 for acc in account_data["accounts"]:
                     signs = (acc["signs"] if "signs" in acc else None)
-                    accounts.append(Account(acc["name"], acc["balance"],acc["rowsDeleted"], acc["colsDeleted"], acc["headers"],acc["detectString"],acc["dmy_format"],acc["ignoreTypes"],signs=signs))
+                    accounts.append(Account(acc["name"], acc["balance"],acc["balance_base"],acc["rowsDeleted"], acc["colsDeleted"], acc["headers"],acc["detectString"],acc["dmy_format"],acc["ignoreTypes"],signs=signs))
 
     return accounts
 
@@ -77,6 +79,7 @@ def exportAllAccounts(accounts,file):
         for acc in accounts:
             new_account = {'name': acc.name,
              'balance': acc.balance,
+             'balance_base': acc.balance_base,
              'rowsDeleted': acc.rowsDeleted,
              'colsDeleted': acc.colsDeleted,
              'headers': acc.headers,

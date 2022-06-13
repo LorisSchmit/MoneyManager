@@ -12,6 +12,7 @@ def createPDF(year,pre_year,folder,setBudget=False):
 
     graph_path_budget = mm_dir_path / "Graphs" /str("Budget"+str(year.year_no)+".svg")
     graph_path_expenses = mm_dir_path / "Graphs" /str("Expenses"+str(year.year_no)+".svg")
+    graph_path_balances = mm_dir_path / "Graphs" /str("Balances"+str(year.year_no)+".svg")
 
     document_title = "Balance Sheet "+str(year.year_no)
     title = "Balance Sheet "+str(year.year_no)
@@ -55,6 +56,13 @@ def createPDF(year,pre_year,folder,setBudget=False):
     pdf.line(50, 773, 113, 773)
 
     drawBalanceTable(pdf,year, x=50, y=50)
+
+    pdf.showPage()
+
+    #Page 4
+    pdf.setFont("Helvetica-Bold", 18)
+    pdf.drawString(50, 775, "Budget")
+    drawImage(graph_path_balances, pdf, 45, 450, 0.62)
 
     pdf.save()
 

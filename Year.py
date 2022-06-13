@@ -6,7 +6,8 @@ import matplotlib.colors as mcolors
 import numpy as np
 import plotly.express as px
 import threading
-import os
+from matplotlib import dates as mdates
+from dateutil.relativedelta import relativedelta
 
 income_tags = importTable("income_tags",tags=True)
 
@@ -18,6 +19,8 @@ class Year:
         self.income_transacts = self.getIncomeTransacts()
         self.lean_transacts = self.getLeanTransacts(self.yearly_transacts)
         self.total_spent = self.getTotalSpent(self.yearly_transacts)
+        if pre_year:
+            self.balances = self.getBalances()
 
         if projection and not setBudget:
             projs = importTable("budget_projection")
@@ -93,6 +96,53 @@ class Year:
             if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
                 income_transacts[id] = action
         return income_transacts
+
+    def getAccounts(self):
+        accounts = {}
+        for id, action in self.yearly_transacts.items():
+            if action.account.name not in accounts:
+                accounts[action.account.name] = action.account
+        return accounts
+
+    def getBalances(self):
+        accounts = self.getAccounts()
+
+        new_year = datetime(self.year_no, 1, 1)
+
+        balances = {}
+        for account_name, account in accounts.items():
+            account_transacts = []
+            for id, action in self.yearly_transacts.items():
+                if action.account.name == account_name:
+                    account_transacts.append(action)
+
+            transacts_list = sorted(account_transacts, key=lambda action: action.date)
+            dates = [action.date for action in transacts_list]
+
+            base_date = datetime(self.year_no,12,31)
+
+            for date in account.balance_base.keys():
+                if date.year == self.year_no:
+                    if date < base_date:
+                        base_date = date
+
+            if base_date < datetime(self.year_no,12,31):
+                balance = account.balance_base[base_date]
+                balance_list = [balance]
+                dates.insert(0, base_date)
+            else:
+                print("No balance base available")
+                balance = 0
+                balance_list = [balance]
+                dates.insert(0, new_year)
+
+            for action in transacts_list:
+                balance += round(action.amount, 2)
+                balance_list.append(round(balance, 2))
+
+            balances[account_name] = (dates, balance_list)
+
+        return balances
 
     def perTag(self):
         tags_temp = {}
@@ -354,6 +404,121 @@ class Year:
         return perMonth,perMonth_pre_year
 
 
+    def createBalancePlot(self,vector=True):
+        new_years_eve = datetime(self.year_no, 12, 31, 23, 59)
+        spectres = {}
+
+        ignore_accounts = ["Visa", "PayPal"]
+        self.balances_plot = {}
+
+        for account_name, balances_tuples in self.balances.items():
+            if account_name not in ignore_accounts:
+                balance_list = balances_tuples[1]
+                spectres[account_name] = (min(balance_list), max(balance_list))
+                self.balances_plot[account_name] = balances_tuples
+        outlier_accounts = []
+        for account_name_i, spectre_i in spectres.items():
+            diff = 0
+            for account_name_j, spectre_j in spectres.items():
+                if account_name_i != account_name_j:
+                    diff += abs(spectre_i[0] - spectre_j[1])  # min(i) - max(j)
+                    diff += abs(spectre_j[0] - spectre_i[1])  # min(j) - max(i)
+            if diff / (2 * (len(spectres.keys()) - 1)) > 10000:
+                outlier_accounts.append(account_name_i)
+        dpi = 500
+        if len(outlier_accounts) > 0:
+            f, axs = plt.subplots(len(outlier_accounts) + 1, 1, sharex=True, figsize=(10,6))
+            f.subplots_adjust(hspace=0.1)  # adjust space between axes
+        else:
+            f = plt.figure(figsize=(10,6))
+            axs = [plt.gca()]
+
+        maxs = []
+        mins = []
+        for account_name, spectre in spectres.items():
+            if account_name not in outlier_accounts:
+                mins.append(spectre[0])
+                maxs.append(spectre[1])
+        y_lim = (min(mins), max(maxs) + 1000)
+
+        for account_name, balances_dict in self.balances_plot.items():
+            dates = balances_dict[0]
+            balance_list = balances_dict[1]
+
+            new_year = dates[0]
+
+            if len(balances_dict) > 0:
+                for ax in axs:
+                    p, = ax.plot(dates, balance_list, label=account_name)
+                    arrow_props = dict(arrowstyle='-', color=p.get_color(), lw=1.5, ls='--')
+                    ax.annotate(str(balance_list[0]).replace(".", ",") + " €", fontsize=12,
+                                xy=(dates[0], balance_list[0]),
+                                xytext=(dates[0] + relativedelta(days=15), balance_list[0]),
+                                arrowprops=arrow_props, va="center", ha="left")
+                    ax.annotate(str(balance_list[-1]).replace(".", ",") + " €", fontsize=12,
+                                xy=(dates[-1], balance_list[-1]),
+                                xytext=(dates[-1] + relativedelta(days=15), balance_list[-1]),
+                                arrowprops=arrow_props, va="center", ha="left")
+
+                # zoom-in / limit the view to different portions of the data
+                if len(outlier_accounts) > 0:
+                    axs[0].set_ylim(spectres[outlier_accounts[0]][0] - 750,
+                                    spectres[outlier_accounts[0]][1] + 750)  # outliers only
+                    axs[1].set_ylim(y_lim)  # most of the data
+                    axs[1].set_xlim([new_year, new_years_eve])
+
+                    # hide the spines between ax and ax2
+                    axs[0].spines.bottom.set_visible(False)
+                    axs[1].spines.top.set_visible(False)
+                    axs[0].xaxis.tick_top()
+                    axs[0].tick_params(labeltop=False)  # don't put tick labels at the top
+                    axs[1].xaxis.tick_bottom()
+
+                    # Now, let's turn towards the cut-out slanted lines.
+                    # We create line objects in axes coordinates, in which (0,0), (0,1),
+                    # (1,0), and (1,1) are the four corners of the axes.
+                    # The slanted lines themselves are markers at those locations, such that the
+                    # lines keep their angle and position, independent of the axes size or scale
+                    # Finally, we need to disable clipping.
+
+                    d = .5  # proportion of vertical to horizontal extent of the slanted line
+                    kwargs = dict(marker=[(-1, -d), (1, d)], markersize=12,
+                                  linestyle="none", color='k', mec='k', mew=1, clip_on=False)
+                    axs[0].plot([0, 1], [0, 0], transform=axs[0].transAxes, **kwargs)
+                    axs[1].plot([0, 1], [1, 1], transform=axs[1].transAxes, **kwargs)
+                else:
+                    axs[0].set_ylim(y_lim)  # most of the data
+                    axs[0].set_xlim([new_year, new_years_eve])
+                # Minor ticks every month.
+                fmt_month = mdates.MonthLocator()
+                # Minor ticks every year.
+                fmt_year = mdates.YearLocator()
+                if len(outlier_accounts) > 0:
+                    ax = axs[1]
+                else:
+                    ax = axs[0]
+                ax.xaxis.set_minor_locator(fmt_month)
+                # '%b' to get the names of the month
+                ax.xaxis.set_minor_formatter(mdates.DateFormatter('%b'))
+                ax.xaxis.set_major_locator(fmt_year)
+                ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+                # fontsize for month labels
+                ax.xaxis.set_tick_params(labelsize=10, which='both')
+                # create a second x-axis beneath the first x-axis to show the year in YYYY format
+                sec_xaxis = ax.secondary_xaxis(-0.075*len(axs))
+                sec_xaxis.xaxis.set_major_locator(fmt_year)
+                sec_xaxis.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+
+                # Hide the second x-axis spines and ticks
+                sec_xaxis.spines['bottom'].set_visible(False)
+                sec_xaxis.tick_params(length=0, labelsize=12)
+
+        axs[0].legend(loc="upper left")
+        file_name = "Balances" + str(self.year_no)
+        graph_path = prepare4Saving(file_name, vector)
+        f.savefig(graph_path, bbox_inches="tight", dpi=dpi)
+
+
 
 def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
     projection = False
@@ -368,18 +533,21 @@ def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
             setBudget = True
     year = Year(year_no,projection=projection,setBudget=setBudget,budget=budget)
     if gui is not None:
-        gui.yearlySheetCreationProgressBar.setValue(25)
+        gui.yearlySheetCreationProgressBar.setValue(20)
         #gui.progressBarLabel.setText("Erstellen des Budget Diagramms für "+str(year_no))
     if redraw_graphs:
         if not setBudget:
             year.createBudgetTreemap()
         if gui is not None:
-            gui.yearlySheetCreationProgressBar.setValue(50)
+            gui.yearlySheetCreationProgressBar.setValue(40)
             #gui.progressBarLabel.setText("Erstellen des Ausgaben Diagramms für " +str(year_no))
         year.createExpensesTreemap()
         if gui is not None:
-            gui.yearlySheetCreationProgressBar.setValue(75)
+            gui.yearlySheetCreationProgressBar.setValue(60)
             #gui.progressBarLabel.setText("Erstellen der jährlichen Bilanz PDF für " +str(year_no))
+        year.createBalancePlot()
+        if gui is not None:
+            gui.yearlySheetCreationProgressBar.setValue(80)
     createPDF(year,year.pre_year,folder,setBudget=setBudget)
     if gui is not None:
         gui.yearlySheetCreationProgressBar.setValue(100)
