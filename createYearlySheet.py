@@ -6,6 +6,10 @@ from reportlab.lib import colors
 from operator import itemgetter
 from pathlib import Path
 from database_api import mm_dir_path
+import math
+
+def formatFloat(num):
+    return "{:,.2f} €".format(num).replace(","," ").replace(".",",")
 
 def createPDF(year,pre_year,folder,setBudget=False):
     file_name = Path(folder) / str("Yearly Sheet"+str(year.year_no)+".pdf")
@@ -33,7 +37,7 @@ def createPDF(year,pre_year,folder,setBudget=False):
     pdf.drawCentredString(300, 790, title)
 
     pdf.setFont("Helvetica-Bold", 18)
-    pdf.drawString(50, 50, "Gesamtausgaben (ohne Vorauszahlungen): " + str(pers_spent) + " €")
+    pdf.drawString(50, 50, "Gesamtausgaben (ohne Vorauszahlungen): " + formatFloat(pers_spent))
 
     pdf.showPage()
 
@@ -49,7 +53,7 @@ def createPDF(year,pre_year,folder,setBudget=False):
     pdf.setFont("Helvetica-Bold", 18)
     if not setBudget:
         drawImage(graph_path_budget, pdf, 45, 380, 1)
-    pdf.drawString(50, 350, "Gesamtbudget: " + str(budget) + " €")
+    pdf.drawString(50, 350, "Gesamtbudget: " + formatFloat(budget))
 
 
     pdf.drawString(50, 775, "Budget")
@@ -106,7 +110,7 @@ def drawCategoryTable(pdf,tags,x,y,width=500,height=700):
         rowHeights = len(ar) * [row_height]
         colWidths = [col_width_tag,col_width_value]
         for index,element in enumerate(ar):
-            value = "%.2f €"%element[1]
+            value = formatFloat(element[1])
             ar[index][1] = value
             tag = ar[index][0]
             ar[index][0] = tag.replace("\n"," ")
@@ -131,11 +135,11 @@ def drawBalanceTable(pdf, year, x, y):
     else:
         sold = 0
 
-    data = [['Gesamtausgaben', str(total_spent) + " €"],
-            ['Rückzahlung', str(payback) + " €"],
-            ['Ausgaben ohne Vorauszahlungen', str(pers_spent) + " €"],
-            ['Grundeinkommen', str(round(budget-sold,2)) + " €"],
-            ['Verkauf', str(sold) + " €"]]
+    data = [['Gesamtausgaben', formatFloat(total_spent)],
+            ['Rückzahlung', formatFloat(payback)],
+            ['Netto Ausgaben*', formatFloat(pers_spent)],
+            ['Grundeinkommen', formatFloat(round(budget-sold,2))],
+            ['Verkauf', formatFloat(sold)]]
     balance = round(payback + budget - total_spent, 2)
 
     style = [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
@@ -150,7 +154,7 @@ def drawBalanceTable(pdf, year, x, y):
         balance_str = "Defizit"
         style.append(['BACKGROUND', (0, 5), (1, 5), colors.rgb2cmyk(255, 150, 110)])
 
-    data.append([balance_str, str(balance) + " €"])
+    data.append([balance_str, formatFloat(balance)])
     row_height = 25
     rowHeights = len(data) * [row_height]
     pdf.line(x, y + row_height*(len(data)+1)+10, x + 480, y + row_height*(len(data)+1)+10)

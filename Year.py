@@ -421,7 +421,7 @@ class Year:
         parents = ["" for _ in range(len(labels))]
         fig = px.treemap(names=labels,values=values,parents=parents,width=510,height=710)#,color=cs)
         fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-        fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
+        fig.data[0].texttemplate = "%{label} <br> %{value:.2f} € <br> %{percentEntry}"
         file_name = "Expenses" + str(self.year_no)
         graph_path = prepare4Saving(file_name, vector)
         fig.write_image(graph_path)
