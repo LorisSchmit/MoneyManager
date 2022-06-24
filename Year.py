@@ -21,6 +21,7 @@ class Year:
         self.total_spent = self.getTotalSpent(self.yearly_transacts)
         if pre_year:
             self.balances = self.getBalances()
+            self.accounts_balance = self.getYearlyAccountsBalance()
 
         if projection and not setBudget:
             projs = importTable("budget_projection")
@@ -142,6 +143,27 @@ class Year:
 
             balances[account_name] = (dates, balance_list)
 
+        all_balances = []
+        all_base_balances = 0
+        all_balances_dates = []
+        for account_name, (dates, balance_list) in balances.items():
+            all_base_balances += balance_list[0]
+
+        all_balances.append(all_base_balances)
+        all_balances_dates.append(dates[0])
+
+        ignore_accounts = ["Visa", "PayPal"]
+
+        balance = all_base_balances
+        transacts_list = sorted(self.yearly_transacts.values(), key=lambda action: action.date)
+        for action in transacts_list:
+            if action.account.name not in ignore_accounts:
+                balance += action.amount
+                all_balances.append(round(balance, 2))
+                all_balances_dates.append(action.date)
+
+        balances["Alle"] = (all_balances_dates,all_balances)
+
         return balances
 
     def perTag(self):
@@ -245,7 +267,30 @@ class Year:
                 data[tag] = round(value, 2)
         return data
 
+    def getYearlyAccountsBalance(self):
+        total_beginning = 0
+        total_end = 0
+        accounts_balance = {}
+        ignore_accounts = ["Visa", "PayPal","Alle"]
+        income = 0
+        expense = 0
+        for id,action in self.yearly_transacts.items():
+            if action.account.name not in ignore_accounts:
+                if action.amount >= 0:
+                    income += action.amount
+                else:
+                    expense -= action.amount
+        accounts_balance["income"] = round(income, 2)
+        accounts_balance["expense"] = round(expense, 2)
+        for account_name,(dates, balance_list) in self.balances.items():
+            if account_name not in ignore_accounts:
+                total_beginning += balance_list[0]
+                total_end += balance_list[-1]
 
+        accounts_balance["total_beginning"] = round(total_beginning,2)
+        accounts_balance["total_end"] = round(total_end,2)
+
+        return accounts_balance
 
     def setProjections(self):
         projections = importTable("budget_projection")
@@ -417,17 +462,22 @@ class Year:
                 spectres[account_name] = (min(balance_list), max(balance_list))
                 self.balances_plot[account_name] = balances_tuples
         outlier_accounts = []
+        """
         for account_name_i, spectre_i in spectres.items():
             diff = 0
             for account_name_j, spectre_j in spectres.items():
                 if account_name_i != account_name_j:
                     diff += abs(spectre_i[0] - spectre_j[1])  # min(i) - max(j)
                     diff += abs(spectre_j[0] - spectre_i[1])  # min(j) - max(i)
-            if diff / (2 * (len(spectres.keys()) - 1)) > 10000:
+            if diff / (2 * (len(spectres.keys()) - 1)) > 13000:
                 outlier_accounts.append(account_name_i)
+        """
+        for account_name, spectre in spectres.items():
+            if spectre[0] > 7500:
+                outlier_accounts.append(account_name)
         dpi = 500
         if len(outlier_accounts) > 0:
-            f, axs = plt.subplots(len(outlier_accounts) + 1, 1, sharex=True, figsize=(10,6))
+            f, axs = plt.subplots(2, 1, sharex=True, figsize=(10,6))
             f.subplots_adjust(hspace=0.1)  # adjust space between axes
         else:
             f = plt.figure(figsize=(10,6))
@@ -435,12 +485,18 @@ class Year:
 
         maxs = []
         mins = []
+        maxs_out = []
+        mins_out = []
         for account_name, spectre in spectres.items():
             if account_name not in outlier_accounts:
                 mins.append(spectre[0])
                 maxs.append(spectre[1])
+            else:
+                mins_out.append(spectre[0])
+                maxs_out.append(spectre[1])
         y_lim = (min(mins), max(maxs) + 1000)
-
+        if len(outlier_accounts) > 0:
+            y_lim_out = (min(mins_out)-1000, max(maxs_out)+1000)
         for account_name, balances_dict in self.balances_plot.items():
             dates = balances_dict[0]
             balance_list = balances_dict[1]
@@ -462,8 +518,7 @@ class Year:
 
                 # zoom-in / limit the view to different portions of the data
                 if len(outlier_accounts) > 0:
-                    axs[0].set_ylim(spectres[outlier_accounts[0]][0] - 750,
-                                    spectres[outlier_accounts[0]][1] + 750)  # outliers only
+                    axs[0].set_ylim(y_lim_out)  # outliers only
                     axs[1].set_ylim(y_lim)  # most of the data
                     axs[1].set_xlim([new_year, new_years_eve])
 
@@ -559,4 +614,7 @@ def executeCreateSingleYear(year,folder,redraw_graphs=False,gui=None):
     new_thread.start()
 
 if __name__ == '__main__':
-    createYearlySheet(2019)#,redraw_graphs=True)
+    createYearlySheet(2020,"/Users/lorisschmit1/Balance Sheets",redraw_graphs=True)
+    #year_no = 2021
+    #year = Year(year_no)
+    #year.createBalancePlot()

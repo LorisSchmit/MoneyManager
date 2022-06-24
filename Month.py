@@ -233,7 +233,7 @@ def monthsPerYear(year):
     for i in range(1, 13):
         month = Month(i, year)
         month.createGraph()
-        month.createBalanceSheet()
+        month.createBalanceSheet("/Users/lorisschmit1/Balance Sheets")
     return "All Balances for "+str(year)+" created"
 
 def createSingleMonth(month,year,folder,gui=None,redraw_graphs=True):
@@ -276,6 +276,7 @@ def executeAssignPayback(month,year):
 
 if __name__ == '__main__':
     monthsPerYear(2021)
+    #createSingleMonth(9,2021,"/Users/lorisschmit1/Balance Sheets",redraw_graphs=False)
     #month = Month(2, 2021)
     #month.assignPayback()
     #month.createGraph()

@@ -64,6 +64,10 @@ def createPDF(year,pre_year,folder,setBudget=False):
     pdf.drawString(50, 775, "Budget")
     drawImage(graph_path_balances, pdf, 45, 450, 0.62)
 
+    drawBalanceTable(pdf, year, x=50, y=250)
+
+    drawAccountBalanceTable(pdf, year, 300, 250)
+
     pdf.save()
 
 
@@ -170,6 +174,32 @@ def drawPerMonthTable(pdf,year,x,y):
     row_height = 28
     col_width_tag = 90
     col_width_value = 70
+def drawAccountBalanceTable(pdf, year, x, y):
+    total_spent = year.accounts_balance["expense"]
+    budget = year.accounts_balance["income"]
+    total_beginning = year.accounts_balance["total_beginning"]
+    total_end = year.accounts_balance["total_end"]
+
+    data = [['Auf Konten eingangen', formatFloat(budget)],
+            ['Von Konten abgezogen', formatFloat(total_spent)],
+            ['Anfangsvermögen', formatFloat(total_beginning)],
+            ['Endvermögen', formatFloat(total_end)]]
+    balance = round(total_end-total_beginning, 2)
+
+    style = [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+             ('FONTSIZE', (0, 0), (-1, -1), 15),
+             ]
+    if balance > 0:
+        balance_str = "Suffizit"
+        style.append(['BACKGROUND', (0, 4), (1, 4), colors.lightgreen])
+    else:
+        balance_str = "Defizit"
+        style.append(['BACKGROUND', (0, 4), (1, 4), colors.rgb2cmyk(255, 150, 110)])
+
+    data.append([balance_str, formatFloat(balance)])
+    row_height = 25
     rowHeights = len(data) * [row_height]
     colWidths = [col_width_tag,col_width_value]
     for index,element in enumerate(data):
@@ -184,3 +214,5 @@ def drawPerMonthTable(pdf,year,x,y):
                            ]))
     t.wrapOn(pdf, 500, 300)
     t.drawOn(pdf, x, y-20-row_height*len(data))
+    t.drawOn(pdf, x, y)
+    return t
