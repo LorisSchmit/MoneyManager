@@ -422,7 +422,7 @@ class CreateAccountDialog(QDialog):
         file = mm_dir_path / "accounts.json"
         if not hasattr(self, 'signs'):
             self.signs = None
-        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.colsDeleted, self.headers,self.detectString,self.dmy_format,self.ignoreTypes,signs=self.signs))
+        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.colsDeleted, self.headers,self.detectString,self.dmy_format,self.ignoreTypes,signs=self.signs,balance_base=[]))
         exportAllAccounts(accounts,file)
 
         self.close()
