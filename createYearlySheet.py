@@ -43,9 +43,9 @@ def createPDF(year,pre_year,folder,setBudget=False):
 
     #Page 2
 
-    drawCategoryTable(pdf, year.tags,x=50,y=775)
+    drawCategoryTable(pdf, year.tags,x=50,y=765)
 
-    drawPerMonthTable(pdf, year, x=50, y=275)
+    drawPerMonthTable(pdf, year, x=50, y=245)
 
     pdf.showPage()
 
@@ -59,7 +59,7 @@ def createPDF(year,pre_year,folder,setBudget=False):
     pdf.drawString(50, 775, "Budget")
     pdf.line(50, 773, 113, 773)
 
-    drawBalanceTable(pdf,year, x=50, y=50)
+
 
     pdf.showPage()
 
@@ -98,8 +98,7 @@ def drawCategoryTable(pdf,tags,x,y,width=500,height=700):
     pdf.drawString(x, y, 'Ausgaben pro Kategorie')
     pdf.line(x, y-2, x+210, y-2)
     row_height = 28
-    col_width_tag = 90
-    col_width_value = 70
+
     pdf.setFont("Helvetica", 12)
 
     def coord(x, y, height, unit=1):
@@ -108,7 +107,12 @@ def drawCategoryTable(pdf,tags,x,y,width=500,height=700):
 
     for index0,ar in enumerate(data):
         rowHeights = len(ar) * [row_height]
-        colWidths = [col_width_tag,col_width_value]
+        max_value = max(ar,key=lambda item:item[1])[1]
+        col_width_value = 45+10*math.log10(max_value)
+
+        max_tag = len(max(ar, key=lambda item: len(item[0]))[0])
+        col_width_tag = max_tag*8
+        colWidths = [col_width_tag, col_width_value]
         for index,element in enumerate(ar):
             value = formatFloat(element[1])
             ar[index][1] = value
@@ -117,13 +121,45 @@ def drawCategoryTable(pdf,tags,x,y,width=500,height=700):
 
         t = Table(ar, rowHeights=rowHeights,colWidths=colWidths)
         t.setStyle(TableStyle([('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-                               ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                               ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
                                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                                ('FONTSIZE', (0, 0), (-1, -1), 15),
                            ]))
         #w, h = t.wrap(width, height)
         t.wrapOn(pdf, width, height)
-        t.drawOn(pdf, x+175*index0, y-20-row_height*len(ar))
+        t.drawOn(pdf, x+(col_width_tag+col_width_value+5)*index0, y-15-row_height*len(ar))
+
+def drawPerMonthTable(pdf,year,x,y):
+    pdf.setFont("Helvetica-Bold", 18)
+    pdf.drawString(x, y, 'Top Ausgaben pro Monat')
+    pdf.line(x, y - 2, x + 215, y - 2)
+    perMonth = list(year.perMonth.items())
+    perMonth_pre_year = list(year.perMonth_pre_year.items())
+    data = [["",str(year.year_no),str(year.year_no-1)]]
+    for ((tag,value),(pre_tag,pre_value)) in zip(perMonth,perMonth_pre_year):
+        data.append([tag,value,pre_value])
+    row_height = 28
+
+    max_value = max(max(data[1:], key=lambda item: item[1])[1],max(data[1:], key=lambda item: item[2])[2])
+    col_width_value = 45 + 10 * math.log10(max_value)
+
+    max_tag = len(max(data, key=lambda item: len(item[0]))[0])
+    col_width_tag = max_tag * 8
+    colWidths = [col_width_tag, col_width_value, col_width_value]
+    rowHeights = len(data) * [row_height]
+    for index,element in enumerate(data):
+        if index > 0:
+            data[index][1] = (formatFloat(element[1]) if element[1] > 0 else "-  €")
+            data[index][2] = (formatFloat(element[2]) if element[2] > 0 else "-  €")
+    t = Table(data, rowHeights=rowHeights,colWidths=colWidths)
+    t.setStyle(TableStyle([('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                               ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+                               ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                               ('FONTSIZE', (0, 0), (-1, -1), 15),
+                           ]))
+    t.wrapOn(pdf, 500, 300)
+    t.drawOn(pdf, x, y-15-row_height*len(data))
+
 
 def drawBalanceTable(pdf, year, x, y):
     total_spent = -year.total_spent
@@ -143,7 +179,7 @@ def drawBalanceTable(pdf, year, x, y):
     balance = round(payback + budget - total_spent, 2)
 
     style = [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+             ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
              ('VALIGN', (0, 0), (-1, -1), 'TOP'),
              ('FONTSIZE', (0, 0), (-1, -1), 15),
              ]
@@ -166,18 +202,6 @@ def drawBalanceTable(pdf, year, x, y):
     t.drawOn(pdf, x, y)
     return t
 
-def drawPerMonthTable(pdf,year,x,y):
-    pdf.setFont("Helvetica-Bold", 18)
-    pdf.drawString(x, y, 'Top Ausgaben pro Monat')
-    pdf.line(x, y - 2, x + 215, y - 2)
-    perMonth = list(year.perMonth.items())
-    perMonth_pre_year = list(year.perMonth_pre_year.items())
-    data = [["",str(year.year_no),str(year.year_no-1)]]
-    for ((tag,value),(pre_tag,pre_value)) in zip(perMonth,perMonth_pre_year):
-        data.append([tag,value,pre_value])
-    row_height = 28
-    col_width_tag = 90
-    col_width_value = 70
 def drawAccountBalanceTable(pdf, year, x, y):
     total_spent = year.accounts_balance["expense"]
     budget = year.accounts_balance["income"]
@@ -205,18 +229,11 @@ def drawAccountBalanceTable(pdf, year, x, y):
     data.append([balance_str, formatFloat(balance)])
     row_height = 25
     rowHeights = len(data) * [row_height]
-    colWidths = [col_width_tag,col_width_value]
-    for index,element in enumerate(data):
-        if index > 0:
-            data[index][1] = ("%.2f €" % element[1] if element[1] > 0 else "-  €")
-            data[index][2] = ("%.2f €" % element[2] if element[2] > 0 else "-  €")
-    t = Table(data, rowHeights=rowHeights,colWidths=colWidths)
-    t.setStyle(TableStyle([('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-                               ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                               ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                               ('FONTSIZE', (0, 0), (-1, -1), 15),
-                           ]))
+    #pdf.line(x, y + row_height*(len(data)+1)+10, x + 480, y + row_height*(len(data)+1)+10)
+    #pdf.drawString(x, y + 6 + row_height*len(data), 'Konten Bilanz')
+    #pdf.line(x, y + 4 + row_height*len(data), x + 120, y + 4 + row_height*len(data))
+    t = Table(data, rowHeights=rowHeights)
+    t.setStyle(TableStyle(style))
     t.wrapOn(pdf, 500, 300)
-    t.drawOn(pdf, x, y-20-row_height*len(data))
     t.drawOn(pdf, x, y)
     return t

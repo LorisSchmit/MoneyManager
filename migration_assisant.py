@@ -6,7 +6,6 @@ import ast
 
 
 from database_api import *
-from Account import CC_LUX
 from Month import Month
 from commonFunctions import object2list
 from importer import importNewFile
@@ -52,7 +51,8 @@ def cleaner():
     writeTransacts2DB(transacts)
 
 def extractText():
-    pdf_document = "/Users/lorisschmit1/Desktop/7898649_2021_Nr.009_Kontoauszug_vom_01.10.2021_20220119062808-unlocked.pdf"
+    #pdf_document = "/Users/lorisschmit1/Balance Sheets/Statements 2020/bbbank/7898649_2020_Nr.006_Kontoauszug_vom_30.06.2020_20220612170031 copy.pdf"
+    pdf_document = "/Users/lorisschmit1/Balance Sheets/Statements 2020/rnet/RWVP_LASERNET02_INPUTCLIENTDOCS_6A9475DD_3F39_4E8A_A1B9_32486E0DD319.pdf"
     with open(pdf_document, "rb") as filehandle:
         pdf = PdfFileReader(filehandle)
         info = pdf.getDocumentInfo()
@@ -62,12 +62,14 @@ def extractText():
         #print("number of pages: %i" % pages)
 
         page1 = pdf.getPage(0)
-        #print(page1)
+        print(page1)
 
         text_extract = page1.extractText()
+        print(text_extract)
         print(text_extract.find("Wert"))
         text_extract = text_extract[text_extract.find("Wert"):]
         lines = text_extract.split('\n')
+        print(lines)
 
         lines = lines[1:]
         transacts = []
@@ -105,7 +107,7 @@ def removeNewLine():
     writeTags(known_tags_new)
 
 
-
+import locale
 
 def main():
     #for i in range(1,8):
@@ -113,8 +115,11 @@ def main():
     #cleaner()
     #file = "/Users/lorisschmit1/Movements/Export_Card_Mouvements.csv"
     #importNewFile(file)
-    retagIncome()
+    #retagIncome()
     #extractText()
+
+    locale.setlocale(locale.LC_ALL, 'de_DE')
+    print(locale.localeconv())
 
 if __name__ == '__main__':
     main()

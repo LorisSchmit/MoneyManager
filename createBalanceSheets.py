@@ -25,27 +25,26 @@ def drawPDF(month_obj,folder):
 
     pdf = canvas.Canvas(str(file_name))
 
-    drawImage(image_path, pdf, 45, 350, 1)
-
-    #pdf.setPageCompression(0)
-    #pdf.drawInlineImage(myImage, 0, 400, width=400,height=400)
+    drawImage(image_path, pdf, 45, 360, 1)
 
     pdf.setTitle(document_title)
 
-
-    drawCategoryTable(pdf,month_obj.tags)
+    drawCategoryTable(pdf,month_obj.tags,370,400)
 
     pdf.setFont("Helvetica-Bold", 30)
     pdf.drawCentredString(300, 780, title)
 
-    drawWeeksTable(pdf,month_obj.weeks,int(month_obj.month),int(month_obj.year_no))
+    #drawWeeksTable(pdf,month_obj.weeks,int(month_obj.month),int(month_obj.year_no))
 
     pdf.line(50, 220, 540, 220)
 
     try:
-        payback = -month_obj.tags["Rückzahlung"]
+        payback = 0
+        for pb in month_obj.pbs:
+            payback += pb.amount
     except KeyError:
         payback = 0
+    pdf.setFont("Helvetica", 18)
     drawBalanceTable(pdf,month_obj.budget,-total_spent,payback,50,75)
 
     pdf.setFont("Helvetica-Bold", 22)
@@ -92,7 +91,7 @@ def drawWeeksTable(pdf,weeks,month,year):
     t.wrapOn(pdf, 500, 300)
     t.drawOn(pdf, 50, 250)
 
-def drawCategoryTable(pdf,tags):
+def drawCategoryTable(pdf,tags,x,y):
     data = []
     for key in tags.keys():
         if key.find("Rückzahlung") == -1:
@@ -109,15 +108,15 @@ def drawCategoryTable(pdf,tags):
                            ('FONTSIZE', (0, 0), (-1, -1), 15),
                            ]))
     pdf.setFont("Helvetica", 18)
-    pdf.drawString(350, 720, 'Ausgaben pro Kategorie')
-    pdf.line(350, 718, 546, 718)
-    t.wrapOn(pdf, 400, 300)
-    t.drawOn(pdf, 400, 700 - len(tags) * 25)
+    pdf.drawString(x, y+320, 'Ausgaben pro Kategorie')
+    pdf.line(x, y+318, x+196, y+318)
+    t.wrapOn(pdf, x, y)
+    t.drawOn(pdf, x, y+310 - len(tags) * 25)
 
 def drawBalanceTable(pdf,budget,spent,payback,x,y):
     data = [['Gesamtausgaben',str(spent)+" €"],
             ['Budget pro Monat', str(budget)+" €"],
-            ['Rückzahlung', str(payback)+" €"]]
+            ['Rückzahlung', str(round(payback,2))+" €"]]
     balance = round(payback+budget-spent,2)
 
     style =[('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
