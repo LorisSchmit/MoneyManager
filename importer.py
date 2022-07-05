@@ -159,14 +159,20 @@ class Importer:
         new_transacts = tag(new_transacts,gui)
         joined_transacts = self.old_transacts
         for id,action in new_transacts.items():
-            joined_transacts[id] = action
+            if id not in joined_transacts.keys():
+                joined_transacts[id] = action
+            else:
+                print("Warning: Overwriting prevented!")
         final_transacts = OrderedDict()
         final_transacts = joined_transacts
 
         final_transacts = OrderedDict(sorted(final_transacts.items(),key=lambda x: x[1].date))
         self.updated_transacts = final_transacts
-        deleteAllFromTable("transacts")
-        writeTransacts2DB(final_transacts)
+        if len(final_transacts) >= len(self.old_transacts):
+            deleteAllFromTable("transacts")
+            writeTransacts2DB(final_transacts)
+        else:
+            print("Warning: Database overwriting prevented")
 
 
 def __eq__(this,other, *attributes):
