@@ -3,18 +3,20 @@ import os
 import json
 from pathlib import Path
 from datetime import datetime
-
+from collections import OrderedDict
 
 mm_dir_path = Path(__file__).parent
 
 class Account:
-    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString="",dmy_format=True,ignoreTypes=[],signs=None,balance_base=[]):
+    def __init__(self,name,balance,rowsDeleted,colsDeleted,headers,detectString="",dmy_format=True,ignoreTypes=[],signs=None,balance_base={}):
         self.name  = name
         self.balance = balance
         self.balance_base = {}
         if len(balance_base) > 0:
             for date, base in balance_base.items():
                 self.balance_base[datetime.strptime(date,"%Y-%m-%d")] = base
+            self.latest_balance_base = sorted(self.balance_base.items())[-1]
+            self.oldest_balance_base = sorted(self.balance_base.items())[0]
         self.rowsDeleted = rowsDeleted
         self.colsDeleted = colsDeleted
         self.headers = headers
@@ -24,14 +26,30 @@ class Account:
         self.ignoreTypes = ignoreTypes
 
 
+    def getAccountTransacts(self,all_transacts):
+        self.account_transacts = OrderedDict()
+        for id, action in all_transacts.items():
+            if action.account == self:
+                self.account_transacts[id] = action
+
     def transfer(self,amount, account):
         self.balance -= amount
         account.balance += amount
 
-
     def getDate(self):
         return self.date
 
+    def getBalances(self):
+        start = self.oldest_balance_base[0]
+        balance = self.oldest_balance_base[1]
+        self.balances = []
+        self.balances.append((start,balance))
+
+        for id,action in self.account_transacts.items():
+            if action.date >= start:
+                balance += action.amount
+                self.balances.append((action.date,round(balance, 2)))
+        self.balance = round(balance, 2)
 
 def accountsLookup(account_name):
     for acc in accounts:
@@ -69,7 +87,8 @@ def importAllAccounts(file):
             if "accounts" in account_data:
                 for acc in account_data["accounts"]:
                     signs = (acc["signs"] if "signs" in acc else None)
-                    accounts.append(Account(acc["name"], acc["balance"],acc["rowsDeleted"], acc["colsDeleted"], acc["headers"],acc["detectString"],acc["dmy_format"],acc["ignoreTypes"],signs=signs,balance_base=acc["balance_base"]))
+                    account = Account(acc["name"], acc["balance"],acc["rowsDeleted"], acc["colsDeleted"], acc["headers"],acc["detectString"],acc["dmy_format"],acc["ignoreTypes"],signs=signs,balance_base=acc["balance_base"])
+                    accounts.append(account)
 
     return accounts
 

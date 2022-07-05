@@ -35,15 +35,6 @@ class MainGUI(QMainWindow):
 
         # Tab: Übersicht
         self.initTransactsTable()
-        """
-        self.filter_proxy_model = []
-        filterLayout_children = [self.filterLineEdit1, self.filterLineEdit2, self.filterLineEdit3, self.filterLineEdit4, self.filterLineEdit5, self.filterLineEdit6, self.filterLineEdit7, self.filterLineEdit8]
-        for i,widget in enumerate(filterLayout_children):
-            if isinstance(widget, QLineEdit):
-                self.filter_proxy_model.append(QSortFilterProxyModel(filterCaseSensitivity=Qt.CaseSensitivity.CaseInsensitive))
-
-                widget.textChanged.connect(lambda: self.filterApplied(self.filter_proxy_model[i],str(widget.text()),i))
-        """
         self.all_transacts = getAllTransacts()
         self.transactsTableView.setModel(self.model)
 
@@ -120,6 +111,10 @@ class MainGUI(QMainWindow):
         self.createAccountButton.clicked.connect(self.createAccount)
         self.displayAccounts()
         self.deleteAccountButton.clicked.connect(self.deleteSelectedAccount)
+        self.accountsListWidget.itemSelectionChanged.connect(self.accountSelected)
+        self.computeBalanceEdit.dateTimeChanged.connect(self.balanceDateChanged)
+        computeBalances()
+
 
     def selectFolder(self):
         self.browseFolderEdit.setText(QFileDialog.getExistingDirectory(self, "Select Directory"))
@@ -131,7 +126,6 @@ class MainGUI(QMainWindow):
         self.browseFileEdit.setText(QFileDialog.getOpenFileName()[0])
 
     def activateImportClicked(self):
-
         self.importFolder = self.browseFolderEdit.text()
         if self.importFolder == "":
             dlg = QMessageBox.information(self, "Import Ablageort", "Bitte gib einen Ablageort für die Import csv-Dateien an.",
@@ -374,6 +368,36 @@ class MainGUI(QMainWindow):
         deleteAccount(selected_index,mm_dir_path/"accounts.json")
         self.displayAccounts()
 
+    def accountSelected(self):
+        selected_index = self.accountsListWidget.currentRow()
+        try:
+            account = accounts[selected_index]
+        except IndexError:
+            return 0
+        self.accountNameLabel.setText(account.name)
+        self.accountBalanceLabel.setText(str(account.balance))
+        date = list(account.balances)[-1][0]
+        self.accountBalanceDateLabel.setText(date.strftime("%d/%m/%Y"))
+        self.computeBalanceEdit.setDate(QDate(date.year,date.month,date.day))
+        self.accountBaseBalanceLabel.setText(str(account.latest_balance_base[1]))
+        self.accountBaseBalanceDateLabel.setText(account.latest_balance_base[0].strftime("%d/%m/%Y"))
+
+    def balanceDateChanged(self):
+        selected_index = self.accountsListWidget.currentRow()
+        try:
+            account = accounts[selected_index]
+        except IndexError:
+            return 0
+        set_date = self.computeBalanceEdit.date()
+        set_date = set_date.toPyDate()
+        set_date = datetime(set_date.year,set_date.month,set_date.day)
+        for (date,balance) in reversed(account.balances):
+            if date <= set_date:
+                self.accountBalanceDateLabel.setText(date.strftime("%d/%m/%Y"))
+                self.accountBalanceLabel.setText(str(balance))
+                break
+
+
 
 
 
@@ -389,6 +413,10 @@ class CreateAccountDialog(QDialog):
         self.detectString = ""
         self.ignoreTypes = []
         self.statementDetectionDone = False
+        today = datetime.today()
+        q_today = QDate(today.year,today.month,today.day)
+        self.balanceDateEdit.setDate(q_today)
+        self.balanceEdit.setText("0")
         self.statementDetectionButton.clicked.connect(self.statementDetectionStarted)
         self.exampleFileEdit.textChanged.connect(self.checkFile)
         self.pushButtonOk.clicked.connect(self.accountCreated)
@@ -419,10 +447,20 @@ class CreateAccountDialog(QDialog):
             dlg = QMessageBox.information(self, "Auszugerkennung", "Bitte führe die Auszugserkennung durch.",QMessageBox.StandardButton.Ok)
             return 0
         self.account_name = self.nameLineEdit.text()
+        try:
+            balance = float(self.balanceEdit.text())
+        except ValueError:
+            dlg = QMessageBox.information(self, "Kontostand", "Bitte gib einen korrekten Wert für den Kontostand ein.",
+                                              QMessageBox.StandardButton.Ok)
+            return 0
+        date = self.balanceDateEdit.date()
+        date = date.toPyDate()
+        date_str = date.strftime("%Y-%m-%d")
+
         file = mm_dir_path / "accounts.json"
         if not hasattr(self, 'signs'):
             self.signs = None
-        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.colsDeleted, self.headers,self.detectString,self.dmy_format,self.ignoreTypes,signs=self.signs,balance_base=[]))
+        accounts.append(Account(self.account_name, 0, self.rowsDeleted, self.colsDeleted, self.headers,self.detectString,self.dmy_format,self.ignoreTypes,signs=self.signs,balance_base={date_str:balance}))
         exportAllAccounts(accounts,file)
 
         self.close()
@@ -636,6 +674,12 @@ class Ask4ProjectionDialog(QDialog):
         writeTable("budget_projection",self.gui.budgetProjections)
         self.gui.displayBudgetProjections()
         self.close()
+
+def computeBalances():
+    all_transacts = getAllTransacts()
+    for account in accounts:
+        account.getAccountTransacts(all_transacts)
+        account.getBalances()
 
 def main():
     app = QApplication([])

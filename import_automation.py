@@ -7,6 +7,8 @@ from importer import importNewFile
 import threading
 from Account import *
 from datetime import datetime
+import shutil
+
 
 mm_dir_path = Path(__file__).parent
 
@@ -31,7 +33,7 @@ def newFileDetectedListener(event,gui):
                 os.mkdir(dir)
             if dest_file.exists():
                 now = datetime.now()
-                dest_file = dest_file.parent / (dest_file.name + now.strftime("%d-%m-%Y")+".csv")
+                dest_file = dest_file.parent / (dest_file.stem + now.strftime("%d-%m-%Y")+".csv")
             os.rename(file, dest_file)
         else:
             gui.accountDetectedLabel.setText("Unbekanntes Konto")
@@ -48,6 +50,20 @@ def newSingleFile(file,gui=None):
         gui.accountDetectedLabel.setText("Konto erkannt: " + account.name)
         sec_thread = threading.Thread(target=importNewFile, args=(file,account,gui))
         sec_thread.start()
+        ind = file.rfind("/")
+        if gui is not None:
+            import_path = Path(gui.importFolder)
+        else:
+            import_path = Path(file[:ind + 1])
+
+        dest_file = import_path / "imported" / Path(file[ind + 1:])
+        dir = import_path / "imported"
+        if not dir.is_dir():
+            os.mkdir(dir)
+        if dest_file.exists():
+            now = datetime.now()
+            dest_file = dest_file.parent / (dest_file.stem + "_"+now.strftime("%d-%m-%Y_%H:%M:%S") + ".csv")
+        shutil.copy2(file, dest_file)
     else:
         gui.accountDetectedLabel.setText("Unbekanntes Konto")
         #print("Unknown file type")
