@@ -11,7 +11,7 @@ from shutil import copyfile
 
 mm_dir_path = Path(__file__).parent
 home = Path.home()
-if str(home) == "/Users/lorisschmit1":
+if str(home) == "/Users/loris":
     db_file = home / "Documents" /"db_private.db"
     db_file_backup = home / "Documents" / "db_private_backup.db"
 else:
@@ -29,8 +29,6 @@ def displayTransact(action):
     return l
 
 def getAllTransacts():
-    #home = str(Path.home())
-    #db_file = home+"/Documents/db.db"
     conn = create_connection(db_file)
     with conn:
         transacts_temp = fetchAllTransacts(conn)
@@ -45,7 +43,11 @@ def getAllTransacts():
                 pb_assign = ast.literal_eval(action[9])
         id = action[0]
         transacts[id] = Transaction(id,datetime.fromtimestamp(action[1]),action[2],action[3],action[4],action[5],action[6],action[7],accountsLookup(action[8]),pb_assign)
-    return transacts
+
+        sorted_transacts = sorted(list(transacts.items()), key=lambda key_value: key_value[1].date)
+        sorted_transacts = OrderedDict(sorted_transacts)
+
+    return sorted_transacts
 
 def writeTransacts2DB(transacts):
     #home = str(Path.home())
