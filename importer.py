@@ -68,7 +68,7 @@ class Importer:
                         for sep in separators[:-1]:
                             if sep != "-":
                                 value = value.replace(sep, '')
-                        if separators:
+                        if separators and separators[-1] != "-":
                             value = value.replace(separators[-1], '.')
                         value = float(value.replace(",","."))
                     if header == "Referenz":
