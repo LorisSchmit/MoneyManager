@@ -113,6 +113,7 @@ class MainGUI(QMainWindow):
         self.deleteAccountButton.clicked.connect(self.deleteSelectedAccount)
         self.accountsListWidget.itemSelectionChanged.connect(self.accountSelected)
         self.computeBalanceEdit.dateTimeChanged.connect(self.balanceDateChanged)
+        self.updateBalancesButton.clicked.connect(self.updateBalances)
         computeBalances()
 
 
@@ -397,7 +398,9 @@ class MainGUI(QMainWindow):
                 self.accountBalanceLabel.setText(str(balance))
                 break
 
-
+    def updateBalances(self):
+        computeBalances()
+        self.balanceDateChanged()
 
 
 

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
@@ -46,7 +45,7 @@
     </property>
     <widget class="QWidget" name="transactsTab">
      <attribute name="title">
-      <string>Übersicht</string>
+      <string>&#220;bersicht</string>
      </attribute>
      <widget class="QTableView" name="transactsTableView">
       <property name="geometry">
@@ -185,7 +184,7 @@
        <item>
         <widget class="QDateEdit" name="endDateEdit">
          <property name="locale">
-          <locale language="German" country="Germany"/>
+          <locale language="German" country="Germany" />
          </property>
          <property name="date">
           <date>
@@ -264,11 +263,11 @@
       <attribute name="verticalHeaderDefaultSectionSize">
        <number>60</number>
       </attribute>
-      <row/>
-      <column/>
-      <column/>
-      <column/>
-      <column/>
+      <row />
+      <column />
+      <column />
+      <column />
+      <column />
      </widget>
      <widget class="QLabel" name="importProgressLabel">
       <property name="enabled">
@@ -283,7 +282,7 @@
        </rect>
       </property>
       <property name="text">
-       <string/>
+       <string />
       </property>
      </widget>
      <widget class="QWidget" name="gridLayoutWidget">
@@ -325,7 +324,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Ordner über den neue Dateien importiert werden:</string>
+          <string>Ordner &#252;ber den neue Dateien importiert werden:</string>
          </property>
         </widget>
        </item>
@@ -352,7 +351,7 @@
        <item row="5" column="1">
         <widget class="QPushButton" name="browseFileButton">
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true" />
          </property>
          <property name="text">
           <string>Durchsuchen</string>
@@ -375,7 +374,7 @@
        <item row="5" column="0">
         <widget class="QLineEdit" name="browseFileEdit">
          <property name="text">
-          <string/>
+          <string />
          </property>
         </widget>
        </item>
@@ -398,7 +397,7 @@
          <item>
           <widget class="QLabel" name="ledLabel">
            <property name="text">
-            <string/>
+            <string />
            </property>
           </widget>
          </item>
@@ -429,10 +428,10 @@
           <bool>false</bool>
          </property>
          <property name="inputMask">
-          <string/>
+          <string />
          </property>
          <property name="text">
-          <string/>
+          <string />
          </property>
         </widget>
        </item>
@@ -452,7 +451,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Bestätigen</string>
+          <string>Best&#228;tigen</string>
          </property>
         </widget>
        </item>
@@ -502,7 +501,7 @@
        </rect>
       </property>
       <property name="text">
-       <string/>
+       <string />
       </property>
      </widget>
      <widget class="QLabel" name="label_5">
@@ -666,7 +665,7 @@
          <item>
           <widget class="QPushButton" name="AssignPaybackButton">
            <property name="text">
-            <string>Rückzahlungen zuweisen</string>
+            <string>R&#252;ckzahlungen zuweisen</string>
            </property>
           </widget>
          </item>
@@ -675,7 +674,7 @@
        <item>
         <widget class="QLabel" name="progressBarMonthLabel">
          <property name="text">
-          <string/>
+          <string />
          </property>
         </widget>
        </item>
@@ -728,14 +727,14 @@
          <item>
           <widget class="QPushButton" name="createYearlyBalanceButton">
            <property name="text">
-            <string>Jährliche Bilanz PDF erstellen</string>
+            <string>J&#228;hrliche Bilanz PDF erstellen</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="showYearlyBalanceSheetButton">
            <property name="text">
-            <string>Jährliche Bilanz PDF zeigen</string>
+            <string>J&#228;hrliche Bilanz PDF zeigen</string>
            </property>
           </widget>
          </item>
@@ -744,7 +743,7 @@
        <item>
         <widget class="QLabel" name="progressBarLabel">
          <property name="text">
-          <string/>
+          <string />
          </property>
         </widget>
        </item>
@@ -859,7 +858,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string/>
+              <string />
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -899,14 +898,14 @@
            <item>
             <widget class="QPushButton" name="addIncomeButton">
              <property name="text">
-              <string>Einkommen hinzufügen</string>
+              <string>Einkommen hinzuf&#252;gen</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="deleteProjButton">
              <property name="text">
-              <string>Einkommen löschen</string>
+              <string>Einkommen l&#246;schen</string>
              </property>
             </widget>
            </item>
@@ -942,7 +941,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string/>
+            <string />
            </property>
           </widget>
          </item>
@@ -1028,7 +1027,7 @@
             </font>
            </property>
            <property name="text">
-            <string>€</string>
+            <string>&#8364;</string>
            </property>
           </widget>
          </item>
@@ -1067,14 +1066,14 @@
        <item>
         <widget class="QPushButton" name="createAccountButton">
          <property name="text">
-          <string>Konto hinzufügen</string>
+          <string>Konto hinzuf&#252;gen</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="deleteAccountButton">
          <property name="text">
-          <string>Konto löschen</string>
+          <string>Konto l&#246;schen</string>
          </property>
         </widget>
        </item>
@@ -1133,7 +1132,7 @@
         <item row="1" column="1">
          <widget class="QLabel" name="accountBalanceLabel">
           <property name="text">
-           <string/>
+           <string />
           </property>
          </widget>
         </item>
@@ -1147,42 +1146,42 @@
         <item row="4" column="0">
          <widget class="QLabel" name="label_13">
           <property name="text">
-           <string>Letzter übermittelter Kontostand:</string>
+           <string>Letzter &#252;bermittelter Kontostand:</string>
           </property>
          </widget>
         </item>
         <item row="5" column="1">
          <widget class="QLabel" name="accountBaseBalanceDateLabel">
           <property name="text">
-           <string/>
+           <string />
           </property>
          </widget>
         </item>
         <item row="0" column="1">
          <widget class="QLabel" name="accountNameLabel">
           <property name="text">
-           <string/>
+           <string />
           </property>
          </widget>
         </item>
         <item row="5" column="0">
          <widget class="QLabel" name="label_16">
           <property name="text">
-           <string>Kontostand übermittelt am:</string>
+           <string>Kontostand &#252;bermittelt am:</string>
           </property>
          </widget>
         </item>
         <item row="2" column="1">
          <widget class="QLabel" name="accountBalanceDateLabel">
           <property name="text">
-           <string/>
+           <string />
           </property>
          </widget>
         </item>
         <item row="4" column="1">
          <widget class="QLabel" name="accountBaseBalanceLabel">
           <property name="text">
-           <string/>
+           <string />
           </property>
          </widget>
         </item>
@@ -1200,10 +1199,23 @@
          </spacer>
         </item>
         <item row="2" column="0">
-         <widget class="QDateEdit" name="computeBalanceEdit"/>
+         <widget class="QDateEdit" name="computeBalanceEdit" />
         </item>
        </layout>
       </widget>
+     </widget>
+     <widget class="QPushButton" name="updateBalancesButton">
+      <property name="geometry">
+       <rect>
+        <x>630</x>
+        <y>10</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Aktualisieren</string>
+      </property>
      </widget>
     </widget>
    </widget>
@@ -1214,11 +1226,11 @@
      <x>0</x>
      <y>0</y>
      <width>882</width>
-     <height>37</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>
  </widget>
- <resources/>
- <connections/>
+ <resources />
+ <connections />
 </ui>

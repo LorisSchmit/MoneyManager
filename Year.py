@@ -20,6 +20,7 @@ class Year:
         self.lean_transacts = self.getLeanTransacts(self.yearly_transacts)
         self.total_spent = self.getTotalSpent(self.yearly_transacts)
         if pre_year:
+            self.accounts = self.getAccounts()
             self.balances = self.getBalances()
             self.accounts_balance = self.getYearlyAccountsBalance()
 
@@ -51,20 +52,23 @@ class Year:
 
     def getTotalSpent(self,transacts):
         tot = 0
+        count = 0
         for id,action in transacts.items():
             if action.tag != "Einkommen" and action.amount < 0 and action.tag != "Kapitaltransfer":
                 tot += action.amount
-        return round(tot, 2)
+                count += 1
+        return round(tot, 2),count
 
     def getYearlyBudget(self,projection=True):
         yearly_budget = 0
+        count = 0
         if projection and self.year_no >= datetime.now().year:
             for proj in self.projections:
                 yearly_budget += proj["amount"]
         else:
             yearly_budget = 0
             for id,action in self.yearly_transacts.items():
-                if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung":
+                if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung" and action.tag != "Kredit":
                     yearly_budget += action.amount
         return round(yearly_budget,2)
 
@@ -106,12 +110,11 @@ class Year:
         return accounts
 
     def getBalances(self):
-        accounts = self.getAccounts()
 
         new_year = datetime(self.year_no, 1, 1)
 
         balances = {}
-        for account_name, account in accounts.items():
+        for account_name, account in self.accounts.items():
             account_transacts = []
             for id, action in self.yearly_transacts.items():
                 if action.account.name == account_name:
@@ -120,22 +123,19 @@ class Year:
             transacts_list = sorted(account_transacts, key=lambda action: action.date)
             dates = [action.date for action in transacts_list]
 
-            base_date = datetime(self.year_no,12,31)
+            base_date = datetime(self.year_no,1,1)
 
-            for date in account.balance_base.keys():
-                if date.year == self.year_no:
-                    if date < base_date:
-                        base_date = date
+            balance_list = []
 
-            if base_date < datetime(self.year_no,12,31):
-                balance = account.balance_base[base_date]
-                balance_list = [balance]
-                dates.insert(0, base_date)
-            else:
-                print("No balance base available")
+            for (date_iter, balance_iter) in reversed(account.balances):
+                if date_iter <= base_date:
+                    balance = balance_iter
+                    balance_list = [balance]
+                    break
+            if len(balance_list) == 0:
                 balance = 0
                 balance_list = [balance]
-                dates.insert(0, new_year)
+            dates.insert(0, new_year)
 
             for action in transacts_list:
                 balance += round(action.amount, 2)
@@ -152,15 +152,23 @@ class Year:
         all_balances.append(all_base_balances)
         all_balances_dates.append(dates[0])
 
-        ignore_accounts = ["Visa", "PayPal"]
+        ignore_accounts = []
 
         balance = all_base_balances
         transacts_list = sorted(self.yearly_transacts.values(), key=lambda action: action.date)
+        count = 0
         for action in transacts_list:
             if action.account.name not in ignore_accounts:
                 balance += action.amount
-                all_balances.append(round(balance, 2))
-                all_balances_dates.append(action.date)
+                if count < 7:
+                    count += 1
+                else:
+                    count = 0
+                    all_balances.append(round(balance, 2))
+                    all_balances_dates.append(action.date)
+
+        all_balances.append(round(balance, 2))
+        all_balances_dates.append(action.date)
 
         balances["Alle"] = (all_balances_dates,all_balances)
 
@@ -271,17 +279,25 @@ class Year:
         total_beginning = 0
         total_end = 0
         accounts_balance = {}
-        ignore_accounts = ["Visa", "PayPal","Alle"]
+        ignore_accounts = ["Alle"]
         income = 0
         expense = 0
+        transfer = 0
+        treated_count = 0
         for id,action in self.yearly_transacts.items():
             if action.account.name not in ignore_accounts:
                 if action.amount >= 0:
                     income += action.amount
                 else:
                     expense -= action.amount
+                if action.tag == "Kapitaltransfer" and action.amount < 0:
+                    transfer += abs(action.amount)
+                treated_count += 1
+
         accounts_balance["income"] = round(income, 2)
         accounts_balance["expense"] = round(expense, 2)
+        accounts_balance["transfer"] = round(transfer, 2)
+        accounts_balance["treated"] = (treated_count, len(self.yearly_transacts))
         for account_name,(dates, balance_list) in self.balances.items():
             if account_name not in ignore_accounts:
                 total_beginning += balance_list[0]
@@ -453,7 +469,7 @@ class Year:
         new_years_eve = datetime(self.year_no, 12, 31, 23, 59)
         spectres = {}
 
-        ignore_accounts = ["Visa", "PayPal"]
+        ignore_accounts = []
         self.balances_plot = {}
 
         for account_name, balances_tuples in self.balances.items():
@@ -462,19 +478,13 @@ class Year:
                 spectres[account_name] = (min(balance_list), max(balance_list))
                 self.balances_plot[account_name] = balances_tuples
         outlier_accounts = []
-        """
-        for account_name_i, spectre_i in spectres.items():
-            diff = 0
-            for account_name_j, spectre_j in spectres.items():
-                if account_name_i != account_name_j:
-                    diff += abs(spectre_i[0] - spectre_j[1])  # min(i) - max(j)
-                    diff += abs(spectre_j[0] - spectre_i[1])  # min(j) - max(i)
-            if diff / (2 * (len(spectres.keys()) - 1)) > 13000:
-                outlier_accounts.append(account_name_i)
-        """
+
         for account_name, spectre in spectres.items():
-            if spectre[0] > 7500:
+            if spectre[0] > 5000:
                 outlier_accounts.append(account_name)
+        for account_name, spectre in spectres.items():
+            if spectre[1] - spectre[0] >= 5000:
+                outlier_accounts = []
         dpi = 500
         if len(outlier_accounts) > 0:
             f, axs = plt.subplots(2, 1, sharex=True, figsize=(10,6))
@@ -498,8 +508,8 @@ class Year:
         if len(outlier_accounts) > 0:
             y_lim_out = (min(mins_out)-1000, max(maxs_out)+1000)
         for account_name, balances_dict in self.balances_plot.items():
-            dates = balances_dict[0]
-            balance_list = balances_dict[1]
+            dates = [val for val in balances_dict[0] for _ in (0, 1)][1:]
+            balance_list = [val for val in balances_dict[1] for _ in (0, 1)][:-1]
 
             new_year = dates[0]
 
@@ -614,7 +624,7 @@ def executeCreateSingleYear(year,folder,redraw_graphs=False,gui=None):
     new_thread.start()
 
 if __name__ == '__main__':
-    createYearlySheet(2020,"/Users/lorisschmit1/Balance Sheets",redraw_graphs=True)
+    createYearlySheet(2021,"/Users/loris/Balance Sheets",redraw_graphs=True)
     #year_no = 2021
     #year = Year(year_no)
     #year.createBalancePlot()

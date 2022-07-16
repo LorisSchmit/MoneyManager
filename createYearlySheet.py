@@ -205,8 +205,47 @@ def drawBalanceTable(pdf, year, x, y):
 def drawAccountBalanceTable(pdf, year, x, y):
     total_spent = year.accounts_balance["expense"]
     budget = year.accounts_balance["income"]
+    transfer = year.accounts_balance["transfer"]
     total_beginning = year.accounts_balance["total_beginning"]
     total_end = year.accounts_balance["total_end"]
+
+    treated,total = year.accounts_balance["treated"]
+
+    data = [['Transaktionen', str(treated)+ " von " +str(total)],
+            ['Auf Konten eingangen', formatFloat(budget)],
+            ['Von Konten abgezogen', formatFloat(total_spent)],
+            ['davon Kapitaltransfer', formatFloat(transfer)],
+            ['Anfangsvermögen', formatFloat(total_beginning)],
+            ['Endvermögen', formatFloat(total_end)]]
+    balance = round(total_end-total_beginning, 2)
+
+    style = [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+             ('FONTSIZE', (0, 0), (-1, -1), 15),
+             ]
+    if balance > 0:
+        balance_str = "Suffizit"
+        style.append(['BACKGROUND', (0, 6), (1, 6), colors.lightgreen])
+    else:
+        balance_str = "Defizit"
+        style.append(['BACKGROUND', (0, 6), (1, 6), colors.rgb2cmyk(255, 150, 110)])
+
+    data.append([balance_str, formatFloat(balance)])
+    row_height = 25
+    rowHeights = len(data) * [row_height]
+    #pdf.line(x, y + row_height*(len(data)+1)+10, x + 480, y + row_height*(len(data)+1)+10)
+    #pdf.drawString(x, y + 6 + row_height*len(data), 'Konten Bilanz')
+    #pdf.line(x, y + 4 + row_height*len(data), x + 120, y + 4 + row_height*len(data))
+    t = Table(data, rowHeights=rowHeights)
+    t.setStyle(TableStyle(style))
+    t.wrapOn(pdf, 500, 300)
+    t.drawOn(pdf, x, y)
+    return t
+
+def drawAccountExpensesTable(pdf, year, x, y):
+    balance_per_account = {}
+
 
     data = [['Auf Konten eingangen', formatFloat(budget)],
             ['Von Konten abgezogen', formatFloat(total_spent)],
