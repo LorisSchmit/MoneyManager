@@ -99,7 +99,7 @@ def drawCategoryTable(pdf,tags,x,y):
     rowHeights = len(data) * [25]
     data = list(reversed(sorted(data, key=itemgetter(1))))
     for index,element in enumerate(data):
-        value = str(element[1])+" €"
+        value = str(round(element[1],2))+" €"
         data[index][1] = value
     t = Table(data, rowHeights=rowHeights)
     t.setStyle(TableStyle([('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),

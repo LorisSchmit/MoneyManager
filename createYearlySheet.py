@@ -66,11 +66,11 @@ def createPDF(year,pre_year,folder,setBudget=False):
     #Page 4
     pdf.setFont("Helvetica-Bold", 18)
     pdf.drawString(50, 775, "Budget")
-    drawImage(graph_path_balances, pdf, 45, 450, 0.62)
+    drawImage(graph_path_balances, pdf, 15, 450, 0.60)
 
-    drawBalanceTable(pdf, year, x=50, y=250)
+    drawBalanceTable(pdf, year, x=50, y=225)
 
-    drawAccountBalanceTable(pdf, year, 300, 250)
+    drawAccountBalanceTable(pdf, year, 300, 225)
 
     pdf.save()
 
@@ -162,16 +162,23 @@ def drawPerMonthTable(pdf,year,x,y):
 
 
 def drawBalanceTable(pdf, year, x, y):
-    total_spent = -year.total_spent
+    total_spent= -year.total_spent
+    total_spent_len = year.total_spent_len
     budget = year.budget
+    budget_len = year.budget_len
     payback = year.payback
+    payback_len = year.payback_len
     pers_spent = -year.pers_spent
+    transfer_transacts_len = year.transfer_transacts_len
     if not year.setBudget:
-        sold = (year.budget_tagged["Verkauf"] if "Verkauf" in year.budget_tagged else 0)
+        sold,sold_len = year.total_sold,year.total_sold_len
     else:
-        sold = 0
+        sold,sold_len = 0,0
 
-    data = [['Gesamtausgaben', formatFloat(total_spent)],
+    treated, treated_total = total_spent_len + budget_len + payback_len + transfer_transacts_len + sold_len, len(year.yearly_transacts)
+
+    data = [['Transaktionen', str(treated)+ " von " +str(treated_total)],
+            ['Gesamtausgaben', formatFloat(total_spent)],
             ['Rückzahlung', formatFloat(payback)],
             ['Netto Ausgaben*', formatFloat(pers_spent)],
             ['Grundeinkommen', formatFloat(round(budget-sold,2))],
@@ -185,10 +192,10 @@ def drawBalanceTable(pdf, year, x, y):
              ]
     if balance > 0:
         balance_str = "Suffizit"
-        style.append(['BACKGROUND', (0, 5), (1, 5), colors.lightgreen])
+        style.append(['BACKGROUND', (0, 6), (1, 6), colors.lightgreen])
     else:
         balance_str = "Defizit"
-        style.append(['BACKGROUND', (0, 5), (1, 5), colors.rgb2cmyk(255, 150, 110)])
+        style.append(['BACKGROUND', (0, 6), (1, 6), colors.rgb2cmyk(255, 150, 110)])
 
     data.append([balance_str, formatFloat(balance)])
     row_height = 25
@@ -203,21 +210,28 @@ def drawBalanceTable(pdf, year, x, y):
     return t
 
 def drawAccountBalanceTable(pdf, year, x, y):
-    total_spent = year.accounts_balance["expense"]
-    budget = year.accounts_balance["income"]
+    account_expense = year.accounts_balance["expense"]
+    account_income = year.accounts_balance["income"]
     transfer = year.accounts_balance["transfer"]
     total_beginning = year.accounts_balance["total_beginning"]
     total_end = year.accounts_balance["total_end"]
+    debt = year.accounts_balance["debt"]
 
-    treated,total = year.accounts_balance["treated"]
+    treated,treated_total = year.accounts_balance["treated"]
 
-    data = [['Transaktionen', str(treated)+ " von " +str(total)],
-            ['Auf Konten eingangen', formatFloat(budget)],
-            ['Von Konten abgezogen', formatFloat(total_spent)],
-            ['davon Kapitaltransfer', formatFloat(transfer)],
-            ['Anfangsvermögen', formatFloat(total_beginning)],
-            ['Endvermögen', formatFloat(total_end)]]
-    balance = round(total_end-total_beginning, 2)
+    data = [['Transaktionen', str(treated)+ " von " +str(treated_total)],
+            ['Auf Konten eingangen', formatFloat(account_income)],
+            ['Von Konten abgezogen', formatFloat(account_expense)],
+            ['davon Kapitaltransfer', formatFloat(transfer)]]
+
+    last_row = 6
+
+    if debt > 0:
+        data.append(['Schulden aufgenommen', formatFloat(debt)])
+        last_row = 7
+
+    data.extend([['Anfangsvermögen', formatFloat(total_beginning)], ['Endvermögen', formatFloat(total_end)]])
+    balance = round(total_end-total_beginning-debt, 2)
 
     style = [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
              ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -226,17 +240,14 @@ def drawAccountBalanceTable(pdf, year, x, y):
              ]
     if balance > 0:
         balance_str = "Suffizit"
-        style.append(['BACKGROUND', (0, 6), (1, 6), colors.lightgreen])
+        style.append(['BACKGROUND', (0, last_row), (1, last_row), colors.lightgreen])
     else:
         balance_str = "Defizit"
-        style.append(['BACKGROUND', (0, 6), (1, 6), colors.rgb2cmyk(255, 150, 110)])
+        style.append(['BACKGROUND', (0, last_row), (1, last_row), colors.rgb2cmyk(255, 150, 110)])
 
     data.append([balance_str, formatFloat(balance)])
     row_height = 25
     rowHeights = len(data) * [row_height]
-    #pdf.line(x, y + row_height*(len(data)+1)+10, x + 480, y + row_height*(len(data)+1)+10)
-    #pdf.drawString(x, y + 6 + row_height*len(data), 'Konten Bilanz')
-    #pdf.line(x, y + 4 + row_height*len(data), x + 120, y + 4 + row_height*len(data))
     t = Table(data, rowHeights=rowHeights)
     t.setStyle(TableStyle(style))
     t.wrapOn(pdf, 500, 300)
