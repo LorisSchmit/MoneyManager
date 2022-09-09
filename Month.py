@@ -5,7 +5,7 @@ from Year import *
 
 
 class Month(Year):
-    def __init__(self,month,year,projection=True,setBudget=False,budget=0):
+    def __init__(self,month,year,projection=True,setBudget=False,budget=0,deduct_in_advances=True):
         self.month = month
         self.month_name = self.monthNumberToMonthName()
         self.year_no = year
@@ -29,8 +29,23 @@ class Month(Year):
                 self.budget = round(budget/12,2)
             self.max = self.biggestTag(self.tags)[1]
             self.weeks = self.perWeek()
+            self.deduct_in_advances = deduct_in_advances
             self.pbs = self.getPayBacks()
-            self.pbs_tags = self.paybackPerTag()
+            self.in_advances = self.paybackPerTag()
+            if len(self.in_advances) > 0 and deduct_in_advances:
+                for tag,in_advance_amount in self.in_advances.items():
+                    if tag in self.tags.keys():
+                        self.tags[tag] -= round(in_advance_amount,2)
+                        if self.tags[tag] == 0:
+                            self.tags.pop(tag)
+                        elif self.tags[tag] < 20:
+                            self.tags["Rest"] += self.tags[tag]
+                            self.tags.pop(tag)
+                    else:
+                        self.tags["Rest"] -= round(in_advance_amount,2)
+                        if self.tags["Rest"] == 0:
+                            self.tags.pop("Rest")
+                self.total_spent = -sum([amount if amount > 0 else 0 for amount in self.tags.values()])
 
     def getMonthlyTransacts(self,transacts):
         start = datetime(self.year_no, self.month, 1)
@@ -46,7 +61,7 @@ class Month(Year):
 
 
     def getMonthlyBudget(self,projection=True):
-        yearly_budget = self.getYearlyBudget(projection=projection)
+        yearly_budget,_ = self.getYearlyBudget(projection=projection)
         monthly_budget = round(yearly_budget/12.0,2)
         return monthly_budget
 
@@ -54,7 +69,9 @@ class Month(Year):
         pbs = []
         for id,action in self.monthly_transacts.items():
             if action.tag == "Rückzahlung":
-                pbs.append(action)
+                if len(action.pb_assign) > 0:
+                    if action.pb_assign[0] == -1 or not self.deduct_in_advances :
+                        pbs.append(action)
         return pbs
 
     def monthNumberToMonthName(self):
@@ -67,7 +84,7 @@ class Month(Year):
         for id,action in self.monthly_transacts.items():
             if type(action.pb_assign) is list:
                 if len(action.pb_assign) > 0:
-                    if action.pb_assign[0] != -1:
+                    if action.pb_assign[0] > 0:
                         tag = action.tag
                         if not (tag in in_advances):
                             in_advances[tag] = 0
@@ -75,27 +92,8 @@ class Month(Year):
                             in_advances[tag] += self.all_transacts[pb_assign].amount
 
                         in_advances[tag] = round(in_advances[tag], 2)
-        pbs_labels = []
-        pbs_labels.extend(in_advances.keys())
-        pbs_labels.append("  ")
-        pbs_values = []
-        pbs_values.extend(in_advances.values())
-        in_advances = OrderedDict(sorted(in_advances.items(), key=lambda x: x[1]))
-        pbs_pie_dict = OrderedDict()
-        tags = self.tags.copy()
-        if "Rückzahlung" in tags:
-            tags.pop("Rückzahlung")
-            for key,value in tags.items():
-                if key in in_advances:
-                    if value >= in_advances[key]:
-                        pbs_pie_dict[key] = in_advances[key]
-                        pbs_pie_dict[key+" fillup"] = round(value - in_advances[key], 2)
-                    else:
-                        pbs_pie_dict[key] = value
-                        pbs_pie_dict[key+" fillup"] = 0
-                else:
-                    pbs_pie_dict[key+" fillup"] = value
-        return pbs_pie_dict
+
+        return in_advances
 
     def perWeek(self):
         weeks = {}
@@ -116,7 +114,7 @@ class Month(Year):
         weeks[week_dates] = str(-round(tot, 2))
         return weeks
 
-    def createGraph(self,vector=False):
+    def createGraph(self,vector=True):
         if len(self.monthly_transacts) > 0:
             font_size = 12
             labels = list(self.tags.keys())
@@ -180,7 +178,7 @@ class Month(Year):
     def createExpensesTreemap(self,vector=True):
         print("Drawing expenses treemap for",self.month_name,"-",self.year_no)
         labels = list(self.tags.keys())
-        values = list(self.tags.values())
+        values = list([round(value,2) for value in self.tags.values()])
         if "Rückzahlung" in labels:
             pb_ind = labels.index("Rückzahlung")
             labels.pop(pb_ind)
@@ -222,7 +220,7 @@ class Month(Year):
             in_advance_action.pb_assign = str(in_advance_action.pb_assign)
             print(object2list(in_advance_action))
         print(assigns)
-        updateMany(assigns)
+        #updateMany(assigns)
 
 
     def createBalanceSheet(self,folder):
@@ -231,12 +229,13 @@ class Month(Year):
 
 def monthsPerYear(year):
     for i in range(1, 13):
-        month = Month(i, year)
-        month.createGraph()
-        month.createBalanceSheet("/Users/lorisschmit1/Balance Sheets")
+        month = Month(i, year,deduct_in_advances=True)
+        month.createExpensesTreemap()
+        home = Path.home()
+        month.createBalanceSheet(home/"Documents"/"Balance Sheets")
     return "All Balances for "+str(year)+" created"
 
-def createSingleMonth(month,year,folder,gui=None,redraw_graphs=True):
+def createSingleMonth(month,year,folder,gui=None,redraw_graphs=True,deduct_in_advances=True):
     projection = False
     budget = 0
     setBudget = False
@@ -247,7 +246,7 @@ def createSingleMonth(month,year,folder,gui=None,redraw_graphs=True):
         if gui.setBudgetRadio.isChecked():
             budget = gui.budget
             setBudget = True
-    month = Month(month, year,projection=projection,setBudget=setBudget,budget=budget)
+    month = Month(month, year,projection=projection,setBudget=setBudget,budget=budget,deduct_in_advances=deduct_in_advances)
     if redraw_graphs:
         if gui is not None:
             gui.monthlySheetCreationProgressBar.setValue(33)
@@ -275,9 +274,10 @@ def executeAssignPayback(month,year):
 
 
 if __name__ == '__main__':
-    monthsPerYear(2021)
-    #createSingleMonth(9,2021,"/Users/lorisschmit1/Balance Sheets",redraw_graphs=False)
-    #month = Month(2, 2021)
+    #monthsPerYear(2021)
+    home = Path.home()
+    createSingleMonth(12,2021,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
+    #month = Month(9, 2021)
     #month.assignPayback()
     #month.createGraph()
     #month.createBalanceSheet()
