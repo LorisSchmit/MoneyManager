@@ -1,5 +1,6 @@
 from database_api import *
 from createYearlySheet import *
+from Account import accounts
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
@@ -108,6 +109,24 @@ class Year:
                 income_transacts[id] = action
         return income_transacts
 
+    def getTotalSold(self):
+        total = 0
+        count = 0
+        for id, action in self.yearly_transacts.items():
+            if action.tag == "Verkauf":
+                total += action.amount
+                count += 1
+        return round(total, 2), count
+
+    def getTransferTransacts(self):
+        transfer_transacts = OrderedDict()
+        count = 0
+        for id,action in self.yearly_transacts.items():
+            if action.tag == "Kapitaltransfer":
+                transfer_transacts[id] = action
+                count += 1
+        return transfer_transacts,count
+
     def getAccounts(self):
         accounts = {}
         for id, action in self.yearly_transacts.items():
@@ -155,7 +174,7 @@ class Year:
         for account_name, (dates, balance_list) in balances.items():
             all_base_balances += balance_list[0]
 
-        all_balances.append(all_base_balances)
+        all_balances.append(round(all_base_balances,2))
         all_balances_dates.append(dates[0])
 
         ignore_accounts = []
@@ -289,6 +308,7 @@ class Year:
         income = 0
         expense = 0
         transfer = 0
+        debt = 0
         treated_count = 0
         for id,action in self.yearly_transacts.items():
             if action.account.name not in ignore_accounts:
@@ -298,12 +318,15 @@ class Year:
                     expense -= action.amount
                 if action.tag == "Kapitaltransfer" and action.amount < 0:
                     transfer += abs(action.amount)
+                if action.tag == "Kredit":
+                    debt += action.amount
                 treated_count += 1
 
         accounts_balance["income"] = round(income, 2)
         accounts_balance["expense"] = round(expense, 2)
         accounts_balance["transfer"] = round(transfer, 2)
         accounts_balance["treated"] = (treated_count, len(self.yearly_transacts))
+        accounts_balance["debt"] = debt
         for account_name,(dates, balance_list) in self.balances.items():
             if account_name not in ignore_accounts:
                 total_beginning += balance_list[0]
@@ -523,11 +546,11 @@ class Year:
                 for ax in axs:
                     p, = ax.plot(dates, balance_list, label=account_name)
                     arrow_props = dict(arrowstyle='-', color=p.get_color(), lw=1.5, ls='--')
-                    ax.annotate(str(balance_list[0]).replace(".", ",") + " €", fontsize=12,
+                    ax.annotate(str(balance_list[0]).replace(".", ",") + " €",color = p.get_color(), fontsize=12,
                                 xy=(dates[0], balance_list[0]),
-                                xytext=(dates[0] + relativedelta(days=15), balance_list[0]),
-                                arrowprops=arrow_props, va="center", ha="left")
-                    ax.annotate(str(balance_list[-1]).replace(".", ",") + " €", fontsize=12,
+                                xytext=(dates[0] - relativedelta(days=15), balance_list[0]),
+                                arrowprops=arrow_props, va="center", ha="right")
+                    ax.annotate(str(balance_list[-1]).replace(".", ",") + " €",color = p.get_color(), fontsize=12,
                                 xy=(dates[-1], balance_list[-1]),
                                 xytext=(dates[-1] + relativedelta(days=15), balance_list[-1]),
                                 arrowprops=arrow_props, va="center", ha="left")
@@ -589,7 +612,13 @@ class Year:
         graph_path = prepare4Saving(file_name, vector)
         f.savefig(graph_path, bbox_inches="tight", dpi=dpi)
 
-
+    def checkTransfers(self):
+        total = 0
+        for id,action in self.transfer_transacts.items():
+            #print(action.id,action.date,action.recipient,action.amount)
+            total += round(action.amount,2)
+            print("After",action.id,action.date,"total is",round(total,2))
+        return round(total,2)
 
 def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
     projection = False
@@ -629,8 +658,15 @@ def executeCreateSingleYear(year,folder,redraw_graphs=False,gui=None):
     new_thread = threading.Thread(target=createYearlySheet,args=(year,folder,redraw_graphs,gui,))
     new_thread.start()
 
+def computeBalances():
+    all_transacts = getAllTransacts()
+    for account in accounts:
+        account.getAccountTransacts(all_transacts)
+        account.getBalances()
+
 if __name__ == '__main__':
-    createYearlySheet(2021,"/Users/loris/Balance Sheets",redraw_graphs=True)
-    #year_no = 2021
-    #year = Year(year_no)
-    #year.createBalancePlot()
+    #createYearlySheet(2021,"/Users/loris/Balance Sheets",redraw_graphs=True)
+    computeBalances()
+    year_no = 2020
+    year = Year(year_no)
+    print(year.checkTransfers())
