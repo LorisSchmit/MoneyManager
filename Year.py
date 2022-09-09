@@ -18,7 +18,9 @@ class Year:
         self.yearly_transacts = self.getYearlyTransacts()
         self.income_transacts = self.getIncomeTransacts()
         self.lean_transacts = self.getLeanTransacts(self.yearly_transacts)
-        self.total_spent = self.getTotalSpent(self.yearly_transacts)
+        self.transfer_transacts,self.transfer_transacts_len = self.getTransferTransacts()
+        self.total_sold, self.total_sold_len = self.getTotalSold()
+        self.total_spent,self.total_spent_len = self.getTotalSpent(self.yearly_transacts)
         if pre_year:
             self.accounts = self.getAccounts()
             self.balances = self.getBalances()
@@ -30,19 +32,19 @@ class Year:
             for proj in projs:
                 if proj["year"] == datetime.now().year:
                     self.projections.append(proj)
-            self.budget = self.getYearlyBudget(projection=projection)
+            self.budget,self.budget_len = self.getYearlyBudget(projection=projection)
             self.budget_tagged = self.analyzeBudget(projection=projection)
         elif not projection:
-            self.budget = self.getYearlyBudget(projection=projection)
+            self.budget,self.budget_len = self.getYearlyBudget(projection=projection)
             self.budget_tagged = self.analyzeBudget(projection=projection)
         else:
-            self.budget = budget
+            self.budget,self.budget_len = budget,0
         self.setBudget = setBudget
 
         tags = self.perTag()
         self.tags = tags
         self.max = self.biggestTag(self.tags)[1]
-        self.payback = self.getPayback()
+        self.payback,self.payback_len = self.getPayback()
         self.pers_spent = round(self.total_spent + self.payback,2)
         if pre_year:
             self.pre_year = Year(self.year_no-1,pre_year=False)
@@ -65,19 +67,23 @@ class Year:
         if projection and self.year_no >= datetime.now().year:
             for proj in self.projections:
                 yearly_budget += proj["amount"]
+                count += 1
         else:
             yearly_budget = 0
             for id,action in self.yearly_transacts.items():
                 if action.amount > 0 and action.tag != "Kapitaltransfer" and action.tag != "Rückzahlung" and action.tag != "Kredit":
                     yearly_budget += action.amount
-        return round(yearly_budget,2)
+                    count += 1
+        return round(yearly_budget,2),count
 
     def getPayback(self):
         total = 0
+        count = 0
         for id,action in self.yearly_transacts.items():
             if action.tag == "Rückzahlung":
                 total += action.amount
-        return round(total,2)
+                count += 1
+        return round(total,2),count
 
     def getYearlyTransacts(self):
         start = datetime(self.year_no, 1, 1)
