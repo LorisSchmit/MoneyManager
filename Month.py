@@ -30,22 +30,11 @@ class Month(Year):
             self.max = self.biggestTag(self.tags)[1]
             self.weeks = self.perWeek()
             self.deduct_in_advances = deduct_in_advances
-            self.pbs = self.getPayBacks()
-            self.in_advances = self.paybackPerTag()
-            if len(self.in_advances) > 0 and deduct_in_advances:
-                for tag,in_advance_amount in self.in_advances.items():
-                    if tag in self.tags.keys():
-                        self.tags[tag] -= round(in_advance_amount,2)
-                        if self.tags[tag] == 0:
-                            self.tags.pop(tag)
-                        elif self.tags[tag] < 20:
-                            self.tags["Rest"] += self.tags[tag]
-                            self.tags.pop(tag)
-                    else:
-                        self.tags["Rest"] -= round(in_advance_amount,2)
-                        if self.tags["Rest"] == 0:
-                            self.tags.pop("Rest")
-                self.total_spent = -sum([amount if amount > 0 else 0 for amount in self.tags.values()])
+            self.payback_transacts = self.getPayBackTransacts(self.monthly_transacts)
+            self.payback, self.payback_len = self.getPayback()
+            self.in_advances = self.paybackPerTag(self.monthly_transacts)
+            if len(self.in_advances) > 0 and self.deduct_in_advances:
+                self.recomputeTags()
 
     def getMonthlyTransacts(self,transacts):
         start = datetime(self.year_no, self.month, 1)
@@ -65,35 +54,13 @@ class Month(Year):
         monthly_budget = round(yearly_budget/12.0,2)
         return monthly_budget
 
-    def getPayBacks(self):
-        pbs = []
-        for id,action in self.monthly_transacts.items():
-            if action.tag == "Rückzahlung":
-                if len(action.pb_assign) > 0:
-                    if action.pb_assign[0] == -1 or not self.deduct_in_advances :
-                        pbs.append(action)
-        return pbs
+
 
     def monthNumberToMonthName(self):
         months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober',
                   'November', 'Dezember']
         return months[self.month-1]
 
-    def paybackPerTag(self):
-        in_advances = {}
-        for id,action in self.monthly_transacts.items():
-            if type(action.pb_assign) is list:
-                if len(action.pb_assign) > 0:
-                    if action.pb_assign[0] > 0:
-                        tag = action.tag
-                        if not (tag in in_advances):
-                            in_advances[tag] = 0
-                        for pb_assign in action.pb_assign:
-                            in_advances[tag] += self.all_transacts[pb_assign].amount
-
-                        in_advances[tag] = round(in_advances[tag], 2)
-
-        return in_advances
 
     def perWeek(self):
         weeks = {}
@@ -193,35 +160,6 @@ class Month(Year):
 
         fig.write_image(graph_path)
 
-    def assignPayback(self):
-        all_transacts = getAllTransacts()
-        assigns = []
-        for id,action in self.monthly_transacts.items():
-            if action.tag == "Rückzahlung":
-                print(object2list(action))
-                pb = int(input("of which action?"))
-                # pb = int(action.pb_assign)
-                if pb > 0:
-                    in_advance_action = all_transacts[pb]
-                    if in_advance_action.pb_assign is None:
-                        in_advance_action.pb_assign = []
-                    elif type(in_advance_action.pb_assign) is str:
-                        #if len(in_advance_action.pb_assign) == 0:
-                        in_advance_action.pb_assign = []
-                        #else:
-                            #in_advance_action.pb_assign = ast.literal_eval(in_advance_action.pb_assign)
-                    if not (action.id in in_advance_action.pb_assign):
-                        in_advance_action.pb_assign.append(action.id)
-                        assigns.append(in_advance_action)
-                else:
-                    action.pb_assign = [-1]
-                    assigns.append(action)
-        for in_advance_action in assigns:
-            in_advance_action.pb_assign = str(in_advance_action.pb_assign)
-            print(object2list(in_advance_action))
-        print(assigns)
-        #updateMany(assigns)
-
 
     def createBalanceSheet(self,folder):
         if len(self.monthly_transacts) > 0:
@@ -276,7 +214,7 @@ def executeAssignPayback(month,year):
 if __name__ == '__main__':
     #monthsPerYear(2021)
     home = Path.home()
-    createSingleMonth(12,2021,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
+    createSingleMonth(8,2021,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
     #month = Month(9, 2021)
     #month.assignPayback()
     #month.createGraph()

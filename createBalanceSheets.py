@@ -38,14 +38,8 @@ def drawPDF(month_obj,folder):
 
     pdf.line(50, 220, 540, 220)
 
-    try:
-        payback = 0
-        for pb in month_obj.pbs:
-            payback += pb.amount
-    except KeyError:
-        payback = 0
     pdf.setFont("Helvetica", 18)
-    drawBalanceTable(pdf,month_obj.budget,-total_spent,payback,50,75)
+    drawBalanceTable(pdf,month_obj.budget,-total_spent,month_obj.payback,50,75)
 
     pdf.setFont("Helvetica-Bold", 22)
     pdf.drawString(50,35,"Gesamtausgaben: "+str(-total_spent)+" €")

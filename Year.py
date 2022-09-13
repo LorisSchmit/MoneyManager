@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 income_tags = importTable("income_tags",tags=True)
 
 class Year:
-    def __init__(self,year_no,projection=True,pre_year=True,setBudget=False,budget=0):
+    def __init__(self,year_no,projection=True,pre_year=True,setBudget=False,budget=0,deduct_in_advances=True):
         self.year_no = year_no
         self.all_transacts = getAllTransacts()
         self.yearly_transacts = self.getYearlyTransacts()
@@ -45,13 +45,21 @@ class Year:
         tags = self.perTag()
         self.tags = tags
         self.max = self.biggestTag(self.tags)[1]
-        self.payback,self.payback_len = self.getPayback()
+        self.deduct_in_advances = deduct_in_advances
+        self.payback_transacts,self.payback_len,self.in_advance_payback_len = self.getPayBackTransacts(self.yearly_transacts)
+        self.payback = self.getPayback()
+        self.in_advances = self.paybackPerTag(self.yearly_transacts)
+        if len(self.in_advances) > 0 and self.deduct_in_advances:
+            self.recomputeTags()
+
+
         self.pers_spent = round(self.total_spent + self.payback,2)
         if pre_year:
+            self.adjustment_foreign_year = self.getForeignYearPaybacks()
             self.pre_year = Year(self.year_no-1,pre_year=False)
+
+
         self.perMonth,self.perMonth_pre_year = self.perMonth(pre_year=pre_year)
-
-
 
     def getTotalSpent(self,transacts):
         tot = 0
@@ -78,13 +86,8 @@ class Year:
         return round(yearly_budget,2),count
 
     def getPayback(self):
-        total = 0
-        count = 0
-        for id,action in self.yearly_transacts.items():
-            if action.tag == "Rückzahlung":
-                total += action.amount
-                count += 1
-        return round(total,2),count
+        total = sum([action.amount for id,action in self.payback_transacts.items()])
+        return round(total,2)
 
     def getYearlyTransacts(self):
         start = datetime(self.year_no, 1, 1)
@@ -98,7 +101,7 @@ class Year:
     def getLeanTransacts(self,transacts):
         lean_transacts = OrderedDict()
         for id,action in transacts.items():
-            if action.tag != "Einkommen" and action.tag != "Kapitaltransfer":
+            if action.amount < 0 and action.tag != "Kapitaltransfer":
                 lean_transacts[id] = action
         return lean_transacts
 
@@ -127,6 +130,83 @@ class Year:
                 count += 1
         return transfer_transacts,count
 
+    def getPayBackTransacts(self,transacts):
+        payback_transacts = OrderedDict()
+        payback_count = 0
+        in_advance_payback_count = 0
+        for id,action in transacts.items():
+            if action.tag == "Rückzahlung":
+                if len(action.pb_assign) > 0:
+                    if action.pb_assign[0] < 0 or not self.deduct_in_advances:
+                        payback_transacts[id] = action
+                        payback_count += 1
+                    else:
+                        in_advance_payback_count += 1
+
+        return payback_transacts, payback_count, in_advance_payback_count
+
+    def getForeignYearPaybacks(self):
+        all_paybacks = OrderedDict()
+        all_paybacks_id = []
+        all_in_advances = OrderedDict()
+        all_in_advances_id = []
+        for id,action in self.yearly_transacts.items():
+            if action.tag == "Rückzahlung":
+                try:
+                    if action.pb_assign[0] == 0:
+                        all_paybacks_id.append(id)
+                except IndexError:
+                    print(action.id)
+            if len(action.pb_assign) > 0:
+                if action.pb_assign[0] > 0:
+                    for id_a in action.pb_assign:
+                        all_in_advances_id.append(id_a)
+
+        differences = [list(set(all_paybacks_id).difference(all_in_advances_id)),list(set(all_in_advances_id).difference(all_paybacks_id))]
+        adjustment_foreign_year = 0
+        adjustment_foreign_year -= sum([self.all_transacts[id].amount for id in differences[0]])
+        adjustment_foreign_year += sum([self.all_transacts[id].amount for id in differences[1]])
+
+        return adjustment_foreign_year
+
+    def assignPayback(self,transacts):
+        all_transacts = getAllTransacts()
+        assigns = []
+        for id,action in transacts.items():
+            if action.tag == "Rückzahlung":
+                print(action.id,action.date,action.recipient,action.reference,action.amount,action.tag)
+                pb = int(input("of which action?"))
+                # pb = int(action.pb_assign)
+                if pb > 0:
+                    in_advance_action = all_transacts[pb]
+                    if in_advance_action.pb_assign is None:
+                        in_advance_action.pb_assign = []
+                    elif type(in_advance_action.pb_assign) is str:
+                        #if len(in_advance_action.pb_assign) == 0:
+                        in_advance_action.pb_assign = []
+                        #else:
+                            #in_advance_action.pb_assign = ast.literal_eval(in_advance_action.pb_assign)
+                    if not (action.id in in_advance_action.pb_assign):
+                        in_advance_action.pb_assign.append(action.id)
+                        assigns.append(in_advance_action)
+                    action.pb_assign = [0]
+                    print("In advance", in_advance_action.id, in_advance_action.date, in_advance_action.recipient,
+                          in_advance_action.reference, in_advance_action.amount, in_advance_action.tag,
+                          in_advance_action.pb_assign)
+                elif pb == -1:
+                    break
+
+                else:
+                    action.pb_assign = [-1]
+                    assigns.append(action)
+                print("Payback",action.id,action.date,action.recipient,action.reference,action.amount,action.tag,action.pb_assign)
+                print()
+        for in_advance_action in assigns:
+            in_advance_action.pb_assign = str(in_advance_action.pb_assign)
+            print(object2list(in_advance_action))
+        print(assigns)
+        updateMany(assigns)
+
     def getAccounts(self):
         accounts = {}
         for id, action in self.yearly_transacts.items():
@@ -135,7 +215,6 @@ class Year:
         return accounts
 
     def getBalances(self):
-
         new_year = datetime(self.year_no, 1, 1)
 
         balances = {}
@@ -218,55 +297,46 @@ class Year:
         for tag,value in tags_temp.items():
             if tags_temp[tag] >= 20:
                 tags[tag.rstrip()] = tags_temp[tag]
-            elif tag == "Rückzahlung":
-                tags[tag.rstrip()] = tags_temp[tag]
-            elif tags_temp[tag] > 0:
+            else:
                 rest += float(tags_temp[tag.rstrip()])
 
         rest = round(rest, 2)
         tags['Rest'] = rest
-        tags_temp = {}
-        for tag,value in tags.items():
-            if value >= 1:
-                tags_temp[tag] = value
-        tags = OrderedDict(sorted(tags_temp.items(), key=lambda x: x[1]))
+
+        tags = OrderedDict(sorted(tags.items(), key=lambda x: x[1]))
 
         return tags
 
-    def paybackPerTag(self):
+
+    def paybackPerTag(self,transacts):
         in_advances = {}
-        for id,action in self.yearly_transacts.items():
+        for id,action in transacts.items():
             if type(action.pb_assign) is list:
                 if len(action.pb_assign) > 0:
-                    if action.pb_assign[0] != -1:
+                    if action.pb_assign[0] > 0:
                         tag = action.tag
                         if not (tag in in_advances):
                             in_advances[tag] = 0
                         for pb_assign in action.pb_assign:
                             in_advances[tag] += self.all_transacts[pb_assign].amount
-
                         in_advances[tag] = round(in_advances[tag], 2)
-        pbs_labels = []
-        pbs_labels.extend(in_advances.keys())
-        pbs_labels.append("  ")
-        pbs_values = []
-        pbs_values.extend(in_advances.values())
-        in_advances = OrderedDict(sorted(in_advances.items(), key=lambda x: x[1]))
-        pbs_pie_dict = OrderedDict()
-        tags = self.tags.copy()
-        if "Rückzahlung" in tags:
-            tags.pop("Rückzahlung")
-            for key,value in tags.items():
-                if key in in_advances:
-                    if value >= in_advances[key]:
-                        pbs_pie_dict[key] = in_advances[key]
-                        pbs_pie_dict[key+" fillup"] = round(value - in_advances[key], 2)
-                    else:
-                        pbs_pie_dict[key] = value
-                        pbs_pie_dict[key+" fillup"] = 0
-                else:
-                    pbs_pie_dict[key+" fillup"] = value
-        return pbs_pie_dict
+        return in_advances
+
+    def recomputeTags(self):
+        for tag, in_advance_amount in self.in_advances.items():
+            if tag in self.tags.keys():
+                self.tags[tag] -= round(in_advance_amount, 2)
+                if self.tags[tag] == 0:
+                    self.tags.pop(tag)
+                elif self.tags[tag] < 20:
+                    self.tags["Rest"] += self.tags[tag]
+                    self.tags.pop(tag)
+            else:
+                self.tags["Rest"] -= round(in_advance_amount, 2)
+                if self.tags["Rest"] == 0:
+                    self.tags.pop("Rest")
+        self.total_spent = -sum([amount if amount > 0 else 0 for amount in self.tags.values()])
+
 
     def biggestTag(self,tags):
         max_key = next(iter(tags))
@@ -631,7 +701,7 @@ def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
         if gui.setBudgetRadio.isChecked():
             budget = gui.budget
             setBudget = True
-    year = Year(year_no,projection=projection,setBudget=setBudget,budget=budget)
+    year = Year(year_no,projection=projection,setBudget=setBudget,budget=budget,deduct_in_advances=True)
     if gui is not None:
         gui.yearlySheetCreationProgressBar.setValue(20)
         #gui.progressBarLabel.setText("Erstellen des Budget Diagramms für "+str(year_no))
@@ -665,8 +735,12 @@ def computeBalances():
         account.getBalances()
 
 if __name__ == '__main__':
-    #createYearlySheet(2021,"/Users/loris/Balance Sheets",redraw_graphs=True)
+    home = Path.home()
     computeBalances()
-    year_no = 2020
-    year = Year(year_no)
-    print(year.checkTransfers())
+    createYearlySheet(2019,home/"Documents"/"Balance Sheets",redraw_graphs=True)
+    #computeBalances()
+    year_no = 2019
+    #year = Year(year_no,deduct_in_advances=False)
+    #year.getForeignYearPaybacks()
+    #year.assignPayback(year.yearly_transacts)
+    #print(year.checkTransfers())

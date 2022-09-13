@@ -168,6 +168,7 @@ def drawBalanceTable(pdf, year, x, y):
     budget_len = year.budget_len
     payback = year.payback
     payback_len = year.payback_len
+    in_advance_payback_len = year.in_advance_payback_len
     pers_spent = -year.pers_spent
     transfer_transacts_len = year.transfer_transacts_len
     if not year.setBudget:
@@ -175,7 +176,7 @@ def drawBalanceTable(pdf, year, x, y):
     else:
         sold,sold_len = 0,0
 
-    treated, treated_total = total_spent_len + budget_len + payback_len + transfer_transacts_len + sold_len, len(year.yearly_transacts)
+    treated, treated_total = total_spent_len + budget_len + payback_len + in_advance_payback_len + transfer_transacts_len + sold_len, len(year.yearly_transacts)
 
     data = [['Transaktionen', str(treated)+ " von " +str(treated_total)],
             ['Gesamtausgaben', formatFloat(total_spent)],
@@ -222,16 +223,17 @@ def drawAccountBalanceTable(pdf, year, x, y):
     data = [['Transaktionen', str(treated)+ " von " +str(treated_total)],
             ['Auf Konten eingangen', formatFloat(account_income)],
             ['Von Konten abgezogen', formatFloat(account_expense)],
-            ['davon Kapitaltransfer', formatFloat(transfer)]]
+            ['davon Kapitaltransfer', formatFloat(transfer)],
+            ['Anpassung Rückzahlungen', formatFloat(year.adjustment_foreign_year)]]
 
-    last_row = 6
+    last_row = 7
 
     if debt > 0:
         data.append(['Schulden aufgenommen', formatFloat(debt)])
-        last_row = 7
+        last_row = 8
 
     data.extend([['Anfangsvermögen', formatFloat(total_beginning)], ['Endvermögen', formatFloat(total_end)]])
-    balance = round(total_end-total_beginning-debt, 2)
+    balance = round(total_end-total_beginning-debt+year.adjustment_foreign_year, 2)
 
     style = [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
              ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
