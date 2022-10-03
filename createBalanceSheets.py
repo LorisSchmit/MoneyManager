@@ -25,7 +25,7 @@ def drawPDF(month_obj,folder):
 
     pdf = canvas.Canvas(str(file_name))
 
-    drawImage(image_path, pdf, 45, 360, 1)
+    drawImage(image_path, pdf, 45, 360, 0.25)
 
     pdf.setTitle(document_title)
 
