@@ -155,15 +155,31 @@ class Importer:
             new_action = copy(action)
             new_action.id = new_id
             new_transacts_reindexed[new_id] = new_action
+
         new_transacts = new_transacts_reindexed
         new_transacts = tag(new_transacts,gui)
         joined_transacts = self.old_transacts
+        biggest_id = max(new_transacts.keys())+1
+        for account in accounts:
+            if account.name == "Visa":
+                VISA = account
         for id,action in new_transacts.items():
+            if action.type == "DECOMPTE VISA":
+                new_transfer = Transaction(biggest_id, action.date, type="Visa Transfer", recipient="Visa",
+                                           reference="Visa Transfer " + action.date.strftime("%d/%m/%Y"),
+                                           amount=-action.amount, currency="EUR",
+                                           tag="Kapitaltransfer", account=VISA)
+
+                if biggest_id not in joined_transacts.keys():
+                    joined_transacts[biggest_id] = new_transfer
+                else:
+                    print("Warning: Overwriting prevented!")
+                biggest_id += 1
             if id not in joined_transacts.keys():
                 joined_transacts[id] = action
             else:
                 print("Warning: Overwriting prevented!")
-        final_transacts = OrderedDict()
+        #final_transacts = OrderedDict()
         final_transacts = joined_transacts
 
         final_transacts = OrderedDict(sorted(final_transacts.items(),key=lambda x: x[1].date))
@@ -171,6 +187,7 @@ class Importer:
         if len(final_transacts) >= len(self.old_transacts):
             deleteAllFromTable("transacts")
             writeTransacts2DB(final_transacts)
+            print("Info: Database writing successful")
         else:
             print("Warning: Database overwriting prevented")
 

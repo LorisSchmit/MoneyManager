@@ -232,7 +232,7 @@ class Year:
             balance_list = []
 
             for (date_iter, balance_iter) in reversed(account.balances):
-                if date_iter <= base_date:
+                if date_iter < base_date:
                     balance = balance_iter
                     balance_list = [balance]
                     break
