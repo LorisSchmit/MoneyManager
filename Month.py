@@ -31,7 +31,7 @@ class Month(Year):
             self.weeks = self.perWeek()
             self.deduct_in_advances = deduct_in_advances
             self.payback_transacts,self.payback_len,self.in_advance_payback_len = self.getPayBackTransacts(self.monthly_transacts)
-            self.payback, self.payback_len = self.getPayback()
+            self.payback = self.getPayback()
             self.in_advances = self.paybackPerTag(self.monthly_transacts)
             if len(self.in_advances) > 0 and self.deduct_in_advances:
                 self.recomputeTags()
