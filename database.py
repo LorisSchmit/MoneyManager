@@ -27,16 +27,16 @@ def read(conn, table):
     return data,names
 
 def write(conn, row):
-    sql = ''' INSERT INTO transacts(id,date,type,recipient,reference,amount,currency,tag,account,pb_assign)
-              VALUES(?,?,?,?,?,?,?,?,?,?) '''
+    sql = ''' INSERT INTO transacts(id,date,type,recipient,reference,amount,currency,tag,sub_tag,account,pb_assign)
+              VALUES(?,?,?,?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, row)
     return cur.lastrowid
 
 
 def writeMany(conn, data):
-    sql = ''' INSERT INTO transacts(id,date,type,recipient,reference,amount,currency,tag,account,pb_assign)
-              VALUES(?,?,?,?,?,?,?,?,?,?) '''
+    sql = ''' INSERT INTO transacts(id,date,type,recipient,reference,amount,currency,tag,sub_tag,account,pb_assign)
+              VALUES(?,?,?,?,?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.executemany(sql, data)
     return cur.lastrowid

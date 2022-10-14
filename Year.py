@@ -9,7 +9,7 @@ import plotly.express as px
 import threading
 from matplotlib import dates as mdates
 from dateutil.relativedelta import relativedelta
-
+import plotly.graph_objects as go
 income_tags = importTable("income_tags",tags=True)
 
 class Year:
@@ -43,6 +43,7 @@ class Year:
         self.setBudget = setBudget
 
         tags = self.perTag()
+        self.tagStruct = self.getTagStructure()
         self.tags = tags
         self.max = self.biggestTag(self.tags)[1]
         self.deduct_in_advances = deduct_in_advances
@@ -60,6 +61,7 @@ class Year:
 
 
         self.perMonth,self.perMonth_pre_year = self.perMonth(pre_year=pre_year)
+        self.file_name = "Expenses"+str(self.year_no)
 
     def getTotalSpent(self,transacts):
         tot = 0
@@ -541,6 +543,81 @@ class Year:
         graph_path = prepare4Saving(file_name, vector)
         fig.write_image(graph_path)
 
+    def createNestedExpensesTreemap(self,vector=True):
+        #print("Drawing expenses treemap for",self.month_name,"-",self.year_no)
+        parents = [""]
+        labels = [" "]
+        values = [0]
+        ids = ["all"]
+
+        for tag,sub_tags in self.tagStruct.items():
+            total = sum([-round(value,2) for sub_tag,value in sub_tags.items()])
+            if total > -0.005*self.total_spent:
+                labels.append(tag)
+                parents.append("all")
+                t_id = "t_"+tag
+                ids.append(t_id )
+                small_amounts = 0
+                small_amounts_labels = []
+                for sub_tag,value in sub_tags.items():
+                    if sub_tag != "Rest":
+                        if -round(value,2) < - 0.0025 * self.total_spent:
+                            small_amounts -= round(value,2)
+                            small_amounts_labels.append(sub_tag)
+                if "Rest" in sub_tags.keys():
+                    values.append(round(-sub_tags["Rest"]+small_amounts,2))
+                else:
+                    values.append(0)
+                for sub_tag,value in sub_tags.items():
+                    if sub_tag != "Rest" and sub_tag not in small_amounts_labels:
+                        labels.append(sub_tag)
+                        parents.append(t_id)
+                        values.append(-round(value,2))
+                        ids.append(t_id +"_st_"+sub_tag)
+
+        fig = go.Figure(go.Treemap(
+            ids = ids,
+            labels=labels,
+            parents=parents,
+            values=values,
+            branchvalues='remainder'
+        ))
+        if type(self) is Year:
+            width=510
+            height=710
+        else:
+            width = 500
+            height = 550
+        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0),width=width, height=height)
+
+        fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
+        #fig.show()
+        graph_path = prepare4Saving(self.file_name, vector)
+        fig.write_image(graph_path)
+
+
+
+    def getTagStructure(self):
+        strct = {}
+        for id,action in self.lean_transacts.items():
+            if action.tag in strct.keys():
+                if action.sub_tag in strct[action.tag].keys() and action.sub_tag != "":
+                    total = strct[action.tag][action.sub_tag]
+                    total += action.amount
+                    strct[action.tag][action.sub_tag] = total
+                elif action.sub_tag != "":
+                    strct[action.tag][action.sub_tag] = action.amount
+                else:
+                    if "Rest" in strct[action.tag].keys():
+                        strct[action.tag]["Rest"] += action.amount
+                    else:
+                        strct[action.tag]["Rest"] = action.amount
+            elif action.sub_tag != "":
+                strct[action.tag] = {action.sub_tag: action.amount}
+            else:
+                strct[action.tag] = {"Rest": action.amount}
+        return strct
+
     def perMonth(self,num_top_tags = 8,pre_year=True):
         top_tags_candidates = list(reversed(self.tags.items()))
         option4top_tags = ["Essen","Bar","Sport","Fahrrad","Auto","Sprit","Transport","Wohnen","Hardware","Drogerie","Amazon","Kleider"]
@@ -711,7 +788,7 @@ def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
         if gui is not None:
             gui.yearlySheetCreationProgressBar.setValue(40)
             #gui.progressBarLabel.setText("Erstellen des Ausgaben Diagramms für " +str(year_no))
-        year.createExpensesTreemap()
+        year.createNestedExpensesTreemap()
         if gui is not None:
             gui.yearlySheetCreationProgressBar.setValue(60)
             #gui.progressBarLabel.setText("Erstellen der jährlichen Bilanz PDF für " +str(year_no))
@@ -737,10 +814,12 @@ def computeBalances():
 if __name__ == '__main__':
     home = Path.home()
     computeBalances()
-    createYearlySheet(2019,home/"Documents"/"Balance Sheets",redraw_graphs=True)
+    createYearlySheet(2022,home/"Documents"/"Balance Sheets",redraw_graphs=True)
     #computeBalances()
-    year_no = 2019
+    year_no = 2021
     #year = Year(year_no,deduct_in_advances=False)
+    #print(json.dumps(year.tagStruct, sort_keys = True, indent = 4))
+    #year.createNestedExpensesTreemap()
     #year.getForeignYearPaybacks()
     #year.assignPayback(year.yearly_transacts)
     #print(year.checkTransfers())

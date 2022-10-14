@@ -5,6 +5,8 @@ from Year import *
 import pandas as pd
 
 
+
+
 class Month(Year):
     def __init__(self,month,year,projection=True,setBudget=False,budget=0,deduct_in_advances=True):
         self.month = month
@@ -17,6 +19,7 @@ class Month(Year):
         self.yearly_transacts = self.getYearlyTransacts()
         if len(self.monthly_transacts) > 0:
             self.tags = self.perTag()
+            self.tagStruct = self.getTagStructure()
             self.total_spent,_ = self.getTotalSpent(self.monthly_transacts)
             if projection and self.year_no >= datetime.now().year:
                 projs = importTable("budget_projection")
@@ -36,6 +39,7 @@ class Month(Year):
             self.in_advances = self.paybackPerTag(self.monthly_transacts)
             if len(self.in_advances) > 0 and self.deduct_in_advances:
                 self.recomputeTags()
+            self.file_name = str(self.year_no) + " - " + str(self.month)
 
     def getMonthlyTransacts(self,transacts):
         start = datetime(self.year_no, self.month, 1)
@@ -161,33 +165,6 @@ class Month(Year):
 
         fig.write_image(graph_path)
 
-    def createNestedExpensesTreemap(self,vector=True):
-        print("Drawing expenses treemap for",self.month_name,"-",self.year_no)
-        tags = list([action.tag for id, action in self.lean_transacts.items()])
-        sub_tags = []
-        values = []
-        for id, action in self.lean_transacts.items():
-            if action.sub_tag is not None:
-                sub_tags.append(action.sub_tag)
-            else:
-                sub_tags.append("Rest")
-            if action.val
-        values = list([-action.amount for id, action in self.lean_transacts.items()])
-        df = pd.DataFrame(
-            dict(sub_tags=sub_tags, tags=tags, values=values)
-        )
-        df["all"] = "all"  # in order to have a single root node
-        print(df)
-        fig = px.treemap(df, path=['all', 'tags', 'sub_tags'], values='values',width=900,height=1200)
-        #fig = px.treemap(names=labels,values=values,parents=parents,width=300,height=400)#,color=cs)
-        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-        fig.data[0].texttemplate = "%{label} <br> %{percentEntry}"
-        fig.show()
-        file_name = str(self.year_no) + " - " + str(self.month)
-        graph_path = prepare4Saving(file_name, vector)
-
-        fig.write_image(graph_path)
-
 
     def createBalanceSheet(self,folder):
         if len(self.monthly_transacts) > 0:
@@ -196,7 +173,7 @@ class Month(Year):
 def monthsPerYear(year):
     for i in range(1, 13):
         month = Month(i, year,deduct_in_advances=True)
-        month.createExpensesTreemap()
+        month.createNestedExpensesTreemap()
         home = Path.home()
         month.createBalanceSheet(home/"Documents"/"Balance Sheets")
     return "All Balances for "+str(year)+" created"
@@ -240,10 +217,11 @@ def executeAssignPayback(month,year):
 
 
 if __name__ == '__main__':
-    #monthsPerYear(2021)
+    monthsPerYear(2022)
     home = Path.home()
-    createSingleMonth(7,2022,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
-    #month = Month(9, 2021)
+    #createSingleMonth(7,2022,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
+    #month = Month(9, 2022)
+    #month.createNestedExpensesTreemap()
     #month.assignPayback()
     #month.createGraph()
     #month.createBalanceSheet()
