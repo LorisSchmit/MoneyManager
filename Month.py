@@ -37,7 +37,7 @@ class Month(Year):
             self.payback_transacts,self.payback_len,self.in_advance_payback_len = self.getPayBackTransacts(self.monthly_transacts)
             self.payback = self.getPayback()
             self.in_advances = self.paybackPerTag(self.monthly_transacts)
-            self.file_name = str(self.year_no) + " - " + str(self.month)
+        self.file_name = str(self.year_no) + " - " + str(self.month)
 
     def getMonthlyTransacts(self,transacts):
         start = datetime(self.year_no, self.month, 1)
@@ -215,9 +215,9 @@ def executeAssignPayback(month,year):
 
 
 if __name__ == '__main__':
-    #monthsPerYear(2022)
+    monthsPerYear(2021)
     home = Path.home()
-    createSingleMonth(9,2022,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
+    #createSingleMonth(9,2022,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
     #month = Month(9, 2022)
     #month.createNestedExpensesTreemap()
     #month.assignPayback(month.monthly_transacts)

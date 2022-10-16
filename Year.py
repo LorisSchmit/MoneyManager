@@ -553,16 +553,15 @@ class Year:
         fig.write_image(graph_path)
 
     def createNestedExpensesTreemap(self,vector=True):
-        #print("Drawing expenses treemap for",self.month_name,"-",self.year_no)
-        parents = [""]
-        labels = [" "]
-        values = [0]
-        ids = ["all"]
-
+        print("Drawing expenses treemap for",self.file_name)
+        parents = ["","all"]
+        labels = [" ","Rest"]
+        values = [0,0]
+        ids = ["all","rest"]
+        small_tags = 0
         for tag,sub_tags in self.tagStruct.items():
             total = sum([-round(value,2) for sub_tag,value in sub_tags.items()])
             if total > -0.005*self.total_spent:
-                labels.append(tag)
                 parents.append("all")
                 t_id = "t_"+tag
                 ids.append(t_id )
@@ -575,15 +574,23 @@ class Year:
                             small_amounts_labels.append(sub_tag)
                 if "Rest" in sub_tags.keys():
                     values.append(round(-sub_tags["Rest"]+small_amounts,2))
+                elif small_amounts > 0:
+                    values.append(round(small_amounts,2))
                 else:
                     values.append(0)
+                if len(sub_tags)-len(small_amounts_labels) == 1:
+                    labels.append(tag)
+                else:
+                    labels.append(tag + "&nbsp;&nbsp;"+ str(round(total / -self.total_spent * 100)) +"%<br>"+ str(round(total, 2)) + " €" )
                 for sub_tag,value in sub_tags.items():
                     if sub_tag != "Rest" and sub_tag not in small_amounts_labels:
                         labels.append(sub_tag)
                         parents.append(t_id)
                         values.append(-round(value,2))
                         ids.append(t_id +"_st_"+sub_tag)
-
+            else:
+                small_tags += total
+        values[1] = round(small_tags,2)
         fig = go.Figure(go.Treemap(
             ids = ids,
             labels=labels,
@@ -597,9 +604,9 @@ class Year:
         else:
             width = 500
             height = 550
-        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0),width=width, height=height)
+        fig.update_layout(margin=dict(l=0, r=0, t=0, b=0),width=width, height=height)#,uniformtext=dict(minsize = 5, mode ='show'))
 
-        fig.data[0].texttemplate = "%{label} <br> %{value} € <br> %{percentEntry}"
+        fig.data[0].texttemplate = "%{label} <br>%{value} €<br>%{percentEntry} "
         #fig.show()
         graph_path = prepare4Saving(self.file_name, vector)
         fig.write_image(graph_path)
