@@ -50,15 +50,11 @@ class Year:
         self.payback_transacts,self.payback_len,self.in_advance_payback_len = self.getPayBackTransacts(self.yearly_transacts)
         self.payback = self.getPayback()
         self.in_advances = self.paybackPerTag(self.yearly_transacts)
-        if len(self.in_advances) > 0 and self.deduct_in_advances:
-            self.recomputeTags()
-
 
         self.pers_spent = round(self.total_spent + self.payback,2)
         if pre_year:
             self.adjustment_foreign_year = self.getForeignYearPaybacks()
             self.pre_year = Year(self.year_no-1,pre_year=False)
-
 
         self.perMonth,self.perMonth_pre_year = self.perMonth(pre_year=pre_year)
         self.file_name = "Expenses"+str(self.year_no)
@@ -317,11 +313,24 @@ class Year:
                 if len(action.pb_assign) > 0:
                     if action.pb_assign[0] > 0:
                         tag = action.tag
+                        sub_tag = action.sub_tag
                         if not (tag in in_advances):
-                            in_advances[tag] = 0
+                            in_advances[tag] = {sub_tag: 0}
+                        elif not (sub_tag in in_advances[tag]):
+                            in_advances[tag][sub_tag] = 0
                         for pb_assign in action.pb_assign:
-                            in_advances[tag] += self.all_transacts[pb_assign].amount
-                        in_advances[tag] = round(in_advances[tag], 2)
+                            in_advances[tag][sub_tag] += self.all_transacts[pb_assign].amount
+                            if sub_tag == "":
+                                self.tagStruct[tag]["Rest"] += self.all_transacts[pb_assign].amount
+                            else:
+                                self.tagStruct[tag][sub_tag] += self.all_transacts[pb_assign].amount
+                        #in_advances[tag] = round(in_advances[tag], 2)
+        self.total_spent = 0
+        for tag in self.tagStruct.values():
+            for subtag in tag.values():
+                if subtag < 0:
+                    self.total_spent += subtag
+        self.total_spent = round(self.total_spent,2)
         return in_advances
 
     def recomputeTags(self):
