@@ -2,6 +2,9 @@ from commonFunctions import weekNumberToDates
 from createBalanceSheets import drawPDF,prepare4Saving
 import os
 from Year import *
+import pandas as pd
+
+
 
 
 class Month(Year):
@@ -16,6 +19,7 @@ class Month(Year):
         self.yearly_transacts = self.getYearlyTransacts()
         if len(self.monthly_transacts) > 0:
             self.tags = self.perTag()
+            self.tagStruct = self.getTagStructure()
             self.total_spent,_ = self.getTotalSpent(self.monthly_transacts)
             if projection and self.year_no >= datetime.now().year:
                 projs = importTable("budget_projection")
@@ -33,8 +37,7 @@ class Month(Year):
             self.payback_transacts,self.payback_len,self.in_advance_payback_len = self.getPayBackTransacts(self.monthly_transacts)
             self.payback = self.getPayback()
             self.in_advances = self.paybackPerTag(self.monthly_transacts)
-            if len(self.in_advances) > 0 and self.deduct_in_advances:
-                self.recomputeTags()
+            self.file_name = str(self.year_no) + " - " + str(self.month)
 
     def getMonthlyTransacts(self,transacts):
         start = datetime(self.year_no, self.month, 1)
@@ -168,7 +171,7 @@ class Month(Year):
 def monthsPerYear(year):
     for i in range(1, 13):
         month = Month(i, year,deduct_in_advances=True)
-        month.createExpensesTreemap()
+        month.createNestedExpensesTreemap()
         home = Path.home()
         month.createBalanceSheet(home/"Documents"/"Balance Sheets")
     return "All Balances for "+str(year)+" created"
@@ -189,7 +192,7 @@ def createSingleMonth(month,year,folder,gui=None,redraw_graphs=True,deduct_in_ad
         if gui is not None:
             gui.monthlySheetCreationProgressBar.setValue(33)
             gui.progressBarMonthLabel.setText("Erstellen des Ausgaben Diagramms für "+str(month.month_name)+" "+str(month.year_no))
-        month.createExpensesTreemap()
+        month.createNestedExpensesTreemap()
         if gui is not None:
             gui.monthlySheetCreationProgressBar.setValue(66)
             gui.progressBarMonthLabel.setText("Erstellen der monatlichen Bilanz PDF für "+str(month.month_name)+" "+str(month.year_no))
@@ -212,11 +215,12 @@ def executeAssignPayback(month,year):
 
 
 if __name__ == '__main__':
-    #monthsPerYear(2021)
+    #monthsPerYear(2022)
     home = Path.home()
-    createSingleMonth(8,2021,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
-    #month = Month(9, 2021)
-    #month.assignPayback()
+    createSingleMonth(9,2022,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
+    #month = Month(9, 2022)
+    #month.createNestedExpensesTreemap()
+    #month.assignPayback(month.monthly_transacts)
     #month.createGraph()
     #month.createBalanceSheet()
     #print(month.budget)

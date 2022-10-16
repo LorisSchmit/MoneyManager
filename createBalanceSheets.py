@@ -25,11 +25,11 @@ def drawPDF(month_obj,folder):
 
     pdf = canvas.Canvas(str(file_name))
 
-    drawImage(image_path, pdf, 45, 360, 1)
+    drawImage(image_path, pdf, 45, 235, 1)
 
     pdf.setTitle(document_title)
 
-    drawCategoryTable(pdf,month_obj.tags,370,400)
+    #drawCategoryTable(pdf,month_obj.tags,370,400)
 
     pdf.setFont("Helvetica-Bold", 30)
     pdf.drawCentredString(300, 780, title)
