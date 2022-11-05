@@ -188,6 +188,7 @@ class Year:
                         in_advance_action.pb_assign.append(action.id)
                         assigns.append(in_advance_action)
                     action.pb_assign = [0]
+                    assigns.append(action)
                     print("In advance", in_advance_action.id, in_advance_action.date, in_advance_action.recipient,
                           in_advance_action.reference, in_advance_action.amount, in_advance_action.tag,
                           in_advance_action.pb_assign)
