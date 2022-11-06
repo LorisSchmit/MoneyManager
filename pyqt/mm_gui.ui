@@ -41,7 +41,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="transactsTab">
      <attribute name="title">
@@ -216,7 +216,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>360</y>
+        <y>350</y>
         <width>641</width>
         <height>61</height>
        </rect>
@@ -275,9 +275,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>420</x>
         <y>430</y>
-        <width>449</width>
+        <width>241</width>
         <height>21</height>
        </rect>
       </property>
@@ -344,7 +344,7 @@
        <item row="1" column="0">
         <widget class="QLineEdit" name="browseFolderEdit">
          <property name="text">
-          <string>/Users/loris/Documents/Movements</string>
+          <string>/Users/loris/Documents/MoneyManager/Movements</string>
          </property>
         </widget>
        </item>
@@ -416,13 +416,20 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>460</y>
+        <y>420</y>
         <width>441</width>
-        <height>125</height>
+        <height>156</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="3" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Speichern als:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
         <widget class="QLineEdit" name="tagReferenceEdit">
          <property name="enabled">
           <bool>false</bool>
@@ -432,6 +439,26 @@
          </property>
          <property name="text">
           <string />
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QPushButton" name="saveTagButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Speichern</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QPushButton" name="notSaveTagButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Nein</string>
          </property>
         </widget>
        </item>
@@ -445,16 +472,6 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="taggingEnterButton">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Best&#228;tigen</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
         <widget class="QLineEdit" name="taggingLineEdit">
          <property name="enabled">
@@ -462,30 +479,16 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="QPushButton" name="notSaveTagButton">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Nein</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QPushButton" name="saveTagButton">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Speichern</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLineEdit" name="subtagLineEdit" />
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="taggingEnterButton">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="text">
-          <string>Speichern als:</string>
+          <string>Best&#228;tigen</string>
          </property>
         </widget>
        </item>
@@ -508,7 +511,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>320</y>
+        <y>310</y>
         <width>141</width>
         <height>31</height>
        </rect>
@@ -526,7 +529,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>300</y>
+        <y>290</y>
         <width>511</width>
         <height>16</height>
        </rect>
@@ -597,7 +600,7 @@
        <item row="1" column="0">
         <widget class="QLineEdit" name="balanceSheetFolderEdit">
          <property name="text">
-          <string>/Users/loris/Documents/Balance Sheets</string>
+          <string>/Users/loris/Documents/MoneyManager/Balance Sheets</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

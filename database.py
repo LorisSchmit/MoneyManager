@@ -50,7 +50,7 @@ def writeManyTable(conn, table, data):
     conn.commit()
 
 def writeManyTags(conn, data):
-    sql = ' INSERT INTO tags(ref,cat) VALUES(?,?) '
+    sql = ' INSERT INTO tags(ref,cat,subtag) VALUES(?,?,?) '
     cur = conn.cursor()
     cur.executemany(sql, data)
     return cur.lastrowid

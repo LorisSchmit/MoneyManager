@@ -32,7 +32,8 @@ def tag(transacts,gui=None):
         tag_found = False
         for known_ref in known_tags:
             if action.recipient.lower().find(known_ref.lower()) != -1 or action.reference.lower().find(known_ref.lower()) != -1:
-                tag = known_tags[known_ref]
+                tag = known_tags[known_ref][0]
+                subtag = known_tags[known_ref][1]
                 tag_found = True
                 break
         if not tag_found:
@@ -44,6 +45,7 @@ def tag(transacts,gui=None):
             while not gui.tagReady:
                 time.sleep(.01)
             tag = str(gui.taggingLineEdit.text())
+            subtag = str(gui.subtagLineEdit.text())
             gui.tagReady = False
             default = (action.recipient if action.recipient!= "" else action.reference)
 
@@ -56,7 +58,7 @@ def tag(transacts,gui=None):
                     time.sleep(.01)
                 if gui.saveTagReady:
                     ref = str(gui.tagReferenceEdit.text())
-                    known_tags[ref] = tag.strip().rstrip()
+                    known_tags[ref] = (tag.strip().rstrip(),subtag.strip().rstrip())
                     writeTags(known_tags)
                 gui.saveTagReady = False
                 gui.notSaveTag = False
@@ -64,9 +66,11 @@ def tag(transacts,gui=None):
                 gui.saveTagButton.setEnabled(False)
                 gui.notSaveTagButton.setEnabled(False)
         transacts[id].tag = tag
+        transacts[id].sub_tag = subtag
         gui.importProgressLabel.setText(" %d von %d Transaktionen importiert" % (i+1, len(transacts)))
         QTimer.singleShot(0, gui.taggingLineEdit.clear)
         QTimer.singleShot(0, gui.tagReferenceEdit.clear)
+        QTimer.singleShot(0, gui.subtagLineEdit.clear)
         gui.taggingTableWidget.clear()
 
 
