@@ -10,7 +10,6 @@ import threading
 from matplotlib import dates as mdates
 from dateutil.relativedelta import relativedelta
 import plotly.graph_objects as go
-income_tags = importTable("income_tags",tags=True)
 
 class Year:
     def __init__(self,year_no,projection=True,pre_year=True,setBudget=False,budget=0,deduct_in_advances=True):

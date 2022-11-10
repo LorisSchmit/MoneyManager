@@ -12,8 +12,8 @@ from shutil import copyfile
 mm_dir_path = Path(__file__).parent
 home = Path.home()
 if str(home) == "/Users/loris":
-    db_file = home / "Documents" /"db_private.db"
-    db_file_backup = home / "Documents" / "db_private_backup.db"
+    db_file = home / "Documents" / "MoneyManager" / "db_private.db"
+    db_file_backup = home / "Documents"/ "MoneyManager" / "db_private_backup.db"
 else:
     db_file = mm_dir_path / "db.db"
     db_file_backup = mm_dir_path / "db_backup.db"
@@ -70,7 +70,7 @@ def importTable(table,tags=False):
     if tags:
         data = {}
         for el in raw_data:
-            data[el[1]] = el[2]
+            data[el[1]] = (el[2],el[3])
     else:
         data = []
         for row in raw_data:
@@ -94,7 +94,7 @@ def writeTags(tags):
     deleteAllFromTable("tags")
     data = []
     for key in tags:
-        temp = [key,tags[key]]
+        temp = [key,tags[key][0],tags[key][1]]
         data.append(temp)
     with conn:
         writeManyTags(conn,data)
