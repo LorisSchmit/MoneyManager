@@ -39,7 +39,9 @@ def drawPDF(month_obj,folder):
     pdf.line(50, 220, 540, 220)
 
     pdf.setFont("Helvetica", 18)
-    drawBalanceTable(pdf,month_obj.budget,-total_spent,month_obj.payback,50,75)
+    print(month_obj.in_advances)
+    in_advances_total = sum(sum(val for val in in_advances.values()) for in_advances in month_obj.in_advances.values())
+    drawBalanceTable(pdf,month_obj.budget,-total_spent,month_obj.payback,in_advances_total,50,75)
 
     pdf.setFont("Helvetica-Bold", 22)
     pdf.drawString(50,35,"Gesamtausgaben: "+str(-total_spent)+" €")
@@ -107,10 +109,10 @@ def drawCategoryTable(pdf,tags,x,y):
     t.wrapOn(pdf, x, y)
     t.drawOn(pdf, x, y+310 - len(tags) * 25)
 
-def drawBalanceTable(pdf,budget,spent,payback,x,y):
+def drawBalanceTable(pdf,budget,spent,payback,in_advances_total,x,y):
     data = [['Gesamtausgaben',str(spent)+" €"],
             ['Budget pro Monat', str(budget)+" €"],
-            ['Rückzahlung', str(round(payback,2))+" €"]]
+            ['Rückzahlung', str(round(in_advances_total,2))+"/"+str(round(payback,2))+" €"]]
     balance = round(payback+budget-spent,2)
 
     style =[('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
