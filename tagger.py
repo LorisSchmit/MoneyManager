@@ -18,9 +18,16 @@ def rlinput(prompt, prefill):
 
 def getUniqueTags():
     transacts = getAllTransacts()
-    tags = [action[1].tag for action in transacts.items()]
+    tags = [action.tag for action in transacts.values()]
     tags = np.array(tags)
     uniques = np.unique(tags)
+    return uniques
+
+def getUniqueSubTags():
+    transacts = getAllTransacts()
+    sub_tags = [action.sub_tag for action in transacts.values()]
+    sub_tags = np.array(sub_tags)
+    uniques = np.unique(sub_tags)
     return uniques
 
 
@@ -42,20 +49,23 @@ def tag(transacts,gui=None):
             gui.taggingTableWidget.setItem(0, 1, QTableWidgetItem(action.recipient))
             gui.taggingTableWidget.setItem(0, 2, QTableWidgetItem(action.reference))
             gui.taggingTableWidget.setItem(0, 3, QTableWidgetItem(str(action.amount)+" €"))
-            while not gui.tagReady:
-                time.sleep(.01)
-            tag = str(gui.taggingLineEdit.text())
-            subtag = str(gui.subtagLineEdit.text())
-            gui.tagReady = False
-            default = (action.recipient if action.recipient!= "" else action.reference)
 
+            default = (action.recipient if action.recipient!= "" else action.reference)
             if len(default) > 0:
+                while not gui.tagReady:
+                    time.sleep(.01)
+
+                gui.tagReady = False
+
                 gui.tagReferenceEdit.setEnabled(True)
                 gui.saveTagButton.setEnabled(True)
                 gui.notSaveTagButton.setEnabled(True)
                 gui.tagReferenceEdit.setText(str(default))
+                gui.tagReferenceEdit.setFocus()
                 while (not gui.saveTagReady) and (not gui.notSaveTag):
                     time.sleep(.01)
+                tag = str(gui.taggingLineEdit.text())
+                subtag = str(gui.subtagLineEdit.text())
                 if gui.saveTagReady:
                     ref = str(gui.tagReferenceEdit.text())
                     known_tags[ref] = (tag.strip().rstrip(),subtag.strip().rstrip())
@@ -65,6 +75,9 @@ def tag(transacts,gui=None):
                 gui.tagReferenceEdit.setEnabled(False)
                 gui.saveTagButton.setEnabled(False)
                 gui.notSaveTagButton.setEnabled(False)
+            else:
+                tag = "Kapitaltransfer"
+                subtag = ""
         transacts[id].tag = tag
         transacts[id].sub_tag = subtag
         gui.importProgressLabel.setText(" %d von %d Transaktionen importiert" % (i+1, len(transacts)))
@@ -79,3 +92,4 @@ def tag(transacts,gui=None):
 
 known_tags = importTable("tags",tags=True)
 unique_tags = getUniqueTags()
+unique_subtags = getUniqueSubTags()
