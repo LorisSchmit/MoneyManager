@@ -1,0 +1,44 @@
+/* Define the base styles for the body of the HTML document */
+body {
+    font-family: "Open", sans-serif; 
+    margin: 0px;
+    padding: 0px;
+    background-color: #eeecec;
+}
+
+/* Styles for the title in the header */
+.navbar {
+    padding: 5px;
+    margin-bottom: 10px; 
+    border-radius: 5px; 
+
+}
+
+/* Styles for the title in the header */
+.header-title {
+    color: #FFFFFF; 
+    font-size: 48px; 
+    text-align: center;
+    margin: 0 auto; 
+}
+
+/* Styles for the title in the header */
+.tile-title {
+    color: #000000; 
+    font-size: 20px; 
+    text-align: left;
+    margin-top: 32px; 
+    margin-left: 10px; 
+}
+
+.mb-4 {
+    background-color: #FFFFFF; 
+    padding: 5px;
+    margin: 0px;
+    border-radius: 5px;
+}
+
+
+.bg-light {
+    background-color: #ff0000;
+}
