@@ -1,6 +1,8 @@
 from database_api import *
 from createYearlySheet import *
 from Account import accounts
+from expense_plotter import *
+
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
@@ -53,9 +55,9 @@ class Year:
         self.pers_spent = round(self.total_spent + self.payback,2)
         if pre_year:
             self.adjustment_foreign_year = self.getForeignYearPaybacks()
-            self.pre_year = Year(self.year_no-1,pre_year=False)
+            #self.pre_year = Year(self.year_no-1,pre_year=False)
 
-        self.perMonth,self.perMonth_pre_year = self.perMonth(pre_year=pre_year)
+        #self.perMonth,self.perMonth_pre_year = self.perMonth(pre_year=pre_year)
         self.file_name = "Expenses"+str(self.year_no)
 
     def getTotalSpent(self,transacts):
@@ -143,9 +145,7 @@ class Year:
         return payback_transacts, payback_count, in_advance_payback_count
 
     def getForeignYearPaybacks(self):
-        all_paybacks = OrderedDict()
         all_paybacks_id = []
-        all_in_advances = OrderedDict()
         all_in_advances_id = []
         for id,action in self.yearly_transacts.items():
             if action.tag == "Rückzahlung":
@@ -328,8 +328,8 @@ class Year:
         self.total_spent = 0
         for tag in self.tagStruct.values():
             for subtag in tag.values():
-                if subtag < 0:
-                    self.total_spent += subtag
+                self.total_spent += subtag
+
         self.total_spent = round(self.total_spent,2)
         return in_advances
 
@@ -391,10 +391,12 @@ class Year:
         transfer = 0
         debt = 0
         treated_count = 0
+        count = 0
         for id,action in self.yearly_transacts.items():
             if action.account.name not in ignore_accounts:
                 if action.amount >= 0:
                     income += action.amount
+                    count += 1
                 else:
                     expense -= action.amount
                 if action.tag == "Kapitaltransfer" and action.amount < 0:
@@ -402,7 +404,7 @@ class Year:
                 if action.tag == "Kredit":
                     debt += action.amount
                 treated_count += 1
-
+        print(income,count)
         accounts_balance["income"] = round(income, 2)
         accounts_balance["expense"] = round(expense, 2)
         accounts_balance["transfer"] = round(transfer, 2)
@@ -672,11 +674,11 @@ class Year:
         outlier_accounts = []
 
         for account_name, spectre in spectres.items():
-            if spectre[0] > 5000:
+            if spectre[0] > 6000:
                 outlier_accounts.append(account_name)
-        for account_name, spectre in spectres.items():
-            if spectre[1] - spectre[0] >= 5000:
-                outlier_accounts = []
+        #for account_name, spectre in spectres.items():
+        #    if spectre[1] - spectre[0] >= 7000:
+        #        outlier_accounts = []
         dpi = 500
         if len(outlier_accounts) > 0:
             f, axs = plt.subplots(2, 1, sharex=True, figsize=(10,6))
@@ -707,8 +709,8 @@ class Year:
 
             if len(balances_dict) > 0:
                 for ax in axs:
-                    p, = ax.plot(dates, balance_list, label=account_name)
-                    arrow_props = dict(arrowstyle='-', color=p.get_color(), lw=1.5, ls='--')
+                    p, = ax.plot(dates, balance_list, label=account_name,lw=2)
+                    arrow_props = dict(arrowstyle='-', color=p.get_color(), lw=2, ls='--')
                     ax.annotate(str(balance_list[0]).replace(".", ",") + " €",color = p.get_color(), fontsize=12,
                                 xy=(dates[0], balance_list[0]),
                                 xytext=(dates[0] - relativedelta(days=15), balance_list[0]),
