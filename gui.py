@@ -90,6 +90,8 @@ class MainGUI(QMainWindow):
         self.showBalanceSheetButton.clicked.connect(self.openBalanceSheet)
         self.createYearlyBalanceButton.clicked.connect(lambda: executeCreateSingleYear(int(self.yearlySheetEdit.text()),self.balanceSheetFolder,redraw_graphs=True,gui=self))
         self.showYearlyBalanceSheetButton.clicked.connect(self.openYearlyBalanceSheet)
+        self.createMonthlyPerTagExpensesChartButton.clicked.connect(lambda: executePerMonthPerTagExpenses(int(self.yearlySheetEdit.text())))
+        self.AssignPaybackButton.clicked.connect(lambda: executeAssignPayback(int(self.monthEdit.text()), int(self.yearEdit.text())))
 
         self.balanceSheetFolderButton.clicked.connect(self.selectBalanceSheetFolder)
 
