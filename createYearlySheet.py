@@ -7,16 +7,19 @@ from operator import itemgetter
 from pathlib import Path
 from database_api import mm_dir_path
 import math
+import os
 
 def formatFloat(num):
     return "{:,.2f} €".format(num).replace(","," ").replace(".",",")
 
-def createPDF(year,pre_year,folder,setBudget=False):
+def createPDF(year,folder,setBudget=False):
     file_name = Path(folder) / str("Yearly Sheet"+str(year.year_no)+".pdf")
 
     graph_path_budget = mm_dir_path / "Graphs" /str("Budget"+str(year.year_no)+".svg")
     graph_path_expenses = mm_dir_path / "Graphs" /str("Expenses"+str(year.year_no)+".svg")
     graph_path_balances = mm_dir_path / "Graphs" /str("Balances"+str(year.year_no)+".svg")
+    graph_path_comparision_bar_chart = mm_dir_path / "Graphs" /str("ExpenseComparison" +str(year.year_no)+".svg")
+    graph_path_monthly_expenses_per_tag = mm_dir_path / "Graphs" /str("monthlyExpensesPerTag" +str(year.year_no)+".svg")
 
     document_title = "Balance Sheet "+str(year.year_no)
     title = "Balance Sheet "+str(year.year_no)
@@ -43,9 +46,13 @@ def createPDF(year,pre_year,folder,setBudget=False):
 
     #Page 2
 
-    drawCategoryTable(pdf, year.tags,x=50,y=765)
+    #drawCategoryTable(pdf, year.tags,x=50,y=765)
 
-    drawPerMonthTable(pdf, year, x=50, y=245)
+    #drawPerMonthTable(pdf, year, x=50, y=245)
+
+    drawImage(graph_path_comparision_bar_chart,pdf,40,440,0.45)
+    if os.path.exists(graph_path_monthly_expenses_per_tag):
+        drawImage(graph_path_monthly_expenses_per_tag,pdf,40,40,0.45)
 
     pdf.showPage()
 
@@ -176,12 +183,12 @@ def drawBalanceTable(pdf, year, x, y):
     else:
         sold,sold_len = 0,0
 
-    treated, treated_total = total_spent_len + budget_len + payback_len + in_advance_payback_len + transfer_transacts_len + sold_len, len(year.yearly_transacts)
+    treated, treated_total = total_spent_len + budget_len + payback_len + in_advance_payback_len + transfer_transacts_len, len(year.yearly_transacts)
 
     data = [['Transaktionen', str(treated)+ " von " +str(treated_total)],
             ['Gesamtausgaben', formatFloat(total_spent)],
             ['Rückzahlung', formatFloat(payback)],
-            ['Netto Ausgaben*', formatFloat(pers_spent)],
+            ['Netto Ausgaben', formatFloat(pers_spent)],
             ['Grundeinkommen', formatFloat(round(budget-sold,2))],
             ['Verkauf', formatFloat(sold)]]
     balance = round(payback + budget - total_spent, 2)

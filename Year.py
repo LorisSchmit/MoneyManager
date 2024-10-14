@@ -775,6 +775,17 @@ class Year:
         graph_path = prepare4Saving(file_name, vector)
         f.savefig(graph_path, bbox_inches="tight", dpi=dpi)
 
+    def plotComparisonBarChartForYears(self, year_to_stop=None):
+        print("Drawimg Comparison Bar Chart for",self.year_no)
+        first_year = list(self.all_transacts.values())[0].date.year if year_to_stop is None else year_to_stop
+        years = []
+        for past_year_no in range(first_year, self.year_no):
+            years.append(Year(past_year_no))
+        years.append(self)
+        all_tags = getAllTags(years)
+        expense_tag_per_year_completed = getExpensesPerTagOverTheYears(years, all_tags)
+        plotComparisonBarChart(expense_tag_per_year_completed, all_tags)
+
     def checkTransfers(self):
         total = 0
         for id,action in self.transfer_transacts.items():
@@ -783,7 +794,7 @@ class Year:
             print("After",action.id,action.date,"total is",round(total,2))
         return round(total,2)
 
-def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
+def createYearlySheet(year_no,folder,redraw_graphs=True,gui=None):
     projection = False
     budget = 0
     setBudget = False
@@ -801,6 +812,7 @@ def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
     if redraw_graphs:
         if not setBudget:
             year.createBudgetTreemap()
+        year.plotComparisonBarChartForYears(year_to_stop=2019)
         if gui is not None:
             gui.yearlySheetCreationProgressBar.setValue(40)
             #gui.progressBarLabel.setText("Erstellen des Ausgaben Diagramms für " +str(year_no))
@@ -811,12 +823,12 @@ def createYearlySheet(year_no,folder,redraw_graphs=False,gui=None):
         year.createBalancePlot()
         if gui is not None:
             gui.yearlySheetCreationProgressBar.setValue(80)
-    createPDF(year,year.pre_year,folder,setBudget=setBudget)
+    createPDF(year,folder,setBudget=setBudget)
     if gui is not None:
         gui.yearlySheetCreationProgressBar.setValue(100)
         #gui.progressBarLabel.setText("Jährliche Bilanz PDF fertig!")
 
-def executeCreateSingleYear(year,folder,redraw_graphs=False,gui=None):
+def executeCreateSingleYear(year,folder,redraw_graphs=True,gui=None):
     print("Yearly Balance Sheet Creation started")
     new_thread = threading.Thread(target=createYearlySheet,args=(year,folder,redraw_graphs,gui,))
     new_thread.start()
@@ -830,10 +842,10 @@ def computeBalances():
 if __name__ == '__main__':
     home = Path.home()
     computeBalances()
-    createYearlySheet(2022,home/"Documents"/"Balance Sheets",redraw_graphs=True)
+    #createYearlySheet(2022,home/"Documents"/"Balance Sheets",redraw_graphs=True)
     #computeBalances()
-    year_no = 2021
-    #year = Year(year_no,deduct_in_advances=False)
+    year_no = 2022
+    year = Year(year_no)
     #print(json.dumps(year.tagStruct, sort_keys = True, indent = 4))
     #year.createNestedExpensesTreemap()
     #year.getForeignYearPaybacks()
