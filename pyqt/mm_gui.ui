@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
@@ -45,7 +46,7 @@
     </property>
     <widget class="QWidget" name="transactsTab">
      <attribute name="title">
-      <string>&#220;bersicht</string>
+      <string>Übersicht</string>
      </attribute>
      <widget class="QTableView" name="transactsTableView">
       <property name="geometry">
@@ -184,7 +185,7 @@
        <item>
         <widget class="QDateEdit" name="endDateEdit">
          <property name="locale">
-          <locale language="German" country="Germany" />
+          <locale language="German" country="Germany"/>
          </property>
          <property name="date">
           <date>
@@ -263,11 +264,11 @@
       <attribute name="verticalHeaderDefaultSectionSize">
        <number>60</number>
       </attribute>
-      <row />
-      <column />
-      <column />
-      <column />
-      <column />
+      <row/>
+      <column/>
+      <column/>
+      <column/>
+      <column/>
      </widget>
      <widget class="QLabel" name="importProgressLabel">
       <property name="enabled">
@@ -282,7 +283,7 @@
        </rect>
       </property>
       <property name="text">
-       <string />
+       <string/>
       </property>
      </widget>
      <widget class="QWidget" name="gridLayoutWidget">
@@ -324,7 +325,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Ordner &#252;ber den neue Dateien importiert werden:</string>
+          <string>Ordner über den neue Dateien importiert werden:</string>
          </property>
         </widget>
        </item>
@@ -351,7 +352,7 @@
        <item row="5" column="1">
         <widget class="QPushButton" name="browseFileButton">
          <property name="styleSheet">
-          <string notr="true" />
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Durchsuchen</string>
@@ -374,7 +375,7 @@
        <item row="5" column="0">
         <widget class="QLineEdit" name="browseFileEdit">
          <property name="text">
-          <string />
+          <string/>
          </property>
         </widget>
        </item>
@@ -397,7 +398,7 @@
          <item>
           <widget class="QLabel" name="ledLabel">
            <property name="text">
-            <string />
+            <string/>
            </property>
           </widget>
          </item>
@@ -435,10 +436,10 @@
           <bool>false</bool>
          </property>
          <property name="inputMask">
-          <string />
+          <string/>
          </property>
          <property name="text">
-          <string />
+          <string/>
          </property>
         </widget>
        </item>
@@ -480,7 +481,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLineEdit" name="subtagLineEdit" />
+        <widget class="QLineEdit" name="subtagLineEdit"/>
        </item>
        <item row="2" column="1">
         <widget class="QPushButton" name="taggingEnterButton">
@@ -488,7 +489,7 @@
           <bool>true</bool>
          </property>
          <property name="text">
-          <string>Best&#228;tigen</string>
+          <string>Bestätigen</string>
          </property>
         </widget>
        </item>
@@ -504,7 +505,7 @@
        </rect>
       </property>
       <property name="text">
-       <string />
+       <string/>
       </property>
      </widget>
      <widget class="QLabel" name="label_5">
@@ -529,7 +530,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>290</y>
+        <y>300</y>
         <width>511</width>
         <height>16</height>
        </rect>
@@ -566,6 +567,19 @@
       </property>
       <property name="text">
        <string>Importieren</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_18">
+      <property name="geometry">
+       <rect>
+        <x>550</x>
+        <y>80</y>
+        <width>231</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Zuerst Visa, dann Compte Courant!</string>
       </property>
      </widget>
     </widget>
@@ -668,7 +682,7 @@
          <item>
           <widget class="QPushButton" name="AssignPaybackButton">
            <property name="text">
-            <string>R&#252;ckzahlungen zuweisen</string>
+            <string>Rückzahlungen zuweisen</string>
            </property>
           </widget>
          </item>
@@ -677,7 +691,7 @@
        <item>
         <widget class="QLabel" name="progressBarMonthLabel">
          <property name="text">
-          <string />
+          <string/>
          </property>
         </widget>
        </item>
@@ -696,7 +710,7 @@
         <x>10</x>
         <y>370</y>
         <width>341</width>
-        <height>191</height>
+        <height>217</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -730,14 +744,21 @@
          <item>
           <widget class="QPushButton" name="createYearlyBalanceButton">
            <property name="text">
-            <string>J&#228;hrliche Bilanz PDF erstellen</string>
+            <string>Jährliche Bilanz PDF erstellen</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="showYearlyBalanceSheetButton">
            <property name="text">
-            <string>J&#228;hrliche Bilanz PDF zeigen</string>
+            <string>Jährliche Bilanz PDF zeigen</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="createMonthlyPerTagExpensesChartButton">
+           <property name="text">
+            <string>Monatliche Ausgabe pro Kategorie erstellen</string>
            </property>
           </widget>
          </item>
@@ -746,7 +767,7 @@
        <item>
         <widget class="QLabel" name="progressBarLabel">
          <property name="text">
-          <string />
+          <string/>
          </property>
         </widget>
        </item>
@@ -861,7 +882,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string />
+              <string/>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -901,14 +922,14 @@
            <item>
             <widget class="QPushButton" name="addIncomeButton">
              <property name="text">
-              <string>Einkommen hinzuf&#252;gen</string>
+              <string>Einkommen hinzufügen</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="deleteProjButton">
              <property name="text">
-              <string>Einkommen l&#246;schen</string>
+              <string>Einkommen löschen</string>
              </property>
             </widget>
            </item>
@@ -944,7 +965,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string />
+            <string/>
            </property>
           </widget>
          </item>
@@ -1030,7 +1051,7 @@
             </font>
            </property>
            <property name="text">
-            <string>&#8364;</string>
+            <string>€</string>
            </property>
           </widget>
          </item>
@@ -1069,14 +1090,14 @@
        <item>
         <widget class="QPushButton" name="createAccountButton">
          <property name="text">
-          <string>Konto hinzuf&#252;gen</string>
+          <string>Konto hinzufügen</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="deleteAccountButton">
          <property name="text">
-          <string>Konto l&#246;schen</string>
+          <string>Konto löschen</string>
          </property>
         </widget>
        </item>
@@ -1135,7 +1156,7 @@
         <item row="1" column="1">
          <widget class="QLabel" name="accountBalanceLabel">
           <property name="text">
-           <string />
+           <string/>
           </property>
          </widget>
         </item>
@@ -1149,42 +1170,42 @@
         <item row="4" column="0">
          <widget class="QLabel" name="label_13">
           <property name="text">
-           <string>Letzter &#252;bermittelter Kontostand:</string>
+           <string>Letzter übermittelter Kontostand:</string>
           </property>
          </widget>
         </item>
         <item row="5" column="1">
          <widget class="QLabel" name="accountBaseBalanceDateLabel">
           <property name="text">
-           <string />
+           <string/>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
          <widget class="QLabel" name="accountNameLabel">
           <property name="text">
-           <string />
+           <string/>
           </property>
          </widget>
         </item>
         <item row="5" column="0">
          <widget class="QLabel" name="label_16">
           <property name="text">
-           <string>Kontostand &#252;bermittelt am:</string>
+           <string>Kontostand übermittelt am:</string>
           </property>
          </widget>
         </item>
         <item row="2" column="1">
          <widget class="QLabel" name="accountBalanceDateLabel">
           <property name="text">
-           <string />
+           <string/>
           </property>
          </widget>
         </item>
         <item row="4" column="1">
          <widget class="QLabel" name="accountBaseBalanceLabel">
           <property name="text">
-           <string />
+           <string/>
           </property>
          </widget>
         </item>
@@ -1202,7 +1223,7 @@
          </spacer>
         </item>
         <item row="2" column="0">
-         <widget class="QDateEdit" name="computeBalanceEdit" />
+         <widget class="QDateEdit" name="computeBalanceEdit"/>
         </item>
        </layout>
       </widget>
@@ -1234,6 +1255,6 @@
    </property>
   </widget>
  </widget>
- <resources />
- <connections />
+ <resources/>
+ <connections/>
 </ui>
