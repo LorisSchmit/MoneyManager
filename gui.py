@@ -22,7 +22,8 @@ from Year import executeCreateSingleYear
 from import_automation import activateImport,newSingleFile
 from Account import Account,statementDetection, importAllAccounts,deleteAccount,exportAllAccounts,accounts
 from database_api import getAllTransacts,importTable,deleteAllFromTable, writeTable
-from tagger import unique_tags
+from tagger import unique_tags,unique_subtags
+from monthlyExpensesPerTag import executePerMonthPerTagExpenses
 
 
 
@@ -74,13 +75,23 @@ class MainGUI(QMainWindow):
         self.saveTagReady = False
         self.notSaveTag = False
         self.taggingEnterButton.clicked.connect(self.tagEntered)
-        self.taggingLineEdit.returnPressed.connect(self.taggingEnterButton.click)
+        self.taggingLineEdit.returnPressed.connect(lambda: self.subtagLineEdit.setFocus())
+        self.subtagLineEdit.returnPressed.connect(self.taggingEnterButton.click)
+
         completer = QCompleter()
         self.taggingLineEdit.setCompleter(completer)
         self.completer_model = QStringListModel()
         completer.setModel(self.completer_model)
         self.completer_model.setStringList(unique_tags)
+
+        subtag_completer = QCompleter()
+        self.subtagLineEdit.setCompleter(subtag_completer)
+        self.subtag_completer_model = QStringListModel()
+        subtag_completer.setModel(self.subtag_completer_model)
+        self.subtag_completer_model.setStringList(unique_subtags)
+
         self.saveTagButton.clicked.connect(self.saveTag)
+        self.tagReferenceEdit.returnPressed.connect(self.saveTagButton.click)
         self.notSaveTagButton.clicked.connect(self.notSave)
 
         # Tab: Bilanz
@@ -183,7 +194,14 @@ class MainGUI(QMainWindow):
 
 
     def tagEntered(self):
-        self.tagReady = True
+        if self.taggingLineEdit.text() != "":
+            self.tagReady = True
+        else:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("No tag")
+            dlg.setText("Please enter a tag")
+            button = dlg.exec()
+
 
     def saveTag(self):
         self.saveTagReady = True
