@@ -209,18 +209,18 @@ def executeCreateSingleMonth(month,year,folder,gui=None):
 def executeAssignPayback(month,year):
     print("Payback Assignment started")
     month_obj = Month(month,year)
-    assign_thread = threading.Thread(target=month_obj.assignPayback())
+    assign_thread = threading.Thread(target=month_obj.assignPayback,args=(month_obj.monthly_transacts,))
     assign_thread.start()
 
 
 
 if __name__ == '__main__':
-    monthsPerYear(2021)
+    #monthsPerYear(2021)
     home = Path.home()
     #createSingleMonth(9,2022,home/"Documents"/"Balance Sheets",redraw_graphs=True,deduct_in_advances=True)
-    #month = Month(9, 2022)
+    month = Month(1, 2023)
     #month.createNestedExpensesTreemap()
-    #month.assignPayback(month.monthly_transacts)
+    month.assignPayback(month.monthly_transacts)
     #month.createGraph()
     #month.createBalanceSheet()
     #print(month.budget)

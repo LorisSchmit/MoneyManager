@@ -110,16 +110,7 @@ def removeNewLine():
 import locale
 
 def main():
-    #for i in range(1,8):
-     #assignPayback(,2021)
-    #cleaner()
-    #file = "/Users/lorisschmit1/Movements/Export_Card_Mouvements.csv"
-    #importNewFile(file)
-    #retagIncome()
-    #extractText()
 
-    locale.setlocale(locale.LC_ALL, 'de_DE')
-    print(locale.localeconv())
 
 if __name__ == '__main__':
     main()
